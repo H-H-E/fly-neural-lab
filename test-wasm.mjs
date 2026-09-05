@@ -1,0 +1,10 @@
+import fs from 'node:fs';
+import create from './dist/brain.mjs';
+const data='/workspace/scratch/c32846136fc4/headless-deliverable/optimization/sparse_fused10/build/static_arrays';
+const module=await create({wasmBinary:fs.readFileSync(new URL('./dist/brain.wasm',import.meta.url)),print:()=>{},printErr:console.error});
+module.FS.mkdir('static_arrays');module.FS.mkdir('results');
+for(const f of fs.readdirSync(data))module.FS.writeFile('static_arrays/'+f,fs.readFileSync(data+'/'+f));
+const t=performance.now();module.callMain([]);const wall=(performance.now()-t)/1000;
+fs.mkdirSync('wasm-results',{recursive:true});
+for(const f of module.FS.readdir('results')) if(f!=='.'&&f!=='..')fs.writeFileSync('wasm-results/'+f,module.FS.readFile('results/'+f));
+console.log(JSON.stringify({wall_s:wall,run_info:fs.readFileSync('wasm-results/last_run_info.txt','utf8')}));

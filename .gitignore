@@ -1,0 +1,8 @@
+wasm-results/
+live-results/
+engine/*.o
+engine/code_objects/*.o
+engine/brianlib/*.o
+engine/main
+engine/results/
+__pycache__/

@@ -1,0 +1,8 @@
+{
+  "spike_ids.bin": true,
+  "spike_times.bin": true,
+  "v": true,
+  "g": true,
+  "lastspike": true,
+  "not_refractory": true
+}

@@ -1,0 +1,7 @@
+#ifndef _INCLUDED_default_synapses_synapses_create_array_codeobject
+#define _INCLUDED_default_synapses_synapses_create_array_codeobject
+
+void _run_default_synapses_synapses_create_array_codeobject();
+
+
+#endif

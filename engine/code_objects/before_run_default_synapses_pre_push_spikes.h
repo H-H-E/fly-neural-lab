@@ -1,0 +1,6 @@
+#ifndef _INCLUDED_default_synapses_pre_push_spikes_before
+#define _INCLUDED_default_synapses_pre_push_spikes_before
+
+void _before_run_default_synapses_pre_push_spikes();
+
+#endif

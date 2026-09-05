@@ -1,0 +1,38 @@
+{
+  "_dynamic_array_spikemonitor_i_*": {
+    "exact": true,
+    "n_native": 169513,
+    "n_wasm": 169513,
+    "max_abs": 0.0
+  },
+  "_dynamic_array_spikemonitor_t_*": {
+    "exact": true,
+    "n_native": 169513,
+    "n_wasm": 169513,
+    "max_abs": 0.0
+  },
+  "_array_default_neurons_v_*": {
+    "exact": true,
+    "n_native": 138639,
+    "n_wasm": 138639,
+    "max_abs": 0.0
+  },
+  "_array_default_neurons_g_*": {
+    "exact": true,
+    "n_native": 138639,
+    "n_wasm": 138639,
+    "max_abs": 0.0
+  },
+  "_array_default_neurons_lastspike_*": {
+    "exact": true,
+    "n_native": 138639,
+    "n_wasm": 138639,
+    "max_abs": 0.0
+  },
+  "_array_default_neurons_not_refractory_*": {
+    "exact": true,
+    "n_native": 138639,
+    "n_wasm": 138639,
+    "max_abs": 0.0
+  }
+}

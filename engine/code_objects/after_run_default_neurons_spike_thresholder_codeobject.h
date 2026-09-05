@@ -1,0 +1,6 @@
+#ifndef _INCLUDED_default_neurons_spike_thresholder_codeobject_after
+#define _INCLUDED_default_neurons_spike_thresholder_codeobject_after
+
+void _after_run_default_neurons_spike_thresholder_codeobject();
+
+#endif
