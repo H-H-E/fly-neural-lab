@@ -1,0 +1,7 @@
+raw/
+*.bin
+synapses_edge.parquet
+synapses.bin
+fafb_reviewed_raw.parquet
+.venv/
+__pycache__/
