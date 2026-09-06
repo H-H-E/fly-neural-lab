@@ -3,9 +3,7 @@
 Canonical loop: `proprio → BANC LIF → MN rates → kinematic hinges → Three.js bones`.
 Neuron-for-neuron at the MN/sensory layer. No DN `forward/left/right` abstractions.
 
-**v1 is kinematic full-body**, not MuJoCo and not a one-joint queue.
-Physics (flybody / MuJoCo WASM) is optional and must not block this path.
-`sexMismatch: male-morphology/female-CNS`.
+**v1 done:** packed BANC LIF on the stage fly. **Flex via BANC** stimulates real FL tibia flexor MNs; Kick is the LUT bypass. Untyped proprio does not close a reflex — Silence proprio is wired, no CPG added.
 
 ## On disk
 
@@ -31,6 +29,9 @@ node validation/effectors/kinematic_check.mjs
 node validation/sensors/proprio_check.mjs
 node validation/banc/lif_smoke.mjs
 node validation/banc/csr_check.mjs
+node validation/banc/stage_m0_check.mjs
+node validation/banc/budget_check.mjs
+node validation/banc/loop_check.mjs
 node validation/reflexes/body_check.mjs
 node validation/reflexes/tibia_check.mjs
 ```

@@ -69,13 +69,13 @@ export class BancNet {
   stimulate(idx, rateHz) { rateHz > 0 ? this.stim.set(idx, rateHz) : this.stim.delete(idx); }
   clearStim() { this.stim.clear(); }
 
-  step(ticks) {
+  step(ticks, collect = true) {
     const { v, g, deadline, off, dst, wt, ring, n } = this;
     for (let s = 0; s < ticks; s++) {
       const slot = ring[this.tick % DELAY_TICKS];
       for (let k = 0; k < slot.length; k += 2) g[slot[k]] += slot[k + 1];
       slot.length = 0;
-      const fired = [];
+      const fired = collect ? [] : null;
       for (let i = 0; i < n; i++) {
         const gv = g[i], vv = v[i];
         g[i] = EG * gv;
@@ -83,7 +83,8 @@ export class BancNet {
         if (this.tick >= deadline[i] && v[i] > VTH) {
           v[i] = V0; g[i] = 0;
           deadline[i] = this.tick + RFC_TICKS;
-          fired.push(i); this.spikeCounts[i]++;
+          this.spikeCounts[i]++;
+          if (fired) fired.push(i);
           const dslot = ring[this.tick % DELAY_TICKS];
           for (let p = off[i]; p < off[i + 1]; p++) dslot.push(dst[p], wt[p]);
         }
@@ -91,10 +92,10 @@ export class BancNet {
       for (const [i, r] of this.stim) {
         if (Math.random() < r * DT) g[i] += W_SYN * F_POI;
       }
-      this.spikes.push(fired);
+      if (fired) this.spikes.push(fired);
       this.tick++; this.t += DT;
     }
-    return this.spikes.splice(0);
+    return collect ? this.spikes.splice(0) : null;
   }
 
   motorRates(idxs, windowTicks) {

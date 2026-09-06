@@ -49,6 +49,7 @@ fetch('./banc-channels.json').then((r) => r.json()).then((c) => {
   motorRates = new Float32Array(c.motor.length);
   $('status').textContent = `BANC LUT · ${c.meta.n_motor_mapped}/${c.meta.n_motor} MNs mapped · ${c.meta.sexMismatch}`;
   if ($('kick')) $('kick').disabled = false;
+  if ($('flex')) $('flex').disabled = false;
   bancWorker = new Worker('./banc-worker.mjs', { type: 'module' });
   bancWorker.onmessage = ({ data: d }) => {
     if (d.type === 'progress') {
@@ -57,8 +58,9 @@ fetch('./banc-channels.json').then((r) => r.json()).then((c) => {
     if (d.type === 'ready') {
       $('pause').disabled = false;
       $('status').textContent = d.mode === 'banc'
-        ? `BANC cord n=${d.n} · ${d.memoryMiB} MiB · ${c.meta.sexMismatch}. Start or Kick FL tibia.`
+        ? `BANC cord n=${d.n} · ${d.memoryMiB} MiB · ${c.meta.sexMismatch}. Start, Flex via BANC, or Kick.`
         : `BANC LUT only (no CSR) · ${c.meta.sexMismatch}. Kick FL tibia.`;
+      if ($('flex')) $('flex').disabled = d.mode !== 'banc';
     }
     if (d.type === 'sample' && d.rates) {
       motorRates = Float32Array.from(d.rates);
@@ -120,6 +122,13 @@ $('pause').onclick = () => {
 $('sugar').onchange = () => worker?.postMessage({ type: 'sugar', on: $('sugar').checked });
 if ($('kick')) {
   $('kick').onclick = () => bancWorker?.postMessage({ type: 'kick', bone: 'leg_FL_tibia', target: 'tibia_flexor' });
+}
+if ($('flex')) {
+  $('flex').onclick = () => {
+    running = true;
+    $('pause').textContent = 'Pause';
+    bancWorker?.postMessage({ type: 'drive', bone: 'leg_FL_tibia', target: 'tibia_flexor' });
+  };
 }
 
 try {
@@ -218,11 +227,15 @@ try {
       }
       if (running && bancWorker && channels && fly?.bones && now - lastStimAt > 50) {
         lastStimAt = now;
-        const { pose } = poseFromBones(fly.bones);
-        const hz = encodeProprio(channels, pose, {});
-        const stim = [];
-        channels.proprio.forEach((p, i) => { if (p.idx >= 0 && hz[i] > 1) stim.push([p.idx, hz[i]]); });
-        bancWorker.postMessage({ type: 'stim', stim });
+        if ($('noproprio')?.checked) {
+          bancWorker.postMessage({ type: 'stim', stim: [] });
+        } else {
+          const { pose } = poseFromBones(fly.bones);
+          const hz = encodeProprio(channels, pose, {});
+          const stim = [];
+          channels.proprio.forEach((p, i) => { if (p.idx >= 0 && hz[i] > 1) stim.push([p.idx, hz[i]]); });
+          bancWorker.postMessage({ type: 'stim', stim });
+        }
       }
     }
     activity.emissiveIntensity = .15 + level * 2;
