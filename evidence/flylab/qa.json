@@ -1,0 +1,17 @@
+{
+  "steps": [],
+  "webgl": {
+    "hasGL": true,
+    "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+    "w": 920,
+    "h": 853
+  },
+  "sim": {
+    "ready": true,
+    "status": "Simulating locally. Stimulation changes apply between samples.",
+    "simtime": "0.30 s",
+    "spikes": "840",
+    "speed": "0.06\u00d7"
+  },
+  "errors": []
+}
