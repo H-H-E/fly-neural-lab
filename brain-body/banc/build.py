@@ -56,17 +56,34 @@ def main():
     if reviewed.exists():
         r = pd.read_csv(reviewed, dtype=str)
         r = r[r["valid"] == "t"].dropna(subset=["pt_root_id", "match_id"])
+        numeric = r["pt_root_id"].str.fullmatch(r"\d+") & r["match_id"].str.fullmatch(r"\d+")
+        print(f"reviewed rows valid={len(r)}, numeric={(numeric.fillna(False)).sum()}")
+        r = r[numeric.fillna(False)]
         r = r[["pt_root_id", "match_id", "match_cell_type"]].astype(
             {"pt_root_id": "int64", "match_id": "int64"})
         r = r.rename(columns={"pt_root_id": "banc_888_id",
                               "match_id": "fafb_id_reviewed",
                               "match_cell_type": "fafb_type_reviewed"})
+        r["banc_888_id"] = r["banc_888_id"].astype(str)
+        xwalk["banc_888_id"] = xwalk["banc_888_id"].astype(str)
         xwalk = xwalk.merge(r, on="banc_888_id", how="left")
         print(f"reviewed matches joined: {xwalk['fafb_id_reviewed'].notna().sum()}")
-    xwalk["fafb_id"] = xwalk["fafb_id_reviewed"].where(
-        xwalk["fafb_id_reviewed"].notna(), xwalk["fafb_id_meta"])
+    for c in ("fafb_id_reviewed", "fafb_id_meta"):
+        if c not in xwalk.columns:
+            xwalk[c] = ""
+    def idstr(s):
+        try:
+            f = float(s)
+            return str(int(f)) if f == f and abs(f) != float("inf") else ""
+        except (TypeError, ValueError):
+            return ""
+    xwalk["fafb_id"] = [b if b and b != "" else a
+                        for a, b in zip((idstr(v) for v in xwalk["fafb_id_meta"]),
+                                        (idstr(v) for v in xwalk["fafb_id_reviewed"]))]
+    xwalk["fafb_id_reviewed"] = [idstr(v) for v in xwalk["fafb_id_reviewed"]]
+    xwalk["fafb_id_meta"] = [idstr(v) for v in xwalk["fafb_id_meta"]]
     xwalk.to_parquet(OUT / "fafb_banc_crosswalk.parquet", index=False)
-    print(f"fafb_banc_crosswalk.parquet: in-meta matches={xwalk['fafb_id_meta'].notna().sum()}")
+    print(f"fafb_banc_crosswalk.parquet: with fafb_id={(xwalk['fafb_id'] != '').sum()}")
 
     # --- sensory / motor channels
     sensory = neurons[neurons["super_class"].isin(["sensory", "sensory_ascending"])]
@@ -98,7 +115,7 @@ def main():
 
     # --- edgelist -> analysis parquet + engine CSR binary
     edge = RAW / "edgelist_simple_v2.feather"
-    if edge.exists() and edge.stat().st_size > 100_000_000:
+    if edge.exists() and edge.stat().st_size > 300_000_000:
         e = pd.read_feather(edge)
         print("edgelist cols:", list(e.columns), e.shape)
         e.to_parquet(OUT / "synapses_edge.parquet", index=False)
