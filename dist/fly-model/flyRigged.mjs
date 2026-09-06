@@ -6,9 +6,9 @@ const AXIS_Z = new THREE.Vector3(0, 0, 1);
 
 // Tiered tessellation: big body shapes get density, small parts don't pay for it.
 const DETAIL = {
-  low:      { big: [22, 14], mid: [12, 8], small: [8, 6], tubeR: 5, bodySetae: 90,  abdomenSetae: 10, legSetae: 4, veinTubular: 10 },
-  standard: { big: [38, 24], mid: [18, 12], small: [10, 7], tubeR: 6, bodySetae: 200, abdomenSetae: 18, legSetae: 6, veinTubular: 16 },
-  hero:     { big: [56, 36], mid: [26, 16], small: [14, 9], tubeR: 8, bodySetae: 360, abdomenSetae: 26, legSetae: 9, veinTubular: 22 },
+  low:      { big: [22, 14], mid: [12, 8], small: [8, 6], tubeR: 5, bodySetae: 90,  abdomenSetae: 10, legSetae: 4, veinTubular: 10, eyeSetae: 30, microRows: 18 },
+  standard: { big: [38, 24], mid: [18, 12], small: [10, 7], tubeR: 6, bodySetae: 200, abdomenSetae: 18, legSetae: 6, veinTubular: 16, eyeSetae: 60, microRows: 30 },
+  hero:     { big: [56, 36], mid: [26, 16], small: [14, 9], tubeR: 8, bodySetae: 360, abdomenSetae: 26, legSetae: 9, veinTubular: 22, eyeSetae: 110, microRows: 44 },
 };
 
 function mulberry32(seed) {
@@ -44,7 +44,7 @@ function hexEyeTexture(size = 512, cols = 30) {
   const canvas = document.createElement('canvas');
   canvas.width = canvas.height = size;
   const ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#6e6e6e';
+  ctx.fillStyle = '#5a5a5a';
   ctx.fillRect(0, 0, size, size);
   const hexW = size / cols;
   const hexH = hexW * 1.1547;
@@ -54,7 +54,7 @@ function hexEyeTexture(size = 512, cols = 30) {
       const cx = col * hexW + (row & 1 ? hexW / 2 : 0);
       const cy = row * hexH;
       const r = hexW * 0.56;
-      const shade = 150 + Math.floor(rng() * 55);
+      const shade = 140 + Math.floor(rng() * 75);
       ctx.beginPath();
       for (let k = 0; k < 6; k++) {
         const a = Math.PI / 6 + (k * Math.PI) / 3;
@@ -65,14 +65,79 @@ function hexEyeTexture(size = 512, cols = 30) {
       ctx.closePath();
       ctx.fillStyle = `rgb(${shade},${shade},${shade})`;
       ctx.fill();
-      ctx.lineWidth = Math.max(1.5, hexW * 0.10);
-      ctx.strokeStyle = 'rgb(52,52,52)';
+      ctx.lineWidth = Math.max(2, hexW * 0.14);
+      ctx.strokeStyle = 'rgb(28,28,28)';
       ctx.stroke();
     }
   }
   const tex = new THREE.CanvasTexture(canvas);
   tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
   tex.colorSpace = THREE.NoColorSpace;
+  return tex;
+}
+
+// Per-facet color variation + dark inter-facet borders (Blender macro pass:
+// borders are what sell facets, not the bump alone).
+function hexEyeColorTexture(size = 512, cols = 30) {
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#3d0d04';
+  ctx.fillRect(0, 0, size, size);
+  const hexW = size / cols;
+  const hexH = hexW * 1.1547;
+  const rng = mulberry32(78);
+  for (let row = -1; row * hexH < size + hexH; row++) {
+    for (let col = -1; col * hexW < size + hexW; col++) {
+      const cx = col * hexW + (row & 1 ? hexW / 2 : 0);
+      const cy = row * hexH;
+      const r = hexW * 0.44;
+      const v = rng();
+      const rr = Math.floor(138 + v * 62);
+      const gg = Math.floor(20 + v * 22);
+      const bb = Math.floor(6 + v * 10);
+      ctx.beginPath();
+      for (let k = 0; k < 6; k++) {
+        const a = Math.PI / 6 + (k * Math.PI) / 3;
+        const px = cx + r * Math.cos(a);
+        const py = cy + r * Math.sin(a);
+        if (k === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.fillStyle = `rgb(${rr},${gg},${bb})`;
+      ctx.fill();
+    }
+  }
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
+// Large-scale warm mottling (near-white blotch map): multiplies base color so
+// the cuticle reads organic, not spray-painted. Sphere/cylinder UVs suffice.
+function mottleTexture(size = 256, seed = 913) {
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#fbf6ec';
+  ctx.fillRect(0, 0, size, size);
+  const rng = mulberry32(seed);
+  for (let i = 0; i < 70; i++) {
+    const x = rng() * size, y = rng() * size;
+    const r = size * (0.03 + rng() * 0.10);
+    const warm = rng() > 0.45;
+    const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+    const a = 0.05 + rng() * 0.09;
+    g.addColorStop(0, warm ? `rgba(214,164,110,${a})` : `rgba(88,52,28,${a})`);
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+  }
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(3, 3);
+  tex.colorSpace = THREE.SRGBColorSpace;
   return tex;
 }
 
@@ -218,6 +283,81 @@ function addCompoundEye(headBone, side, segments, materials) {
   headBone.add(eye);
 }
 
+// Inter-ommatidial bristles: the tiny hairs between facets that sell a real
+// compound eye at macro distance (Blender pass 6). One instanced draw per eye.
+function addEyeSetae(headBone, side, count, seed, material) {
+  const radii = [0.23, 0.24, 0.125];
+  const center = new THREE.Vector3(-0.16, 0.035, side * 0.25);
+  const rng = mulberry32(seed);
+  const geom = new THREE.ConeGeometry(0.004, 1, 5, 1, false);
+  geom.translate(0, 0.5, 0);
+  const inst = new THREE.InstancedMesh(geom, material, count);
+  inst.name = side > 0 ? 'eye_setae_L' : 'eye_setae_R';
+  const m = new THREE.Matrix4(), q = new THREE.Quaternion();
+  const p = new THREE.Vector3(), n = new THREE.Vector3(), s = new THREE.Vector3();
+  let written = 0, guard = 0;
+  while (written < count && guard < count * 40) {
+    guard++;
+    const u = rng() * 2 - 1, phi = rng() * Math.PI * 2;
+    const sq = Math.sqrt(Math.max(0, 1 - u * u));
+    const d = new THREE.Vector3(sq * Math.cos(phi), u, sq * Math.sin(phi));
+    if (d.z * side < 0.05) continue; // outer shell only
+    p.set(center.x + radii[0] * d.x, center.y + radii[1] * d.y, center.z + radii[2] * d.z);
+    n.set(d.x / radii[0], d.y / radii[1], d.z / radii[2]).normalize();
+    q.setFromUnitVectors(AXIS_Y, n);
+    const l = 0.035 + rng() * 0.025;
+    s.set(1, l, 1);
+    m.compose(p, q, s);
+    inst.setMatrixAt(written++, m);
+  }
+  inst.count = written;
+  inst.instanceMatrix.needsUpdate = true;
+  headBone.add(inst);
+  return inst;
+}
+
+// Thoracic microchaetae: acrostichal rows + scutellars (Blender pass 6).
+// One instanced draw; real flies carry these in neat dorsal rows.
+function addThoracicMicro(thoraxBone, count, seed, material) {
+  const radii = [0.53, 0.43, 0.38];
+  const rng = mulberry32(seed);
+  const geom = new THREE.ConeGeometry(0.0032, 1, 5, 1, false);
+  geom.translate(0, 0.5, 0);
+  const inst = new THREE.InstancedMesh(geom, material, count + 4);
+  inst.name = 'thoracic_microchaetae';
+  const m = new THREE.Matrix4(), q = new THREE.Quaternion();
+  const p = new THREE.Vector3(), n = new THREE.Vector3(), s = new THREE.Vector3();
+  let w = 0;
+  const perRow = Math.floor(count / 2);
+  for (const zoff of [0.06, -0.06]) {
+    for (let i = 0; i < perRow; i++) {
+      const x = -0.34 + (0.72 * i) / Math.max(1, perRow - 1);
+      const dx = x / radii[0], dz = zoff / radii[2];
+      const qq = 1 - dx * dx - dz * dz;
+      if (qq <= 0.05) continue;
+      const y = radii[1] * Math.sqrt(qq);
+      p.set(x, y, zoff);
+      n.set(dx / radii[0], Math.sqrt(qq) / radii[1], dz / radii[2]).normalize();
+      q.setFromUnitVectors(AXIS_Y, n);
+      s.set(1, 0.045 + rng() * 0.02, 1);
+      m.compose(p, q, s);
+      inst.setMatrixAt(w++, m);
+    }
+  }
+  for (const sd of [1, -1]) { // scutellar pair, longer
+    p.set(0.47, 0.18, sd * 0.10);
+    n.set(0.55, 0.8, sd * 0.25).normalize();
+    q.setFromUnitVectors(AXIS_Y, n);
+    s.set(1.4, 0.13, 1.4);
+    m.compose(p, q, s);
+    inst.setMatrixAt(w++, m);
+  }
+  inst.count = w;
+  inst.instanceMatrix.needsUpdate = true;
+  thoraxBone.add(inst);
+  return inst;
+}
+
 function addOcelli(headBone, segments, materials) {
   // Three tiny ellipsoids merged into one draw (same bone, static).
   const pts = [
@@ -346,6 +486,16 @@ function addWing(thoraxBone, side, bones, segments, materials) {
     ['PCV', [[1.05,0.068],[1.06,0.01],[1.07,-0.07],[1.04,-0.12]]],
   ];
   const specs = veins.map(([, pts]) => [pts.map(([x, z]) => yz(x, z)), 0.0045, segments.veinTubular, 3, false]);
+  // costal fringe: short marginal hairs along the leading edge (Blender pass 6),
+  // merged into the venation draw — zero new draw calls.
+  const costa = veins[0][1];
+  for (let i = 1; i < costa.length - 1; i += 2) {
+    const [fx, fz] = costa[i];
+    specs.push([
+      [yz(fx, fz, 0.002), [fx - 0.006, camberOf(fx) + 0.034, side * (fz + 0.030)]],
+      0.0022, 4, 3, false,
+    ]);
+  }
   specs.push([outline.map(([x, z]) => yz(x, z, 0.004)), 0.0045, 44, 3, true]);
   mergedTubeMesh(wing, specs, materials.wingVein, `${wing.name}_venation`);
 
@@ -746,16 +896,18 @@ export function createDrosophilaMale(options = {}) {
   const seg = DETAIL[detailName] || DETAIL.hero;
   const bodyNoise = noiseTexture(1337, 96);
   const hexEye = hexEyeTexture(512, 30);
+  const hexEyeColor = hexEyeColorTexture(512, 30);
+  const mottle = mottleTexture(256, 913);
 
   // Photo-matched palette (honey-amber glossy cuticle, saturated red-orange
   // eyes, pearl iridescent wings). Shared bump map, few materials.
   const materials = {
-    cuticle:      new THREE.MeshPhysicalMaterial({ color: 0x7c431a, roughness: .48, metalness: 0, clearcoat: .35, clearcoatRoughness: .38, bumpMap: bodyNoise, bumpScale: .014 }),
-    cuticleLight: new THREE.MeshPhysicalMaterial({ color: 0x8a4e1e, roughness: .50, clearcoat: .30, clearcoatRoughness: .40, bumpMap: bodyNoise, bumpScale: .012 }),
-    cuticleDark:  new THREE.MeshPhysicalMaterial({ color: 0x63391a, roughness: .55, clearcoat: .25, clearcoatRoughness: .42, bumpMap: bodyNoise, bumpScale: .010 }),
-    leg:          new THREE.MeshPhysicalMaterial({ color: 0x85501f, roughness: .50, clearcoat: .30, clearcoatRoughness: .38, bumpMap: bodyNoise, bumpScale: .010 }),
+    cuticle:      new THREE.MeshPhysicalMaterial({ color: 0x7c431a, map: mottle, roughness: .48, metalness: 0, clearcoat: .35, clearcoatRoughness: .38, bumpMap: bodyNoise, bumpScale: .014 }),
+    cuticleLight: new THREE.MeshPhysicalMaterial({ color: 0x8a4e1e, map: mottle, roughness: .50, clearcoat: .30, clearcoatRoughness: .40, bumpMap: bodyNoise, bumpScale: .012 }),
+    cuticleDark:  new THREE.MeshPhysicalMaterial({ color: 0x63391a, map: mottle, roughness: .55, clearcoat: .25, clearcoatRoughness: .42, bumpMap: bodyNoise, bumpScale: .010 }),
+    leg:          new THREE.MeshPhysicalMaterial({ color: 0x85501f, map: mottle, roughness: .50, clearcoat: .30, clearcoatRoughness: .38, bumpMap: bodyNoise, bumpScale: .010 }),
     tarsus:       new THREE.MeshPhysicalMaterial({ color: 0x502e14, roughness: .55, clearcoat: .20, bumpMap: bodyNoise, bumpScale: .008 }),
-    eye:          new THREE.MeshPhysicalMaterial({ color: 0x8a1506, roughness: .26, metalness: 0, clearcoat: .95, clearcoatRoughness: .10, bumpMap: hexEye, bumpScale: .028 }),
+    eye:          new THREE.MeshPhysicalMaterial({ color: 0xffffff, map: hexEyeColor, roughness: .26, metalness: 0, clearcoat: .95, clearcoatRoughness: .10, bumpMap: hexEye, bumpScale: .035 }),
     ocellus:      new THREE.MeshPhysicalMaterial({ color: 0x2c1712, roughness: .22, clearcoat: .7 }),
     darkHair:     new THREE.MeshStandardMaterial({ color: 0x3a2a1a, roughness: .62 }),
     wing:         new THREE.MeshPhysicalMaterial({ color: 0xcfd8da, roughness: .16, metalness: 0, transparent: true, opacity: .15, iridescence: .4, iridescenceIOR: 1.3, sheen: .5, sheenColor: new THREE.Color(0x9db8c8), side: THREE.DoubleSide, depthWrite: false }),
@@ -795,12 +947,15 @@ export function createDrosophilaMale(options = {}) {
   pleura.castShadow = true;
   thorax.add(pleura);
   addEllipsoidSetae(thorax, { radii: [.53, .43, .38], count: seg.bodySetae, seed: 22, length: [.03, .07], material: materials.darkHair, reject: (p, n) => p.y < -.28 || (Math.abs(p.z) > .31 && p.y < .05) });
+  addThoracicMicro(thorax, seg.microRows, 5150, materials.darkHair);
   addScutellumAndMacrochaetae(thorax, seg, materials);
 
   const head = new THREE.Bone(); head.name = 'head'; head.position.set(-.64, .02, 0); thorax.add(head); bones[head.name] = head;
   const headBody = ellipsoid({ radii: [.39, .34, .36], material: materials.cuticleLight, seg: seg.big, center: [0, 0, 0], name: 'head_capsule' });
   head.add(headBody);
   addCompoundEye(head, 1, seg, materials); addCompoundEye(head, -1, seg, materials); addOcelli(head, seg, materials);
+  addEyeSetae(head, 1, seg.eyeSetae, 6101, materials.darkHair);
+  addEyeSetae(head, -1, seg.eyeSetae, 6102, materials.darkHair);
   addEllipsoidSetae(head, { radii: [.39, .34, .36], count: Math.round(seg.bodySetae * .3), seed: 44, length: [.025, .06], material: materials.darkHair, reject: (p, n) => Math.abs(p.z) > .23 && p.y < .25 && p.y > -.24 });
   addHeadBristles(head, materials);
   addAntenna(head, 1, bones, seg, materials); addAntenna(head, -1, bones, seg, materials);

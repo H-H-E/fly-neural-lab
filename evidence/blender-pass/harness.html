@@ -19,7 +19,7 @@ const key = new THREE.DirectionalLight(0xffffff, 3.0); key.position.set(2, 4, -3
 const rim = new THREE.DirectionalLight(0xd8ff70, 1.2); rim.position.set(-3, 1.5, 2.5); scene.add(rim);
 const fill = new THREE.DirectionalLight(0x8aa090, 1.4); fill.position.set(0, -3, 1); scene.add(fill);
 
-const fly = createDrosophilaMale({ detail: 'hero' });
+const fly = createDrosophilaMale({ detail: new URLSearchParams(location.search).get('detail') || 'hero' });
 resetPose(fly);
 // neutral staging: no walk clip, wings folded as authored
 scene.add(fly.group);
