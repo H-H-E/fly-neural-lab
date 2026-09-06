@@ -1,0 +1,132 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tibia Reflex Probe — BANC front leg</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 900px; margin: 2em auto; padding: 0 1em; }
+  canvas { border: 1px solid #ccc; display: block; margin: .5em 0; }
+  .row { display: flex; gap: 1em; align-items: center; flex-wrap: wrap; margin: .5em 0; }
+  #log { white-space: pre-wrap; font: 12px monospace; background: #f6f6f6; padding: .5em; }
+</style>
+<h1>Front-leg tibia reflex probe</h1>
+<p id="status">Loading reflex-tibia.json…</p>
+<div class="row">
+  <button id="run" disabled>Run</button>
+  <button id="perturb" disabled>Perturb +20°</button>
+  <label>Bend <input id="bend" type="range" min="10" max="150" value="70" disabled> <span id="bendv">70°</span></label>
+</div>
+<canvas id="leg" width="640" height="220"></canvas>
+<canvas id="raster" width="640" height="120"></canvas>
+<div class="row" id="stats"></div>
+<div id="log"></div>
+<script type="module">
+import { ReflexNet, DT } from './reflex-engine.mjs';
+const $ = id => document.getElementById(id);
+const log = m => { $('log').textContent += m + '\n'; };
+
+const graph = await (await fetch('./reflex-tibia.json')).json();
+const net = new ReflexNet(graph);
+const N = graph.meta.n_nodes;
+$('status').textContent = `Loaded: ${N} neurons, ${graph.meta.n_edges} edges (${graph.meta.source}).`;
+
+const sensIdx = [], flexMN = [], extMN = [], otherMN = [];
+graph.role.forEach((r, i) => {
+  if (r === 'sensory') sensIdx.push(i);
+  else if (r === 'motor') {
+    const t = graph.target[i];
+    if (/flexor/i.test(t)) flexMN.push(i);
+    else if (/extensor/i.test(t)) extMN.push(i);
+    else otherMN.push(i);
+  }
+});
+log(`sensory=${sensIdx.length} flexMN=${flexMN.length} extMN=${extMN.length} otherMN=${otherMN.length}`);
+// split sensory into position (first 60%), velocity (next 30%), limit (rest)
+const nP = Math.floor(sensIdx.length * .6), nV = Math.floor(sensIdx.length * .3);
+const posN = sensIdx.slice(0, nP), velN = sensIdx.slice(nP, nP + nV), limN = sensIdx.slice(nP + nV);
+
+// hinge state
+let theta = 70 * Math.PI / 180, omega = 0, running = false, simT = 0;
+let perturbT = -1, torqueOnsetT = -1, lastTorque = 0, poolWin = [];
+const TH_MIN = 10 * Math.PI / 180, TH_MAX = 150 * Math.PI / 180;
+const K_MUSC = 2e-4, K_SPR = 4e-5, C_DMP = 2e-5, INERT = 1e-6;
+
+function encode(dt) {
+  const deg = theta * 180 / Math.PI;
+  posN.forEach((idx, k) => {           // Gaussian position tuning across range
+    const pref = 10 + 140 * (k / Math.max(1, posN.length - 1));
+    net.stimulate(idx, 150 * Math.exp(-((deg - pref) ** 2) / (2 * 25 ** 2)));
+  });
+  velN.forEach((idx, k) => {           // half each direction
+    const dir = k % 2 ? 1 : -1, w = omega * 180 / Math.PI;
+    net.stimulate(idx, Math.max(0, dir * w) * 2);
+  });
+  limN.forEach(idx => {                // joint-limit detectors
+    const near = Math.min(deg - 10, 150 - deg);
+    net.stimulate(idx, near < 15 ? 150 * (1 - near / 15) : 0);
+  });
+}
+function poolRate(pool, window) {
+  let c = 0;
+  for (const tickSpikes of window) for (const s of tickSpikes) if (pool.includes(s)) c++;
+  return c / (pool.length * window.length * DT);
+}
+function physicsStep(dt, flexHz, extHz) {
+  const tq = K_MUSC * (flexHz - extHz) - K_SPR * (theta - 70 * Math.PI / 180) - C_DMP * omega;
+  omega += tq / INERT * dt; theta += omega * dt;
+  if (theta < TH_MIN) { theta = TH_MIN; omega = 0; }
+  if (theta > TH_MAX) { theta = TH_MAX; omega = 0; }
+  return tq;
+}
+function draw() {
+  const c = $('leg').getContext('2d');
+  c.clearRect(0, 0, 640, 220);
+  const ox = 120, oy = 110, L1 = 180, L2 = 200;
+  const kx = ox + L1, ky = oy;
+  const tx = kx + L2 * Math.cos(-theta), ty = ky + L2 * Math.sin(-theta);
+  c.lineWidth = 10; c.strokeStyle = '#6d7653'; c.beginPath(); c.moveTo(ox, oy); c.lineTo(kx, ky); c.stroke();
+  c.strokeStyle = '#b34c2f'; c.beginPath(); c.moveTo(kx, ky); c.lineTo(tx, ty); c.stroke();
+  c.fillStyle = '#000'; c.fillText(`θ=${(theta * 180 / Math.PI).toFixed(1)}°`, 10, 20);
+  const r = $('raster').getContext('2d');
+  r.clearRect(0, 0, 640, 120);
+  r.fillStyle = '#b34c2f';
+  const win = poolWin.slice(-200);
+  win.forEach((sp, x) => {
+    let yf = 20, ye = 70;
+    for (const s of sp) {
+      if (flexMN.includes(s) && yf < 55) r.fillRect(x * 3.2, yf++, 2, 2);
+      else if (extMN.includes(s) && ye < 105) r.fillRect(x * 3.2, ye++, 2, 2);
+    }
+  });
+  r.fillStyle = '#000'; r.fillText('flexor pool', 10, 12); r.fillText('extensor pool', 10, 62);
+}
+function loop() {
+  if (!running) return;
+  encode();
+  const spikes = net.step(10);          // 1 ms sensor↔CNS exchange
+  poolWin.push(...spikes); if (poolWin.length > 500) poolWin.splice(0, poolWin.length - 500);
+  simT += 10 * DT;
+  const flexHz = poolRate(flexMN, poolWin.slice(-100)), extHz = poolRate(extMN, poolWin.slice(-100));
+  const tq = physicsStep(10 * DT, flexHz, extHz);
+  if (perturbT > 0 && torqueOnsetT < 0 && Math.sign(tq) !== Math.sign(lastTorque) && Math.abs(tq) > 1e-6) {
+    torqueOnsetT = simT;
+    log(`corrective torque onset latency: ${((torqueOnsetT - perturbT) * 1000).toFixed(1)} ms`);
+  }
+  lastTorque = tq;
+  $('stats').textContent = `t=${simT.toFixed(2)}s flex=${flexHz.toFixed(1)}Hz ext=${extHz.toFixed(1)}Hz τ=${tq.toExponential(2)}`;
+  draw();
+  setTimeout(loop, 0);
+}
+$('bend').oninput = e => { $('bendv').textContent = e.target.value + '°'; };
+$('run').onclick = () => {
+  running = !running; $('run').textContent = running ? 'Pause' : 'Run';
+  if (running) { theta = $('bend').value * Math.PI / 180; omega = 0; loop(); }
+};
+$('perturb').onclick = () => {
+  theta = Math.min(TH_MAX, theta + 20 * Math.PI / 180); omega = 0;
+  perturbT = simT; torqueOnsetT = -1;
+  log(`perturb at t=${simT.toFixed(3)}s → θ=${(theta * 180 / Math.PI).toFixed(1)}°`);
+};
+$('run').disabled = $('perturb').disabled = $('bend').disabled = false;
+$('status').textContent += ' Ready. Press Run, then Perturb.';
+draw();
+</script>
