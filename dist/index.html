@@ -1,6 +1,69 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Fly Lab — a brain in your browser</title><link rel="stylesheet" href="style.css"></head><body>
-<header><a href="./" class="brand">FLY LAB<span>01 / DROSOPHILA</span></a><span class="tag">Living circuits, simulated.</span></header>
-<main><section class="stage"><div class="stage-title"><h1>A tiny brain.<br>A whole lot happening.</h1><p>BANC motor neurons on a rigged fly. FlyWire overlay optional.</p></div><canvas id="scene" aria-label="Interactive three-dimensional schematic of a fruit fly"></canvas><div class="stage-caption"><span>DRAG TO ROTATE · SCROLL TO ZOOM</span><span>Rigged body · BANC MN drive</span></div></section>
-<aside><div class="eyebrow">THE EXPERIMENT</div><h2>Give the brain a taste.</h2><p>The body is driven from BANC motor neurons through a kinematic LUT. FlyWire v783 is an optional overlay. Male mesh, female CNS.</p><button id="load">Load FlyWire overlay</button><progress id="progress" max="1" value="0" hidden></progress><p id="status" role="status">Loading BANC channel LUT…</p><div class="controls"><button id="pause" disabled>Start</button><button id="flex" disabled>Flex via BANC</button><button id="kick" disabled>Kick FL tibia</button><label class="switch"><input id="noproprio" type="checkbox"><span>Silence proprio</span></label><label class="switch"><input id="sugar" type="checkbox" checked disabled><span>Sugar stimulation</span></label></div>
-<div class="readouts"><div><span>SIMULATED TIME</span><strong id="simtime">0.00 <small>s</small></strong></div><div><span>SPIKES / LAST 50 MS</span><strong id="spikes">—</strong></div><div><span>COMPUTE SPEED</span><strong id="speed">—</strong></div></div><canvas id="trace" aria-label="Recent neural spike count over simulation time"></canvas><p class="legend">Each sample is 50 milliseconds of simulated brain activity.</p>
-details><summary>What am I looking at?</summary><p>A leaky integrate-and-fire model. The visible fly is a procedural male mesh driven by BANC v888 motor neurons through a generated bone LUT (kinematic, not MuJoCo). FlyWire v783 is an optional overlay. Tagged <code>sexMismatch: male-morphology/female-CNS</code>. This is not a complete biological fly.</p><p>Kick FL tibia writes 200 Hz into the LUT (bypass). Flex via BANC stimulates the real front-left tibia flexor motor neurons in the packed LIF. Silence proprio skips sensory writeback — expected to do nothing until claw/hook IDs exist.</p><p id="download-info"></p><p><a href="./reflex.html">Front-leg tibia reflex probe ↗</a> — BANC v888 FeCO→VNC→flexor MN slice.</p><a href="https://github.com/H-H-E/fly-neural-lab" target="_blank" rel="noopener">Model source and attribution ↗</a></details></aside></main><footer>CONNECTOME → NEURAL ACTIVITY <span>Research prototype · no account required</span></footer><script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script><script type="module" src="app.mjs"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Fly Lab — a fruit fly you can poke</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <a href="./" class="brand">FLY LAB<span>01 / DROSOPHILA</span></a>
+  <span class="tag">A fruit fly you can poke.</span>
+</header>
+<main>
+  <section class="stage">
+    <div class="stage-title">
+      <h1>This shin folds<br>because a neuron fired.</h1>
+      <p>A real fruit-fly motor neuron, traced in electron microscope pictures, pulling on a 3D leg.</p>
+    </div>
+    <canvas id="scene" aria-label="Interactive three-dimensional fruit fly"></canvas>
+    <div class="stage-caption">
+      <span>DRAG TO ROTATE · SCROLL TO ZOOM</span>
+      <span>Front-left shin is the one that flexes</span>
+    </div>
+  </section>
+  <aside>
+    <div class="eyebrow">TRY THIS</div>
+    <h2>Fold the front-left shin.</h2>
+    <p>Wait until the button lights up, then press it. The green glow is leftover activity, not a thought. Nothing decided to move — a motor neuron fired and the joint went with it.</p>
+    <p id="status" role="status">Loading the nerve cord…</p>
+    <progress id="progress" max="1" value="0" hidden></progress>
+    <div class="controls primary">
+      <button id="flex" disabled>Flex the shin</button>
+    </div>
+    <p class="legend"><a href="./reflex.html">Then watch the reflex ↗</a> — bend the joint yourself and see the nerve cord push back. Better first lesson than this 3D view.</p>
+    <div class="readouts">
+      <div><span>SIMULATED TIME</span><strong id="simtime">0.00 <small>s</small></strong></div>
+      <div><span>SPIKES / LAST CHUNK</span><strong id="spikes">—</strong></div>
+      <div><span>COMPUTE SPEED</span><strong id="speed">—</strong></div>
+    </div>
+    <canvas id="trace" aria-label="Recent motor-neuron spike count"></canvas>
+    <details>
+      <summary>More controls</summary>
+      <div class="controls">
+        <button id="pause" disabled>Start cord</button>
+        <button id="kick" disabled>Kick (skip the neurons)</button>
+      </div>
+      <label class="switch"><input id="noproprio" type="checkbox"><span>Silence joint sensors</span></label>
+      <p class="legend">Kick writes 200 Hz straight onto the joint. Flex goes through the real motor neurons. Silence sensors does nothing useful yet — those cells are not typed well enough to close the loop.</p>
+    </details>
+    <details>
+      <summary>Load the whole brain (54 MB)</summary>
+      <p>Optional overlay: FlyWire v783, sugar taste, 138,639 neurons. The body does not start walking.</p>
+      <button id="load">Load FlyWire overlay</button>
+      <label class="switch"><input id="sugar" type="checkbox" checked disabled><span>Sugar stimulation</span></label>
+    </details>
+    <details>
+      <summary>What am I looking at?</summary>
+      <p>Male 3D mesh, female central nervous system. The cord is BANC v888 as a leaky integrate-and-fire model. Joints are kinematic, not physics. This is not a complete biological fly.</p>
+      <p id="download-info"></p>
+      <p><a href="https://github.com/H-H-E/fly-neural-lab" target="_blank" rel="noopener">Source and attribution ↗</a></p>
+    </details>
+  </aside>
+</main>
+<footer>CONNECTOME → A LEG THAT MOVES <span>Research prototype · no account required</span></footer>
+<script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
+<script type="module" src="app.mjs"></script>
+</body>
+</html>

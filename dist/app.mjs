@@ -10,6 +10,7 @@ const history = [];
 const chart = $('trace');
 
 function drawTrace() {
+  if (!chart) return;
   const dpr = Math.min(devicePixelRatio, 2);
   chart.width = chart.clientWidth * dpr;
   chart.height = 90 * dpr;
@@ -47,19 +48,20 @@ fetch('./data-manifest.json').then((r) => r.json()).then((m) => {
 fetch('./banc-channels.json').then((r) => r.json()).then((c) => {
   channels = c;
   motorRates = new Float32Array(c.motor.length);
-  $('status').textContent = `BANC LUT · ${c.meta.n_motor_mapped}/${c.meta.n_motor} MNs mapped · ${c.meta.sexMismatch}`;
+  $('status').textContent = `Nerve cord loading… ${c.meta.n_motor_mapped} motor neurons mapped.`;
   if ($('kick')) $('kick').disabled = false;
-  if ($('flex')) $('flex').disabled = false;
   bancWorker = new Worker('./banc-worker.mjs', { type: 'module' });
   bancWorker.onmessage = ({ data: d }) => {
     if (d.type === 'progress') {
-      $('status').textContent = d.message || `Loading BANC · ${Math.round((d.fraction || 0) * 100)}%`;
+      if ($('progress')) { $('progress').hidden = false; $('progress').value = d.fraction; }
+      $('status').textContent = d.message || `Loading nerve cord · ${Math.round((d.fraction || 0) * 100)}%`;
     }
     if (d.type === 'ready') {
+      if ($('progress')) $('progress').hidden = true;
       $('pause').disabled = false;
       $('status').textContent = d.mode === 'banc'
-        ? `BANC cord n=${d.n} · ${d.memoryMiB} MiB · ${c.meta.sexMismatch}. Start, Flex via BANC, or Kick.`
-        : `BANC LUT only (no CSR) · ${c.meta.sexMismatch}. Kick FL tibia.`;
+        ? 'Ready. Press Flex — the front-left shin should fold.'
+        : 'Nerve cord file missing. You can still Kick the joint (skips the neurons).';
       if ($('flex')) $('flex').disabled = d.mode !== 'banc';
     }
     if (d.type === 'sample' && d.rates) {
@@ -138,9 +140,9 @@ try {
   renderer.setClearColor(0x000000, 0);
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(40, 1, .1, 100);
-  camera.position.set(5, 3.2, 7);
+  camera.position.set(4.2, 1.6, 5.4);
   const controls = new OrbitControls(camera, canvas);
-  controls.target.set(0, .7, 0);
+  controls.target.set(0, 0.15, 0.35);
   controls.enableDamping = true;
   controls.minDistance = 4;
   controls.maxDistance = 12;

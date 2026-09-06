@@ -6,7 +6,7 @@ This is a neural simulation prototype, not validated motor embodiment. Tagged `s
 
 ## The rigged body
 
-The stage fly is a procedural, photo-matched **rigged male Drosophila melanogaster** (`dist/fly-model/flyRigged.mjs`, 43 bones). BANC maps 764 of 805 motor neurons onto those bones (`dist/banc-channels.json`). Kick the front-left tibia flexor pool from the UI, or Start the BANC LIF worker (packed CSR in `dist/banc-data/`, ~13 MB). Direct joint access: `fly.bones['leg_FL_femur']`. See `docs/banc-embodiment.md`.
+The stage fly is a procedural, photo-matched **rigged male Drosophila melanogaster**. Press **Flex the shin** to fire real BANC tibia-flexor neurons. The first lesson is [`dist/reflex.html`](https://fly-neural-lab.vercel.app/reflex.html): bend the joint and watch the cord push back.
 
 ## Implementation
 
