@@ -3,5 +3,6 @@ raw/
 synapses_edge.parquet
 synapses.bin
 fafb_reviewed_raw.parquet
+tibia_front.json
 .venv/
 __pycache__/

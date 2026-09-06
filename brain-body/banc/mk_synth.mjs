@@ -10,5 +10,5 @@ const g={meta:{source:'synthetic',w_syn_V:0.275e-3,nt_rule:'t',n_nodes:N,n_edges
  id:[...Array(N).keys()],cell_type:Array(N).fill('x'),role,
  target:[...Array(N_S+N_I).fill(''),...Array(N_M).fill('tibia_flexor_muscle')],
  side:Array(N).fill(''),pre_sign:Array(N).fill(1),src,dst,count:cnt};
-writeFileSync('dist/reflex-tibia.json', JSON.stringify(g));
-console.log('synthetic written', N, 'nodes');
+writeFileSync('dist/reflex-tibia.synth.json', JSON.stringify(g));
+console.log('synthetic written', N, 'nodes -> dist/reflex-tibia.synth.json');
