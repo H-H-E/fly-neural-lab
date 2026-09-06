@@ -5,7 +5,7 @@ import { encodeProprio, poseFromBones } from './sensors/proprio.mjs';
 
 const $ = (id) => document.getElementById(id);
 let running = false, worker = null, bancWorker = null, level = 0;
-let channels = null, effector = null, motorRates = new Float32Array(0);
+let channels = null, effector = null, motorRates = new Float32Array(0), lastRateMode = 'idle', lastStimAt = 0;
 const history = [];
 const chart = $('trace');
 
@@ -51,12 +51,18 @@ fetch('./banc-channels.json').then((r) => r.json()).then((c) => {
   if ($('kick')) $('kick').disabled = false;
   bancWorker = new Worker('./banc-worker.mjs', { type: 'module' });
   bancWorker.onmessage = ({ data: d }) => {
+    if (d.type === 'progress') {
+      $('status').textContent = d.message || `Loading BANC · ${Math.round((d.fraction || 0) * 100)}%`;
+    }
     if (d.type === 'ready') {
-      $('status').textContent = `BANC ${d.mode} · n=${d.n || 0} · ${c.meta.sexMismatch}. Kick a tibia or Start FlyWire.`;
-      if (d.mode === 'banc') { $('pause').disabled = false; }
+      $('pause').disabled = false;
+      $('status').textContent = d.mode === 'banc'
+        ? `BANC cord n=${d.n} · ${d.memoryMiB} MiB · ${c.meta.sexMismatch}. Start or Kick FL tibia.`
+        : `BANC LUT only (no CSR) · ${c.meta.sexMismatch}. Kick FL tibia.`;
     }
     if (d.type === 'sample' && d.rates) {
       motorRates = Float32Array.from(d.rates);
+      lastRateMode = d.mode || 'banc';
       if (d.mode !== 'kick') {
         $('simtime').innerHTML = d.time.toFixed(2) + ' <small>s</small>';
         $('spikes').textContent = d.spikes.toLocaleString();
@@ -106,8 +112,8 @@ $('load').onclick = () => {
 
 $('pause').onclick = () => {
   running = !running;
-  const w = worker || bancWorker;
-  w?.postMessage({ type: running ? 'run' : 'pause' });
+  bancWorker?.postMessage({ type: running ? 'run' : 'pause' });
+  worker?.postMessage({ type: running ? 'run' : 'pause' });
   $('pause').textContent = running ? 'Pause' : 'Resume';
   $('status').textContent = running ? 'Simulating locally.' : 'Paused.';
 };
@@ -207,13 +213,16 @@ try {
     controls.update();
     if (effector && motorRates.length) {
       effector.step(dt, motorRates);
-      for (let i = 0; i < motorRates.length; i++) motorRates[i] *= 0.92;
-      if (bancWorker && channels && fly?.bones) {
+      if (lastRateMode === 'kick') {
+        for (let i = 0; i < motorRates.length; i++) motorRates[i] *= 0.92;
+      }
+      if (running && bancWorker && channels && fly?.bones && now - lastStimAt > 50) {
+        lastStimAt = now;
         const { pose } = poseFromBones(fly.bones);
         const hz = encodeProprio(channels, pose, {});
         const stim = [];
         channels.proprio.forEach((p, i) => { if (p.idx >= 0 && hz[i] > 1) stim.push([p.idx, hz[i]]); });
-        if (running && stim.length) bancWorker.postMessage({ type: 'stim', stim });
+        bancWorker.postMessage({ type: 'stim', stim });
       }
     }
     activity.emissiveIntensity = .15 + level * 2;

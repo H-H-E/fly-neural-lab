@@ -25,16 +25,18 @@ Physics (flybody / MuJoCo WASM) is optional and must not block this path.
 ```text
 brain-body/.venv/Scripts/python.exe brain-body/banc/mk_channel_lut.py
 brain-body/.venv/Scripts/python.exe brain-body/banc/compact_csr.py
+brain-body/.venv/Scripts/python.exe brain-body/banc/pack_banc.py
 node validation/channels/lut_check.mjs
 node validation/effectors/kinematic_check.mjs
 node validation/sensors/proprio_check.mjs
 node validation/banc/lif_smoke.mjs
+node validation/banc/csr_check.mjs
 node validation/reflexes/body_check.mjs
 node validation/reflexes/tibia_check.mjs
 ```
 
-`dist/banc-csr.bin` is generated, not committed (too large). Without it the stage fly still
-accepts MN kicks through the LUT.
+`dist/banc-csr.bin` is generated, not committed. Packed gzip chunks in `dist/banc-data/`
+(~13 MB) are committed and loaded by `banc-worker.mjs`. Kick still works if they are missing.
 
 ## Infidelity flags (do not silently "fix")
 

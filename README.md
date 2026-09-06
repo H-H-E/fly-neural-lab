@@ -6,7 +6,7 @@ This is a neural simulation prototype, not validated motor embodiment. Tagged `s
 
 ## The rigged body
 
-The stage fly is a procedural, photo-matched **rigged male Drosophila melanogaster** (`dist/fly-model/flyRigged.mjs`, 43 bones). BANC maps 764 of 805 motor neurons onto those bones (`dist/banc-channels.json`). Kick the front-left tibia flexor pool from the UI, or run the BANC LIF worker when `dist/banc-csr.bin` has been generated (`brain-body/banc/compact_csr.py`). Direct joint access: `fly.bones['leg_FL_femur']`. Scientific priors live in `group.userData.scientific`. See `docs/banc-embodiment.md`.
+The stage fly is a procedural, photo-matched **rigged male Drosophila melanogaster** (`dist/fly-model/flyRigged.mjs`, 43 bones). BANC maps 764 of 805 motor neurons onto those bones (`dist/banc-channels.json`). Kick the front-left tibia flexor pool from the UI, or Start the BANC LIF worker (packed CSR in `dist/banc-data/`, ~13 MB). Direct joint access: `fly.bones['leg_FL_femur']`. See `docs/banc-embodiment.md`.
 
 ## Implementation
 
