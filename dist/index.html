@@ -3,66 +3,96 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Fly Lab — a walking fruit fly driven by real BANC nerve-cord neurons, simulated in your browser.">
   <title>Fly Lab — a fruit fly you can poke</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2324402c'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%23c8ef61'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header>
-  <a href="./" class="brand">FLY LAB<span>01 / DROSOPHILA</span></a>
-  <span class="tag">A fruit fly you can poke.</span>
+<header class="topbar">
+  <a href="./" class="brand"><strong>Fly Lab</strong><small>DROSOPHILA · BANC v888</small></a>
+  <nav class="topnav">
+    <a href="./reflex.html">Reflex lesson</a>
+    <a href="https://github.com/H-H-E/fly-neural-lab" target="_blank" rel="noopener">Source</a>
+  </nav>
 </header>
-<main>
-  <section class="stage">
-    <div class="stage-title">
-      <h1>It's walking.<br>You can interrupt a step.</h1>
-      <p>Tripod gait is kinematic (the silent cord does not invent walking). Flex still fires real motor neurons into the front-left shin.</p>
+
+<section class="hero">
+  <p class="eyebrow">LIVING CONNECTOME · 01</p>
+  <h1>It&rsquo;s walking. <em>You can interrupt a step.</em></h1>
+  <p class="lede">A procedural male fruit fly walks a tripod gait while a real nerve-cord simulation &mdash; traced neuron by neuron from electron microscopy &mdash; drives one shin. Tripod walking itself is kinematic; the flex is neural.</p>
+  <ul class="meta-row">
+    <li>138,639 neurons</li>
+    <li>BANC v888 cord</li>
+    <li>runs locally · no account</li>
+  </ul>
+</section>
+
+<main class="layout">
+  <section class="stage-card" aria-label="Interactive three-dimensional fruit fly">
+    <div class="stage-head">
+      <span>SPECIMEN &mdash; WALKING</span>
+      <span class="status-pill" id="status">Loading the nerve cord&hellip;</span>
     </div>
-    <canvas id="scene" aria-label="Interactive three-dimensional fruit fly"></canvas>
-    <div class="stage-caption">
-      <span>DRAG TO ROTATE · SCROLL TO ZOOM</span>
-      <span>Front-left shin is the one that flexes</span>
+    <div class="viewport">
+      <canvas id="scene" aria-label="Interactive three-dimensional fruit fly"></canvas>
+    </div>
+    <div class="stage-foot">
+      <span>DRAG TO ROTATE &middot; SCROLL TO ZOOM</span>
+      <span>FRONT-LEFT SHIN IS THE DRIVEN JOINT</span>
     </div>
   </section>
-  <aside>
-    <div class="eyebrow">TRY THIS</div>
-    <h2>Fold the front-left shin.</h2>
-    <p>The fly is already walking. When the button lights up, press it — that leg's shin is driven by BANC motor neurons for a moment, then the gait takes it back.</p>
-    <p id="status" role="status">Loading the nerve cord…</p>
-    <progress id="progress" max="1" value="0" hidden></progress>
-    <div class="controls primary">
-      <button id="flex" disabled>Flex the shin</button>
-    </div>
-    <p class="legend"><a href="./reflex.html">Then watch the reflex ↗</a> — bend the joint yourself and see the nerve cord push back. Better first lesson than this 3D view.</p>
-    <div class="readouts">
-      <div><span>SIMULATED TIME</span><strong id="simtime">0.00 <small>s</small></strong></div>
-      <div><span>SPIKES / LAST CHUNK</span><strong id="spikes">—</strong></div>
-      <div><span>COMPUTE SPEED</span><strong id="speed">—</strong></div>
-    </div>
-    <canvas id="trace" aria-label="Recent motor-neuron spike count"></canvas>
-    <details>
+
+  <aside class="panel">
+    <section class="card">
+      <p class="card-number">01 &mdash; STIMULATE</p>
+      <h2>Fold the front-left shin.</h2>
+      <p>The fly is already walking. When the button lights up, press it &mdash; that leg&rsquo;s shin is driven by BANC motor neurons for a moment, then the gait takes it back.</p>
+      <progress id="progress" max="1" value="0" hidden></progress>
+      <div class="btn-row">
+        <button class="btn" id="flex" disabled>Flex the shin</button>
+      </div>
+      <p class="hint"><a href="./reflex.html">Then watch the reflex &nearr;</a> &mdash; bend the joint yourself and see the nerve cord push back. The better first lesson.</p>
+      <div class="readouts">
+        <div><span>SIM TIME</span><strong id="simtime">0.00 <small>s</small></strong></div>
+        <div><span>SPIKES</span><strong id="spikes">&mdash;</strong></div>
+        <div><span>SPEED</span><strong id="speed">&mdash;</strong></div>
+      </div>
+      <figure class="figure">
+        <canvas id="trace" aria-label="Recent motor-neuron spike count"></canvas>
+        <figcaption class="figcap">MOTOR SPIKES · LAST 120 CHUNKS</figcaption>
+      </figure>
+    </section>
+
+    <details class="disclosure">
       <summary>More controls</summary>
-      <div class="controls">
-        <button id="pause" disabled>Start cord</button>
-        <button id="kick" disabled>Kick (skip the neurons)</button>
+      <div class="controls btn-row">
+        <button class="btn-ghost btn" id="pause" disabled>Start cord</button>
+        <button class="btn-ghost btn" id="kick" disabled>Kick (skip the neurons)</button>
       </div>
       <label class="switch"><input id="noproprio" type="checkbox"><span>Silence joint sensors</span></label>
-      <p class="legend">Kick writes 200 Hz straight onto the joint. Flex goes through the real motor neurons. Silence sensors does nothing useful yet — those cells are not typed well enough to close the loop.</p>
+      <p class="hint">Kick writes 200&nbsp;Hz straight onto the joint. Flex goes through the real motor neurons. Silencing sensors does nothing useful yet &mdash; those cells aren&rsquo;t typed well enough to close the loop.</p>
     </details>
-    <details>
+
+    <details class="disclosure">
       <summary>Load the whole brain (54 MB)</summary>
       <p>Optional overlay: FlyWire v783, sugar taste, 138,639 neurons. The body does not start walking.</p>
-      <button id="load">Load FlyWire overlay</button>
+      <div class="btn-row">
+        <button class="btn-ghost btn" id="load">Load FlyWire overlay</button>
+      </div>
       <label class="switch"><input id="sugar" type="checkbox" checked disabled><span>Sugar stimulation</span></label>
     </details>
-    <details>
+
+    <details class="disclosure">
       <summary>What am I looking at?</summary>
       <p>Male 3D mesh, female central nervous system. The cord is BANC v888 as a leaky integrate-and-fire model. Joints are kinematic, not physics. This is not a complete biological fly.</p>
       <p id="download-info"></p>
-      <p><a href="https://github.com/H-H-E/fly-neural-lab" target="_blank" rel="noopener">Source and attribution ↗</a></p>
+      <p><a href="https://github.com/H-H-E/fly-neural-lab" target="_blank" rel="noopener">Source and attribution &nearr;</a></p>
     </details>
   </aside>
 </main>
-<footer>CONNECTOME → A LEG THAT MOVES <span>Research prototype · no account required</span></footer>
+
+<footer class="colophon"><span>CONNECTOME &rarr; A LEG THAT MOVES</span><span>RESEARCH PROTOTYPE · NO ACCOUNT REQUIRED</span></footer>
 <script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
 <script type="module" src="app.mjs"></script>
 </body>

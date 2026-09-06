@@ -60,6 +60,7 @@ fetch('./banc-channels.json').then((r) => r.json()).then((c) => {
     if (d.type === 'ready') {
       if ($('progress')) $('progress').hidden = true;
       $('pause').disabled = false;
+      $('status').classList.add('live');
       $('status').textContent = d.mode === 'banc'
         ? 'Ready. Press Flex — the front-left shin should fold.'
         : 'Nerve cord file missing. You can still Kick the joint (skips the neurons).';
