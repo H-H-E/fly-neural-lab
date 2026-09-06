@@ -1,12 +1,12 @@
 # Fly Lab
 
-Browser-local FlyWire v783 neural simulation in WebAssembly, with a Three.js rigged anatomical male fly and aggregate neural-activity display. No model inference server is used. Load the model explicitly, start/pause, and switch sugar stimulation on/off.
+Browser-local FlyWire v783 neural simulation in WebAssembly, with a Three.js rigged anatomical male fly driven by a BANC v888 motor-neuron LUT. No model inference server is used.
 
-This is a neural simulation prototype, not validated motor embodiment. The fly body plays an idle animation (head, antennae, abdomen micro-motion; wings/legs are rig-addressable for future work). Its glow represents aggregate activity at the head, not a biological mapping of circuit anatomy.
+This is a neural simulation prototype, not validated motor embodiment. Tagged `sexMismatch: male-morphology/female-CNS`. The body is kinematic (MN rate → first-order muscle → hinge), not MuJoCo. Idle clips are off; joints are driven. Glow is aggregate activity, not a biological mapping of circuit anatomy.
 
 ## The rigged body
 
-The stage fly is a procedural, photo-matched **rigged male Drosophila melanogaster** (`dist/fly-model/flyRigged.mjs`, 43 bones, 4 AnimationClips, hex-bump compound eyes, vertex-color banded abdomen, merged venation/bristle geometry). It renders in ~110 draw calls / ~38k triangles and replaces the earlier oval schematic; if its module fails to load, the app falls back to the schematic automatically. Direct joint access for future motor work: `fly.bones['leg_FL_femur'].rotation.z = -0.4`, wing roots `fly.bones.wing_L/R`, clip switching via `fly.clips` (idle/flight/walk/groom). Scientific priors (male scale 2.26 mm, wingbeat ~200 Hz, haltere antiphase 192°, head yaw ±15°) are embedded in `group.userData.scientific`.
+The stage fly is a procedural, photo-matched **rigged male Drosophila melanogaster** (`dist/fly-model/flyRigged.mjs`, 43 bones). BANC maps 764 of 805 motor neurons onto those bones (`dist/banc-channels.json`). Kick the front-left tibia flexor pool from the UI, or run the BANC LIF worker when `dist/banc-csr.bin` has been generated (`brain-body/banc/compact_csr.py`). Direct joint access: `fly.bones['leg_FL_femur']`. Scientific priors live in `group.userData.scientific`. See `docs/banc-embodiment.md`.
 
 ## Implementation
 

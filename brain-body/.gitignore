@@ -4,5 +4,6 @@ synapses_edge.parquet
 synapses.bin
 fafb_reviewed_raw.parquet
 tibia_front.json
+banc-channels.json
 .venv/
 __pycache__/
