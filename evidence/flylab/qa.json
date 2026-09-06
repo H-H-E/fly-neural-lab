@@ -1,17 +1,33 @@
 {
   "steps": [],
+  "pose": {
+    "cam": [
+      2.05,
+      1.05,
+      -3.55
+    ],
+    "target": [
+      0.05,
+      0.42,
+      0
+    ],
+    "flyY": 1.22265370832973,
+    "coxaY": 0.168,
+    "tibiaX": 0.052,
+    "mix": 0.192
+  },
   "webgl": {
     "hasGL": true,
     "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
     "w": 920,
-    "h": 853
+    "h": 934
   },
   "sim": {
     "ready": true,
-    "status": "Simulating locally. Stimulation changes apply between samples.",
-    "simtime": "0.30 s",
-    "spikes": "840",
-    "speed": "0.06\u00d7"
+    "status": "Firing front-left tibia flexor neurons\u2026",
+    "flexDisabled": false,
+    "simtime": "0.01 s",
+    "spikes": "5"
   },
   "errors": []
 }

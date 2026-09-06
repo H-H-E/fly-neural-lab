@@ -6,6 +6,7 @@ import { encodeProprio, poseFromBones } from './sensors/proprio.mjs';
 const $ = (id) => document.getElementById(id);
 let running = false, worker = null, bancWorker = null, level = 0;
 let channels = null, effector = null, motorRates = new Float32Array(0), lastRateMode = 'idle', lastStimAt = 0, stageFly = null;
+let walkAct = null;
 const history = [];
 const chart = $('trace');
 
@@ -129,6 +130,8 @@ if ($('flex')) {
   $('flex').onclick = () => {
     running = true;
     $('pause').textContent = 'Pause';
+    if (walkAct) walkAct.timeScale = 0.2;
+    setTimeout(() => { if (walkAct) walkAct.timeScale = 1; }, 2200);
     bancWorker?.postMessage({ type: 'drive', bone: 'leg_FL_tibia', target: 'tibia_flexor' });
     $('status').textContent = 'Firing front-left tibia flexor neurons…';
     const tibia = stageFly?.bones?.leg_FL_tibia;
@@ -151,32 +154,48 @@ try {
   renderer.setClearColor(0x000000, 0);
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(40, 1, .1, 100);
-  camera.position.set(0.2, 0.85, -3.6);
+  camera.position.set(2.05, 1.05, -3.55);
   const controls = new OrbitControls(camera, canvas);
-  controls.target.set(0, 0.7, 0);
+  controls.target.set(0.05, 0.42, 0);
   controls.enableDamping = true;
-  controls.minDistance = 2.2;
-  controls.maxDistance = 10;
+  controls.minDistance = 3.3;
+  controls.maxDistance = 9;
+  controls.minPolarAngle = 1.05;
+  controls.maxPolarAngle = 1.62;
   controls.enablePan = false;
   scene.add(new THREE.HemisphereLight(0xedffd6, 0x192818, 2.6));
   const key = new THREE.DirectionalLight(0xffffff, 3.2); key.position.set(2, 4, -3); scene.add(key);
   const rim = new THREE.DirectionalLight(0xc8ef61, 1.6); rim.position.set(-3, 1, 2); scene.add(rim);
   const fill = new THREE.DirectionalLight(0x6d8a70, 2.2); fill.position.set(0, -4, 0); scene.add(fill);
   const activity = new THREE.MeshStandardMaterial({ color: 0xc8ef61, emissive: 0xc8ef61, emissiveIntensity: .1, transparent: true, opacity: .8 });
-  let fly = null, activityGlow = null, last = performance.now();
+  let fly = null, activityGlow = null, last = performance.now(), mixer = null;
   try {
     const { createDrosophilaMale, resetPose } = await import('./fly-model/flyRigged.mjs');
     fly = createDrosophilaMale({ detail: 'standard' });
     stageFly = fly;
     fly.group.rotation.y = Math.PI;
-    fly.group.position.y = 1.55;
+    fly.group.position.y = 1.22;
     scene.add(fly.group);
     resetPose(fly);
+    mixer = new THREE.AnimationMixer(fly.group);
+    walkAct = mixer.clipAction(fly.clips.find((c) => c.name === 'walk'));
+    walkAct.timeScale = 1.25;
+    walkAct.play();
+    const idleAct = mixer.clipAction(fly.clips.find((c) => c.name === 'idle'));
+    idleAct.play();
     fly.group.userData.sexMismatch = 'male-morphology/female-CNS';
     const glow = new THREE.Mesh(new THREE.SphereGeometry(.12, 12, 10), activity);
     glow.position.set(-.55, .22, 0);
     fly.group.add(glow);
     activityGlow = glow;
+    window.__qa = () => ({
+      cam: camera.position.toArray().map((n) => +n.toFixed(3)),
+      target: controls.target.toArray().map((n) => +n.toFixed(3)),
+      flyY: fly.group.position.y,
+      coxaY: +fly.bones.leg_FL_coxa.quaternion.y.toFixed(3),
+      tibiaX: +fly.bones.leg_FL_tibia.quaternion.x.toFixed(3),
+      mix: mixer ? +mixer.time.toFixed(3) : 0,
+    });
     const attach = () => {
       if (!channels || !fly?.bones) return;
       effector = makeEffector(channels, fly.bones);
@@ -235,6 +254,10 @@ try {
     const dt = Math.min(0.05, (now - last) / 1000) || 0.016;
     last = now;
     controls.update();
+    if (mixer) {
+      mixer.update(dt);
+      fly.group.position.y = 1.22 + 0.02 * Math.sin(mixer.time * Math.PI * 5);
+    }
     if (effector && motorRates.length) {
       effector.step(dt, motorRates);
       if (lastRateMode === 'kick') {

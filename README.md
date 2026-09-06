@@ -2,11 +2,11 @@
 
 Browser-local FlyWire v783 neural simulation in WebAssembly, with a Three.js rigged anatomical male fly driven by a BANC v888 motor-neuron LUT. No model inference server is used.
 
-This is a neural simulation prototype, not validated motor embodiment. Tagged `sexMismatch: male-morphology/female-CNS`. The body is kinematic (MN rate → first-order muscle → hinge), not MuJoCo. Idle clips are off; joints are driven. Glow is aggregate activity, not a biological mapping of circuit anatomy.
+This is a neural simulation prototype, not validated motor embodiment. Tagged `sexMismatch: male-morphology/female-CNS`. The body is kinematic (MN rate → first-order muscle → hinge), not MuJoCo. A kinematic tripod walk clip runs on the rig; BANC motor rates overlay driven joints (Flex the shin). Glow is aggregate activity, not a biological mapping of circuit anatomy.
 
 ## The rigged body
 
-The stage fly is a procedural, photo-matched **rigged male Drosophila melanogaster**. Press **Flex the shin** to fire real BANC tibia-flexor neurons. The first lesson is [`dist/reflex.html`](https://fly-neural-lab.vercel.app/reflex.html): bend the joint and watch the cord push back.
+The stage fly is a procedural, photo-matched **rigged male Drosophila melanogaster**. It walks a kinematic tripod on load. Press **Flex the shin** to fire real BANC tibia-flexor neurons into that joint. The first lesson is [`dist/reflex.html`](https://fly-neural-lab.vercel.app/reflex.html): bend the joint and watch the cord push back.
 
 ## Implementation
 

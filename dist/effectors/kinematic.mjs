@@ -64,6 +64,7 @@ export function makeEffector(channels, bones) {
         angles.set(g.bone, slot);
       }
       for (const [name, slot] of angles) {
+        if (Math.abs(slot.x) + Math.abs(slot.y) + Math.abs(slot.z) < 0.04) continue;
         const bone = bones[name];
         const rest = bone.userData?.restQuaternion || [0, 0, 0, 1];
         let q = rest;

@@ -21,7 +21,11 @@ def main() -> int:
         page.on("console", lambda m: errors.append(f"console[{m.type}]: {m.text[:160]}") if m.type == "error" else None)
 
         page.goto(BASE, wait_until="domcontentloaded", timeout=30000)
-        time.sleep(3.5)
+        page.wait_for_function(
+            "() => window.__qa && Math.abs(window.__qa().coxaY) > 0.02",
+            timeout=20000,
+        )
+        log["pose"] = page.evaluate("() => window.__qa ? window.__qa() : null")
 
         webgl = page.evaluate(
             "() => { const c = document.querySelector('#scene');"

@@ -691,7 +691,7 @@ function makeFlightClip(bones) {
   return new THREE.AnimationClip('flight', .10, tracks);
 }
 
-function walkWave(phaseShift = 0, amp = .42) {
+function walkWave(phaseShift = 0, amp = .62) {
   const base = [0, 1, 0, -1, 0];
   if (!phaseShift) return base.map(v => v * amp);
   return [0, -1, 0, 1, 0].map(v => v * amp);
