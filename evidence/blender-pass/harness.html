@@ -1,0 +1,88 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>capture</title>
+<style>html,body{margin:0;padding:0;background:#2a2e26}canvas{display:block}</style>
+<script type="importmap">{"imports":{"three":"/dist/vendor/three.module.js"}}</script>
+</head><body>
+<script type="module">
+import * as THREE from 'three';
+import { createDrosophilaMale, resetPose } from '/dist/fly-model/flyRigged.mjs';
+
+const W = 900, H = 700;
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setSize(W, H);
+renderer.setClearColor(0x2a2e26, 1);
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.add(new THREE.HemisphereLight(0xf2ffe0, 0x1a2416, 2.2));
+const key = new THREE.DirectionalLight(0xffffff, 3.0); key.position.set(2, 4, -3); scene.add(key);
+const rim = new THREE.DirectionalLight(0xd8ff70, 1.2); rim.position.set(-3, 1.5, 2.5); scene.add(rim);
+const fill = new THREE.DirectionalLight(0x8aa090, 1.4); fill.position.set(0, -3, 1); scene.add(fill);
+
+const fly = createDrosophilaMale({ detail: 'hero' });
+resetPose(fly);
+// neutral staging: no walk clip, wings folded as authored
+scene.add(fly.group);
+fly.group.updateMatrixWorld(true);
+
+const bbox = new THREE.Box3().setFromObject(fly.group);
+const center = bbox.getCenter(new THREE.Vector3());
+const size = bbox.getSize(new THREE.Vector3());
+const radius = Math.max(size.x, size.y, size.z);
+
+function shot(dir, up) {
+  const cam = new THREE.PerspectiveCamera(28, W / H, 0.1, 100);
+  const d = radius * 3.1;
+  cam.position.copy(center).addScaledVector(dir.clone().normalize(), d);
+  cam.up.copy(up);
+  cam.lookAt(center);
+  renderer.render(scene, cam);
+  return renderer.domElement.toDataURL('image/png');
+}
+
+window.__shots = {
+  side: shot(new THREE.Vector3(0, 0.25, 1), new THREE.Vector3(0, 1, 0)),
+  top: shot(new THREE.Vector3(0, 1, 0.02), new THREE.Vector3(0, 0, -1)),
+  front: shot(new THREE.Vector3(-1, 0.15, 0), new THREE.Vector3(0, 1, 0)),
+  threequarter: shot(new THREE.Vector3(-0.7, 0.55, 0.75), new THREE.Vector3(0, 1, 0)),
+};
+
+// ---- spec dump: bones + mesh world bboxes + wing outline ----
+const bones = {};
+for (const [name, b] of Object.entries(fly.bones)) {
+  const p = new THREE.Vector3(); b.getWorldPosition(p);
+  const q = new THREE.Quaternion(); b.getWorldQuaternion(q);
+  bones[name] = { pos: p.toArray(), quat: q.toArray() };
+}
+const meshes = [];
+const _b = new THREE.Box3();
+fly.group.traverse((o) => {
+  if (!o.isMesh) return;
+  _b.setFromObject(o);
+  const mat = o.material || {};
+  const c = mat.color ? mat.color.getHex() : null;
+  let extra = {};
+  if (/membrane/.test(o.name || '')) {
+    const pos = o.geometry.attributes.position;
+    const arr = [];
+    for (let i = 0; i < pos.count; i++) arr.push([+pos.getX(i).toFixed(4), +pos.getY(i).toFixed(4), +pos.getZ(i).toFixed(4)]);
+    extra.outline = arr;
+  }
+  meshes.push({
+    name: o.name, parentBone: o.parent && o.parent.isBone ? o.parent.name : null,
+    isInstanced: !!o.isInstancedMesh, count: o.isInstancedMesh ? o.count : undefined,
+    worldMin: _b.min.toArray(), worldMax: _b.max.toArray(),
+    verts: o.geometry.attributes.position.count, colorHex: c,
+    ...extra,
+  });
+});
+window.__spec = { bones, meshes, bbox: { min: bbox.min.toArray(), max: bbox.max.toArray() } };
+window.__perf = {
+  drawCalls: renderer.info.render.calls,
+  triangles: renderer.info.render.triangles,
+  geometries: renderer.info.memory.geometries,
+  textures: renderer.info.memory.textures,
+};
+window.__ready = true;
+</script>
+</body></html>

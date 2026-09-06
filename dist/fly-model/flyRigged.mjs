@@ -281,6 +281,12 @@ function addAntenna(headBone, side, bones, segments, materials) {
   mergedTubeMesh(arista, specs, materials.darkHair, `${arista.name}_full`);
 }
 
+function camberOf(x) {
+  // gentle spanwise camber: real wings are not flat plates (Blender pass 3)
+  const t = THREE.MathUtils.clamp(x / 1.92, 0, 1);
+  return 0.030 * Math.sin(Math.PI * t);
+}
+
 function wingGeometry(side) {
   // Male wing ≈ 1.92 mm on a 2.26 mm body (grade A): longer relative to body.
   const outline = [
@@ -292,7 +298,7 @@ function wingGeometry(side) {
   const pos = [];
   const uv = [];
   for (const p of pts2) {
-    pos.push(p.x, 0, p.y);
+    pos.push(p.x, camberOf(p.x), p.y);
     uv.push(p.x / 1.92, (p.y / side + .185) / .69);
   }
   const g = new THREE.BufferGeometry();
@@ -326,7 +332,7 @@ function addWing(thoraxBone, side, bones, segments, materials) {
   wing.add(membrane);
 
   // Venation merged into ONE mesh per wing (was 11 separate tube draws).
-  const yz = (x, z, y = 0.008) => [x, y, side * z];
+  const yz = (x, z, lift = 0.004) => [x, camberOf(x) + lift, side * z];
   const veins = [
     ['C',   [[0.02,0.01],[0.20,0.16],[0.74,0.37],[1.38,0.47],[1.74,0.39],[1.91,0.25]]],
     ['Sc',  [[0.04,0.00],[0.24,0.10],[0.63,0.25],[1.02,0.34]]],
@@ -377,15 +383,15 @@ function addScutellumAndMacrochaetae(thoraxBone, segments, materials) {
   sc.castShadow = false;
   thoraxBone.add(sc);
   const macro = [
-    [[-0.24,0.34, 0.18],[-.30,.68,.20],.20], [[-0.24,0.34,-0.18],[-.30,.68,-.20],.20],
-    [[-0.05,0.40, 0.14],[-.07,.74,.14],.22], [[-0.05,0.40,-0.14],[-.07,.74,-.14],.22],
-    [[0.14,0.39, 0.15],[.19,.76,.17],.23], [[0.14,0.39,-0.15],[.19,.76,-.17],.23],
-    [[0.37,0.26, 0.20],[.44,.62,.30],.21], [[0.37,0.26,-0.20],[.44,.62,-.30],.21],
-    [[0.43,0.19, 0.23],[.68,.46,.44],.26], [[0.43,0.19,-0.23],[.68,.46,-.44],.26],
+    [[-0.24,0.34, 0.18],[-.30,.68,.20],.17], [[-0.24,0.34,-0.18],[-.30,.68,-.20],.17],
+    [[-0.05,0.40, 0.14],[-.07,.74,.14],.19], [[-0.05,0.40,-0.14],[-.07,.74,-.14],.19],
+    [[0.14,0.39, 0.15],[.19,.76,.17],.20], [[0.14,0.39,-0.15],[.19,.76,-.17],.20],
+    [[0.37,0.26, 0.20],[.44,.62,.30],.18], [[0.37,0.26,-0.20],[.44,.62,-.30],.18],
+    [[0.43,0.19, 0.23],[.68,.46,.44],.22], [[0.43,0.19,-0.23],[.68,.46,-.44],.22],
   ];
   const geoms = macro.map(([base, tip, len]) => {
     const d = new THREE.Vector3().fromArray(tip).sub(new THREE.Vector3().fromArray(base)).normalize();
-    return bristleGeom(base, d.toArray(), len, 0.011, .14);
+    return bristleGeom(base, d.toArray(), len, 0.007, .14);
   });
   const merged = mergeGeometries(geoms, false);
   geoms.forEach(g => g.dispose());
@@ -397,13 +403,13 @@ function addScutellumAndMacrochaetae(thoraxBone, segments, materials) {
 
 function addHeadBristles(headBone, materials) {
   const defs = [
-    [[-0.10,.28,.22],[-.25,.78,.32],.22], [[-0.10,.28,-.22],[-.25,.78,-.32],.22],
-    [[-.27,.18,.23],[-.55,.55,.42],.20], [[-.27,.18,-.23],[-.55,.55,-.42],.20],
-    [[-.31,-.02,.20],[-.62,.18,.38],.17], [[-.31,-.02,-.20],[-.62,.18,-.38],.17],
+    [[-0.10,.28,.22],[-.25,.78,.32],.19], [[-0.10,.28,-.22],[-.25,.78,-.32],.19],
+    [[-.27,.18,.23],[-.55,.55,.42],.17], [[-.27,.18,-.23],[-.55,.55,-.42],.17],
+    [[-.31,-.02,.20],[-.62,.18,.38],.15], [[-.31,-.02,-.20],[-.62,.18,-.38],.15],
   ];
   const geoms = defs.map(([base, tip, len]) => {
     const d = new THREE.Vector3().fromArray(tip).sub(new THREE.Vector3().fromArray(base)).normalize();
-    return bristleGeom(base, d.toArray(), len, 0.006, .10);
+    return bristleGeom(base, d.toArray(), len, 0.004, .10);
   });
   const merged = mergeGeometries(geoms, false);
   geoms.forEach(g => g.dispose());
@@ -491,6 +497,9 @@ function addLeg(thoraxBone, positionCode, side, bones, segments, materials, seed
   const femur = new THREE.Bone(); femur.name = `${prefix}_femur`; femur.position.fromArray(coxaV); coxa.add(femur); bones[femur.name] = femur;
   const femurV = mirrorVec(cfg.femur, side);
   cylinderBetween(femur, [0, 0, 0], femurV, positionCode === 'H' ? .036 : .032, materials.leg, segments.tubeR, `${prefix}_femur_mesh`);
+  // femoral muscle swell: validated in Blender look-dev (pass 3), kills pipe-cleaner read
+  const swell = ellipsoid({ radii: [.052, .044, .046], material: materials.leg, seg: segments.small, center: [femurV[0] * .45, femurV[1] * .45, femurV[2] * .45], name: `${prefix}_femur_swell` });
+  femur.add(swell);
   addSegmentSetae(femur, femurV, segments.legSetae, seed + 1, materials.darkHair, .034);
 
   const tibia = new THREE.Bone(); tibia.name = `${prefix}_tibia`; tibia.position.fromArray(femurV); femur.add(tibia); bones[tibia.name] = tibia;
@@ -527,8 +536,8 @@ function addLeg(thoraxBone, positionCode, side, bones, segments, materials, seed
   if (positionCode === 'F') addSexComb(tarsus, tarsusV, side, materials);
 
   const jointMat = materials.leg;
-  for (const [bone, at] of [[coxa, coxaV], [femur, femurV], [tibia, tibiaV]]) {
-    const j = ellipsoid({ radii: [.030, .027, .030], material: jointMat, seg: segments.small, center: at, name: 'leg_joint' });
+  for (const [bone, at, r] of [[coxa, coxaV, .030], [femur, femurV, .034], [tibia, tibiaV, .028]]) {
+    const j = ellipsoid({ radii: [r, r * .9, r], material: jointMat, seg: segments.small, center: at, name: 'leg_joint' });
     bone.add(j);
   }
 }
@@ -741,18 +750,18 @@ export function createDrosophilaMale(options = {}) {
   // Photo-matched palette (honey-amber glossy cuticle, saturated red-orange
   // eyes, pearl iridescent wings). Shared bump map, few materials.
   const materials = {
-    cuticle:      new THREE.MeshPhysicalMaterial({ color: 0x7c431a, roughness: .38, metalness: 0, clearcoat: .55, clearcoatRoughness: .30, bumpMap: bodyNoise, bumpScale: .014 }),
-    cuticleLight: new THREE.MeshPhysicalMaterial({ color: 0x8a4e1e, roughness: .40, clearcoat: .50, clearcoatRoughness: .32, bumpMap: bodyNoise, bumpScale: .012 }),
-    cuticleDark:  new THREE.MeshPhysicalMaterial({ color: 0x63391a, roughness: .46, clearcoat: .40, clearcoatRoughness: .35, bumpMap: bodyNoise, bumpScale: .010 }),
-    leg:          new THREE.MeshPhysicalMaterial({ color: 0x85501f, roughness: .42, clearcoat: .45, clearcoatRoughness: .30, bumpMap: bodyNoise, bumpScale: .010 }),
-    tarsus:       new THREE.MeshPhysicalMaterial({ color: 0x502e14, roughness: .48, clearcoat: .30, bumpMap: bodyNoise, bumpScale: .008 }),
-    eye:          new THREE.MeshPhysicalMaterial({ color: 0x9e1c08, roughness: .20, metalness: 0, clearcoat: .95, clearcoatRoughness: .10, bumpMap: hexEye, bumpScale: .028 }),
+    cuticle:      new THREE.MeshPhysicalMaterial({ color: 0x7c431a, roughness: .48, metalness: 0, clearcoat: .35, clearcoatRoughness: .38, bumpMap: bodyNoise, bumpScale: .014 }),
+    cuticleLight: new THREE.MeshPhysicalMaterial({ color: 0x8a4e1e, roughness: .50, clearcoat: .30, clearcoatRoughness: .40, bumpMap: bodyNoise, bumpScale: .012 }),
+    cuticleDark:  new THREE.MeshPhysicalMaterial({ color: 0x63391a, roughness: .55, clearcoat: .25, clearcoatRoughness: .42, bumpMap: bodyNoise, bumpScale: .010 }),
+    leg:          new THREE.MeshPhysicalMaterial({ color: 0x85501f, roughness: .50, clearcoat: .30, clearcoatRoughness: .38, bumpMap: bodyNoise, bumpScale: .010 }),
+    tarsus:       new THREE.MeshPhysicalMaterial({ color: 0x502e14, roughness: .55, clearcoat: .20, bumpMap: bodyNoise, bumpScale: .008 }),
+    eye:          new THREE.MeshPhysicalMaterial({ color: 0x8a1506, roughness: .26, metalness: 0, clearcoat: .95, clearcoatRoughness: .10, bumpMap: hexEye, bumpScale: .028 }),
     ocellus:      new THREE.MeshPhysicalMaterial({ color: 0x2c1712, roughness: .22, clearcoat: .7 }),
     darkHair:     new THREE.MeshStandardMaterial({ color: 0x3a2a1a, roughness: .62 }),
-    wing:         new THREE.MeshPhysicalMaterial({ color: 0xcfd8da, roughness: .16, metalness: 0, transparent: true, opacity: .22, iridescence: .4, iridescenceIOR: 1.3, sheen: .5, sheenColor: new THREE.Color(0x9db8c8), side: THREE.DoubleSide, depthWrite: false }),
-    wingVein:     new THREE.MeshStandardMaterial({ color: 0x8a6a42, roughness: .55, transparent: true, opacity: .45 }),
+    wing:         new THREE.MeshPhysicalMaterial({ color: 0xcfd8da, roughness: .16, metalness: 0, transparent: true, opacity: .15, iridescence: .4, iridescenceIOR: 1.3, sheen: .5, sheenColor: new THREE.Color(0x9db8c8), side: THREE.DoubleSide, depthWrite: false }),
+    wingVein:     new THREE.MeshStandardMaterial({ color: 0x8a6a42, roughness: .55, transparent: true, opacity: .6 }),
     haltere:      new THREE.MeshPhysicalMaterial({ color: 0xa86f33, roughness: .40, clearcoat: .5 }),
-    abdomen:      new THREE.MeshPhysicalMaterial({ vertexColors: true, roughness: .40, metalness: 0, clearcoat: .55, clearcoatRoughness: .28, bumpMap: bodyNoise, bumpScale: .012 }),
+    abdomen:      new THREE.MeshPhysicalMaterial({ vertexColors: true, roughness: .48, metalness: 0, clearcoat: .40, clearcoatRoughness: .35, bumpMap: bodyNoise, bumpScale: .012 }),
     terminalia:   new THREE.MeshStandardMaterial({ color: 0x191009, roughness: .68, metalness: 0 }),
     proboscis:    new THREE.MeshStandardMaterial({ color: 0x7a4a20, roughness: .55 }),
     proboscisDark:new THREE.MeshStandardMaterial({ color: 0x523218, roughness: .60 }),
