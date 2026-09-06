@@ -21,8 +21,9 @@ ROOT = BASE.parent.parent
 DIST = ROOT / "dist"
 CSR_IN = BASE / "synapses.bin"
 SKIP = {
-    "glia", "trachea", "not_a_neuron",
+    "glia", "trachea", "not_a_neuron", "",
     "optic_lobe_intrinsic", "visual_projection", "visual_centrifugal",
+    "central_brain_intrinsic",
 }
 
 

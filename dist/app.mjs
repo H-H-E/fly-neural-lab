@@ -5,7 +5,7 @@ import { encodeProprio, poseFromBones } from './sensors/proprio.mjs';
 
 const $ = (id) => document.getElementById(id);
 let running = false, worker = null, bancWorker = null, level = 0;
-let channels = null, effector = null, motorRates = new Float32Array(0), lastRateMode = 'idle', lastStimAt = 0;
+let channels = null, effector = null, motorRates = new Float32Array(0), lastRateMode = 'idle', lastStimAt = 0, stageFly = null;
 const history = [];
 const chart = $('trace');
 
@@ -130,6 +130,17 @@ if ($('flex')) {
     running = true;
     $('pause').textContent = 'Pause';
     bancWorker?.postMessage({ type: 'drive', bone: 'leg_FL_tibia', target: 'tibia_flexor' });
+    $('status').textContent = 'Firing front-left tibia flexor neurons…';
+    const tibia = stageFly?.bones?.leg_FL_tibia;
+    tibia?.traverse((o) => {
+      if (!o.isMesh || !/tibia/.test(o.name || '')) return;
+      if (!o.userData._lit) {
+        o.material = o.material.clone();
+        o.userData._lit = true;
+      }
+      o.material.emissive = new THREE.Color(0xc8ef61);
+      o.material.emissiveIntensity = 1.1;
+    });
   };
 }
 
@@ -140,28 +151,30 @@ try {
   renderer.setClearColor(0x000000, 0);
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(40, 1, .1, 100);
-  camera.position.set(4.2, 1.6, 5.4);
+  camera.position.set(0.2, 0.85, -3.6);
   const controls = new OrbitControls(camera, canvas);
-  controls.target.set(0, 0.15, 0.35);
+  controls.target.set(0, 0.7, 0);
   controls.enableDamping = true;
-  controls.minDistance = 4;
-  controls.maxDistance = 12;
+  controls.minDistance = 2.2;
+  controls.maxDistance = 10;
   controls.enablePan = false;
   scene.add(new THREE.HemisphereLight(0xedffd6, 0x192818, 2.6));
-  const key = new THREE.DirectionalLight(0xffffff, 4); key.position.set(2, 6, 4); scene.add(key);
-  const rim = new THREE.DirectionalLight(0xc8ef61, 2); rim.position.set(-5, 1, -3); scene.add(rim);
+  const key = new THREE.DirectionalLight(0xffffff, 3.2); key.position.set(2, 4, -3); scene.add(key);
+  const rim = new THREE.DirectionalLight(0xc8ef61, 1.6); rim.position.set(-3, 1, 2); scene.add(rim);
+  const fill = new THREE.DirectionalLight(0x6d8a70, 2.2); fill.position.set(0, -4, 0); scene.add(fill);
   const activity = new THREE.MeshStandardMaterial({ color: 0xc8ef61, emissive: 0xc8ef61, emissiveIntensity: .1, transparent: true, opacity: .8 });
   let fly = null, activityGlow = null, last = performance.now();
   try {
     const { createDrosophilaMale, resetPose } = await import('./fly-model/flyRigged.mjs');
     fly = createDrosophilaMale({ detail: 'standard' });
+    stageFly = fly;
     fly.group.rotation.y = Math.PI;
-    fly.group.position.y = -.02;
+    fly.group.position.y = 1.55;
     scene.add(fly.group);
     resetPose(fly);
     fly.group.userData.sexMismatch = 'male-morphology/female-CNS';
-    const glow = new THREE.Mesh(new THREE.SphereGeometry(.28, 16, 12), activity);
-    glow.position.set(-.62, .34, 0);
+    const glow = new THREE.Mesh(new THREE.SphereGeometry(.12, 12, 10), activity);
+    glow.position.set(-.55, .22, 0);
     fly.group.add(glow);
     activityGlow = glow;
     const attach = () => {

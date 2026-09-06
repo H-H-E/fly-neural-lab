@@ -42,11 +42,13 @@ def main() -> int:
             )
             ready = True
             page.click("#flex")
-            page.wait_for_timeout(2500)
+            page.wait_for_timeout(4000)
             log["sim"] = {
                 "ready": ready,
                 "status": page.eval_on_selector("#status", "e => e.textContent"),
                 "flexDisabled": page.eval_on_selector("#flex", "e => e.disabled"),
+                "simtime": page.eval_on_selector("#simtime", "e => e.textContent"),
+                "spikes": page.eval_on_selector("#spikes", "e => e.textContent"),
             }
             page.screenshot(path=str(OUT / "flylab_flex.png"), timeout=15000)
         except Exception as e:  # noqa: BLE001

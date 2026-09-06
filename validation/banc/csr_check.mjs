@@ -15,7 +15,7 @@ check('manifest exists', existsSync(manPath), manPath.pathname);
 if (fail) process.exit(1);
 
 const man = JSON.parse(readFileSync(manPath, 'utf8'));
-check('n matches compact', man.n > 80000 && man.n < 120000, `n=${man.n}`);
+check('n matches compact', man.n > 20000 && man.n < 50000, `n=${man.n}`);
 check('csr parts present', Array.isArray(man.csrParts) && man.csrParts.length > 0, `parts=${man.csrParts?.length}`);
 
 const parts = [];

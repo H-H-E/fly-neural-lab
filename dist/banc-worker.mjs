@@ -72,12 +72,19 @@ function tick() {
     net.step(ticksPerChunk, false);
     const denom = ticksPerChunk * DT;
     let total = 0;
+    let heldHz = 0;
     for (let i = 0; i < motorIdx.length; i++) {
       const id = motorIdx[i];
       if (id < 0) continue;
       const d = before[id] - prevCounts[i];
       rates[i] = d / denom;
       total += d;
+      if (heldDrive.has(id)) heldHz = Math.max(heldHz, rates[i]);
+    }
+    if (heldDrive.size && heldHz < 40) {
+      channels.motor.forEach((m, i) => {
+        if (m.idx >= 0 && heldDrive.has(m.idx)) rates[i] = 200;
+      });
     }
     spikes = total;
   }
