@@ -214,7 +214,7 @@ function addSegmentSetae(parent, vec, count, seed, material, radius = 0.035) {
 
 function addCompoundEye(headBone, side, segments, materials) {
   const center = new THREE.Vector3(-0.16, 0.035, side * 0.265);
-  const eye = ellipsoid({ radii: [0.23, 0.29, 0.125], material: materials.eye, seg: segments.mid, center: center.toArray(), name: side > 0 ? 'eye_L' : 'eye_R' });
+  const eye = ellipsoid({ radii: [0.23, 0.265, 0.125], material: materials.eye, seg: segments.mid, center: center.toArray(), name: side > 0 ? 'eye_L' : 'eye_R' });
   headBone.add(eye);
 }
 
@@ -257,16 +257,16 @@ function addAntenna(headBone, side, bones, segments, materials) {
   bones[arista.name] = arista;
 
   const shaft = [
-    [0, 0, 0], [-0.09, 0.02, side * 0.015], [-0.18, 0.055, side * 0.025], [-0.28, 0.09, side * 0.035], [-0.38, 0.13, side * 0.04]
+    [0, 0, 0], [-0.06, 0.015, side * 0.01], [-0.12, 0.035, side * 0.018], [-0.18, 0.06, side * 0.026], [-0.24, 0.09, side * 0.032]
   ];
   const branchCount = 7;
-  const specs = [[shaft, 0.0065, 18, 4, false]];
+  const specs = [[shaft, 0.0075, 14, 4, false]];
   for (let i = 1; i <= branchCount; i++) {
     const t = i / (branchCount + 1);
-    const x = -0.38 * t;
-    const y = 0.13 * t;
-    const z = side * 0.04 * t;
-    const l = 0.05 + 0.03 * Math.sin(Math.PI * t);
+    const x = -0.24 * t;
+    const y = 0.09 * t;
+    const z = side * 0.032 * t;
+    const l = 0.028 + 0.018 * Math.sin(Math.PI * t);
     specs.push([
       [[x, y, z], [x + 0.008, y + l * 0.45, z + side * l * 0.15], [x + 0.012, y + l, z + side * l * 0.24]],
       0.0032, 6, 3, false,
@@ -305,9 +305,14 @@ function wingGeometry(side) {
 function addWing(thoraxBone, side, bones, segments, materials) {
   const wing = new THREE.Bone();
   wing.name = side > 0 ? 'wing_L' : 'wing_R';
-  wing.position.set(0.06, 0.17, side * 0.31);
-  wing.rotation.y = side * 0.055;
-  wing.rotation.z = side * -0.035;
+  // Fold math: the planform's own tip sits +0.26 outboard, angling the blade
+  // axis ~8° outward before rotation. Bone yaw 0.27 rad puts the blade axis
+  // ~8° INWARD — tips meet/overlap at the dorsal midline (v8 0.52 = X-cross,
+  // v9/v10 0.035-0.12 = splay).
+  wing.position.set(0.06, 0.33, side * 0.22);
+  wing.rotation.y = side * 0.27;
+  wing.rotation.z = -0.10;
+  wing.rotation.x = side * -0.03;
   thoraxBone.add(wing);
   bones[wing.name] = wing;
 
@@ -336,23 +341,24 @@ function addWing(thoraxBone, side, bones, segments, materials) {
   specs.push([outline.map(([x, z]) => yz(x, z, 0.004)), 0.0045, 44, 3, true]);
   mergedTubeMesh(wing, specs, materials.wingVein, `${wing.name}_venation`);
 
-  const hinge = ellipsoid({ radii: [0.105, 0.055, 0.075], material: materials.cuticleDark, seg: segments.small, center: [0.025, 0, side * 0.01], name: `${wing.name}_hinge` });
+  const hinge = ellipsoid({ radii: [0.07, 0.04, 0.05], material: materials.cuticleDark, seg: segments.small, center: [0.025, 0, side * 0.01], name: `${wing.name}_hinge` });
   wing.add(hinge);
 }
 
 function addHaltere(thoraxBone, side, bones, segments, materials) {
   const b = new THREE.Bone();
   b.name = side > 0 ? 'haltere_L' : 'haltere_R';
-  b.position.set(0.31, -0.015, side * 0.31);
+  // Tucked under the folded wing, small: real halteres are ~0.1 mm clubs.
+  b.position.set(0.31, 0.02, side * 0.24);
   thoraxBone.add(b);
   bones[b.name] = b;
-  const stemEnd = [0.24, -0.05, side * 0.18];
+  const stemEnd = [0.17, -0.03, side * 0.12];
   // Stem + capitellum merged into one draw (same bone, static).
-  const stem = new THREE.CylinderGeometry(0.013, 0.016, new THREE.Vector3().fromArray(stemEnd).length(), 6, 1, false);
+  const stem = new THREE.CylinderGeometry(0.010, 0.012, new THREE.Vector3().fromArray(stemEnd).length(), 6, 1, false);
   stem.translate(0, new THREE.Vector3().fromArray(stemEnd).length() / 2, 0);
   stem.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(AXIS_Y, new THREE.Vector3().fromArray(stemEnd).normalize()));
   const knob = new THREE.SphereGeometry(1, segments.small[0], segments.small[1]);
-  knob.scale(0.085, 0.065, 0.075);
+  knob.scale(0.055, 0.042, 0.048);
   knob.translate(stemEnd[0], stemEnd[1], stemEnd[2]);
   const merged = mergeGeometries([stem, knob], false);
   stem.dispose(); knob.dispose();
@@ -448,24 +454,24 @@ function addSexComb(tarsusBone, tarsusVec, side, materials) {
 const LEG_LAYOUT = {
   F: {
     attachX: -0.25,
-    coxa:  [-0.04,-0.12,0.12],
-    femur: [-0.31,-0.18,0.22],
-    tibia: [-0.27,-0.28,0.17],
-    tarsus:[-0.22,-0.38,0.13],
+    coxa:  [-0.06,-0.12,0.10],
+    femur: [-0.20,-0.20,0.16],
+    tibia: [-0.22,-0.32,0.13],
+    tarsus:[-0.24,-0.44,0.10],
   },
   M: {
     attachX: 0.00,
-    coxa:  [0.00,-0.13,0.13],
-    femur: [-0.01,-0.35,0.31],
-    tibia: [0.02,-0.36,0.29],
-    tarsus:[0.02,-0.43,0.19],
+    coxa:  [0.02,-0.13,0.11],
+    femur: [0.04,-0.36,0.22],
+    tibia: [0.06,-0.38,0.21],
+    tarsus:[0.06,-0.46,0.15],
   },
   H: {
     attachX: 0.27,
-    coxa:  [0.04,-0.13,0.13],
-    femur: [0.35,-0.17,0.25],
-    tibia: [0.36,-0.30,0.20],
-    tarsus:[0.29,-0.46,0.13],
+    coxa:  [0.06,-0.13,0.11],
+    femur: [0.28,-0.20,0.19],
+    tibia: [0.32,-0.34,0.16],
+    tarsus:[0.30,-0.50,0.11],
   }
 };
 
@@ -559,11 +565,11 @@ function addAbdomen(thoraxBone, bones, segments, materials) {
   // Deep overlap + gentle droop so the chain reads as ONE curved male abdomen,
   // not a stack of beads; dark bands sit in the exposed grooves only.
   const defs = [
-    { len: .30, ry: .30, rz: .32, band: 0.78 },
-    { len: .28, ry: .31, rz: .33, band: 0.74 },
-    { len: .27, ry: .30, rz: .32, band: 0.70 },
-    { len: .26, ry: .28, rz: .30, band: 0.62 },
-    { len: .25, ry: .25, rz: .27, band: 0.48 },
+    { len: .30, ry: .30, rz: .32, band: 0.52 },
+    { len: .28, ry: .31, rz: .33, band: 0.50 },
+    { len: .27, ry: .30, rz: .32, band: 0.48 },
+    { len: .26, ry: .28, rz: .30, band: 0.44 },
+    { len: .25, ry: .25, rz: .27, band: 0.36 },
     { len: .22, ry: .21, rz: .23, band: 0.0 },  // terminal: fully dark (male)
   ];
   let parent = thoraxBone;
@@ -732,8 +738,8 @@ export function createDrosophilaMale(options = {}) {
   // Photo-matched palette (honey-amber glossy cuticle, saturated red-orange
   // eyes, pearl iridescent wings). Shared bump map, few materials.
   const materials = {
-    cuticle:      new THREE.MeshPhysicalMaterial({ color: 0x8f4f1f, roughness: .38, metalness: 0, clearcoat: .55, clearcoatRoughness: .30, bumpMap: bodyNoise, bumpScale: .014 }),
-    cuticleLight: new THREE.MeshPhysicalMaterial({ color: 0x9d6026, roughness: .40, clearcoat: .50, clearcoatRoughness: .32, bumpMap: bodyNoise, bumpScale: .012 }),
+    cuticle:      new THREE.MeshPhysicalMaterial({ color: 0x7c431a, roughness: .38, metalness: 0, clearcoat: .55, clearcoatRoughness: .30, bumpMap: bodyNoise, bumpScale: .014 }),
+    cuticleLight: new THREE.MeshPhysicalMaterial({ color: 0x8a4e1e, roughness: .40, clearcoat: .50, clearcoatRoughness: .32, bumpMap: bodyNoise, bumpScale: .012 }),
     cuticleDark:  new THREE.MeshPhysicalMaterial({ color: 0x63391a, roughness: .46, clearcoat: .40, clearcoatRoughness: .35, bumpMap: bodyNoise, bumpScale: .010 }),
     leg:          new THREE.MeshPhysicalMaterial({ color: 0x85501f, roughness: .42, clearcoat: .45, clearcoatRoughness: .30, bumpMap: bodyNoise, bumpScale: .010 }),
     tarsus:       new THREE.MeshPhysicalMaterial({ color: 0x502e14, roughness: .48, clearcoat: .30, bumpMap: bodyNoise, bumpScale: .008 }),

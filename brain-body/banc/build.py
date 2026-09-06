@@ -2,10 +2,10 @@
 
 Inputs (brain-body/banc/raw/):
   banc_888_meta_20260521.parquet   neuron metadata (required)
-  dv_13992792.bin                  banc_888_edgelist_simple_v2.feather (optional until download lands)
-  dv_13916450.bin                  banc_888_neurotransmitter_prediction_v2.csv
-  dv_13994485.bin                  banc_fafb_reviewed_matches.csv.gz
-  dv_13916453.bin                  cell_info.parquet (optional)
+  edgelist_simple_v2.feather       synapses_v2 edgelist (Dataverse 13992792)
+  banc_fafb_reviewed_matches.csv   reviewed BANC->FAFB crosswalk (Dataverse 13994485)
+  banc_888_nt_v2.csv               per-neuron NT predictions (audit source)
+  cell_info.parquet                cell info supplement (optional)
 
 Outputs (brain-body/banc/):
   neurons.parquet, synapses_edge.parquet (+synapses.bin, engine-ready CSR),
@@ -49,17 +49,22 @@ def main():
     neurons.to_parquet(OUT / "neurons.parquet", index=False)
     print(f"neurons.parquet: {neurons.shape}")
 
-    # --- crosswalk: in-meta fafb_match is primary, reviewed CSV patches gaps
+    # --- crosswalk: reviewed matches primary, in-meta fafb_match fallback
     xwalk = neurons[["banc_888_id", "root_888", "cell_type", "fafb_match"]].copy()
     xwalk = xwalk.rename(columns={"fafb_match": "fafb_id_meta"})
-    reviewed = RAW / "dv_13994485.bin"
+    reviewed = RAW / "banc_fafb_reviewed_matches.csv"
     if reviewed.exists():
-        try:
-            r = pd.read_csv(reviewed)
-            print("reviewed matches cols:", list(r.columns)[:12], r.shape)
-            r.to_parquet(OUT / "fafb_reviewed_raw.parquet", index=False)
-        except Exception as e:  # noqa: BLE001
-            print(f"reviewed matches unreadable ({e}); skipping")
+        r = pd.read_csv(reviewed, dtype=str)
+        r = r[r["valid"] == "t"].dropna(subset=["pt_root_id", "match_id"])
+        r = r[["pt_root_id", "match_id", "match_cell_type"]].astype(
+            {"pt_root_id": "int64", "match_id": "int64"})
+        r = r.rename(columns={"pt_root_id": "banc_888_id",
+                              "match_id": "fafb_id_reviewed",
+                              "match_cell_type": "fafb_type_reviewed"})
+        xwalk = xwalk.merge(r, on="banc_888_id", how="left")
+        print(f"reviewed matches joined: {xwalk['fafb_id_reviewed'].notna().sum()}")
+    xwalk["fafb_id"] = xwalk["fafb_id_reviewed"].where(
+        xwalk["fafb_id_reviewed"].notna(), xwalk["fafb_id_meta"])
     xwalk.to_parquet(OUT / "fafb_banc_crosswalk.parquet", index=False)
     print(f"fafb_banc_crosswalk.parquet: in-meta matches={xwalk['fafb_id_meta'].notna().sum()}")
 
@@ -92,7 +97,7 @@ def main():
     print(body_targets.sort_values("n_motor_neurons", ascending=False).head(30).to_string())
 
     # --- edgelist -> analysis parquet + engine CSR binary
-    edge = RAW / "dv_13992792.bin"
+    edge = RAW / "edgelist_simple_v2.feather"
     if edge.exists() and edge.stat().st_size > 100_000_000:
         e = pd.read_feather(edge)
         print("edgelist cols:", list(e.columns), e.shape)

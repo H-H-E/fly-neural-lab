@@ -1,0 +1,24 @@
+{
+  "ready": true,
+  "events": [
+    "t= 20.5s frac=0.223 status=Loading connectome \u00b7 22%",
+    "t= 25.5s frac=0.331 status=Loading connectome \u00b7 33%",
+    "t= 35.6s frac=0.439 status=Loading connectome \u00b7 44%",
+    "t= 45.7s frac=0.547 status=Loading connectome \u00b7 55%",
+    "t= 50.8s frac=0.676 status=Loading connectome \u00b7 68%",
+    "t= 60.9s frac=0.784 status=Loading connectome \u00b7 78%",
+    "t= 66.0s frac=0.844 status=Loading connectome \u00b7 84%",
+    "t= 71.0s frac=0.904 status=Loading connectome \u00b7 90%",
+    "t= 76.1s frac=0.970 status=Loading connectome \u00b7 97%",
+    "t= 81.2s frac=1.000 status=Loading connectome \u00b7 100%",
+    "t= 91.2s frac=1.000 status=Connecting the neurons\u2026",
+    "t= 96.2s frac=1.000 status=Brain ready \u00b7 737 MiB WebAssembly memory allocated. Press Start."
+  ],
+  "final": {
+    "ready": true,
+    "status": "Simulating locally. Stimulation changes apply between samples.",
+    "simtime": "0.35 s",
+    "spikes": "743"
+  },
+  "errors": []
+}

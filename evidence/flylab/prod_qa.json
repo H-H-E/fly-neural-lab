@@ -1,0 +1,12 @@
+{
+  "webgl": {
+    "hasGL": true,
+    "w": 920,
+    "h": 853
+  },
+  "sim": {
+    "ready": false,
+    "error": "Page.wait_for_function: Timeout 150000ms exceeded."
+  },
+  "errors": []
+}
