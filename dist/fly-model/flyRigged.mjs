@@ -214,7 +214,7 @@ function addSegmentSetae(parent, vec, count, seed, material, radius = 0.035) {
 
 function addCompoundEye(headBone, side, segments, materials) {
   const center = new THREE.Vector3(-0.16, 0.035, side * 0.265);
-  const eye = ellipsoid({ radii: [0.23, 0.265, 0.125], material: materials.eye, seg: segments.mid, center: center.toArray(), name: side > 0 ? 'eye_L' : 'eye_R' });
+  const eye = ellipsoid({ radii: [0.23, 0.24, 0.125], material: materials.eye, seg: segments.mid, center: [-0.16, 0.035, side * 0.25], name: side > 0 ? 'eye_L' : 'eye_R' });
   headBone.add(eye);
 }
 
@@ -242,6 +242,8 @@ function addAntenna(headBone, side, bones, segments, materials) {
   const base = new THREE.Bone();
   base.name = side > 0 ? 'antenna_L' : 'antenna_R';
   base.position.set(-0.335, 0.06, side * 0.16);
+  // subtle down-tip only: strong rotation read as horns from above
+  base.rotation.z = -0.15;
   headBone.add(base);
   bones[base.name] = base;
 
@@ -539,8 +541,8 @@ function bandedTergiteGeometry(radii, center, bandStart = 0.55, seed = 1) {
   g.translate(center[0], center[1], center[2]);
   const pos = g.attributes.position;
   const colors = new Float32Array(pos.count * 3);
-  const amber = new THREE.Color(0xa86a2e);
-  const dark = new THREE.Color(0x241509);
+  const amber = new THREE.Color(0x96602a);
+  const dark = new THREE.Color(0x241408);
   const c = new THREE.Color();
   const xMax = center[0] + radii[0];
   const xMin = center[0] - radii[0];
@@ -548,7 +550,8 @@ function bandedTergiteGeometry(radii, center, bandStart = 0.55, seed = 1) {
   const jitter = (rng() - 0.5) * 0.04;
   for (let i = 0; i < pos.count; i++) {
     const t = (pos.getX(i) - xMin) / (xMax - xMin); // 0 anterior → 1 posterior
-    const band = THREE.MathUtils.smoothstep(t, bandStart + jitter, bandStart + jitter + 0.10);
+    // wide smoothstep = soft pigment gradient like the real tergites
+    const band = THREE.MathUtils.smoothstep(t, bandStart + jitter, bandStart + jitter + 0.26);
     c.copy(amber).lerp(dark, band);
     // subtle dorsal darkening for a rounded, lit cuticle look
     const dorsal = THREE.MathUtils.clamp(1 - pos.getY(i) / (radii[1] * 1.4), 0, 1) * 0.12;
@@ -565,12 +568,12 @@ function addAbdomen(thoraxBone, bones, segments, materials) {
   // Deep overlap + gentle droop so the chain reads as ONE curved male abdomen,
   // not a stack of beads; dark bands sit in the exposed grooves only.
   const defs = [
-    { len: .30, ry: .30, rz: .32, band: 0.52 },
-    { len: .28, ry: .31, rz: .33, band: 0.50 },
-    { len: .27, ry: .30, rz: .32, band: 0.48 },
-    { len: .26, ry: .28, rz: .30, band: 0.44 },
-    { len: .25, ry: .25, rz: .27, band: 0.36 },
-    { len: .22, ry: .21, rz: .23, band: 0.0 },  // terminal: fully dark (male)
+    { len: .32, ry: .30, rz: .32, band: 0.52 },
+    { len: .30, ry: .31, rz: .33, band: 0.50 },
+    { len: .29, ry: .30, rz: .32, band: 0.48 },
+    { len: .28, ry: .28, rz: .30, band: 0.44 },
+    { len: .27, ry: .25, rz: .27, band: 0.36 },
+    { len: .24, ry: .21, rz: .23, band: 0.0 },  // terminal: fully dark (male)
   ];
   let parent = thoraxBone;
   for (let i = 0; i < defs.length; i++) {
