@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { createDrosophilaMale, resetPose } from './fly-model/flyRigged.mjs';
 import { RandomSource } from './experiment-core.mjs';
+import { SoftwareSceneRenderer } from './software-scene.mjs';
 
 const V = (x = 0, y = 0, z = 0) => new THREE.Vector3(x, y, z);
 const LIME = 0xd8f788, CORAL = 0xf49b80, BLUE = 0x8ebfcc;
@@ -113,7 +114,8 @@ function createBrain() {
 }
 
 export function createStoryScene(canvas, labelsElement, { onNode, onError } = {}) {
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'low-power' });
+  const context = canvas.getContext('webgl2', { antialias: true, alpha: true, powerPreference: 'low-power' });
+  const renderer = context ? new THREE.WebGLRenderer({ canvas, context, antialias: true, alpha: true }) : new SoftwareSceneRenderer(canvas);
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, innerWidth < 760 ? 1.5 : 1.75));
   renderer.setClearColor(0x000000,0); renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.25;
@@ -122,7 +124,7 @@ export function createStoryScene(canvas, labelsElement, { onNode, onError } = {}
   const key = new THREE.DirectionalLight(0xfff2d6,3.4); key.position.set(-3,5,-3); scene.add(key);
   const rim = new THREE.DirectionalLight(0xc8e2d1,3); rim.position.set(4,2,3); scene.add(rim);
   const fill = new THREE.DirectionalLight(0xc2d8cb,1.8); fill.position.set(0,-2,-4); scene.add(fill);
-  const fly = createDrosophilaMale({detail:innerWidth < 760 ? 'low' : 'standard'});
+  const fly = createDrosophilaMale({detail:renderer.isSoftware || innerWidth < 760 ? 'low' : 'standard'});
   resetPose(fly); fly.group.position.y = .65;
   const flyRoot = new THREE.Group(); flyRoot.add(fly.group); scene.add(flyRoot);
   const mixer = new THREE.AnimationMixer(fly.group);
@@ -137,7 +139,7 @@ export function createStoryScene(canvas, labelsElement, { onNode, onError } = {}
   let chapter=0, progress=0, motion=!matchMedia('(prefers-reduced-motion: reduce)').matches;
   let rotate=false, yaw=0, tilt=0, walking=false, last=0, frameId=0, disposed=false;
   let teaching={time:0, result:null, circuitResult:null, circuitTime:0, selectedNode:'input'};
-  let brainSpikes=0, drag=null;
+  let brainSpikes=0, drag=null, revision=0, signature="", lastDraw=0;
   const target=V(), desiredCamera=V(), desiredTarget=V(), pointer=new THREE.Vector2(), raycaster=new THREE.Raycaster();
   const labels = [];
   function label(text, position, mode, className='') {
@@ -154,7 +156,7 @@ export function createStoryScene(canvas, labelsElement, { onNode, onError } = {}
 
   function resize() {
     const rect=canvas.getBoundingClientRect();
-    renderer.setSize(rect.width,rect.height,false); camera.aspect=rect.width/Math.max(1,rect.height); camera.updateProjectionMatrix();
+    renderer.setSize(rect.width,rect.height,false); revision++; camera.aspect=rect.width/Math.max(1,rect.height); camera.updateProjectionMatrix();
   }
   const observer=new ResizeObserver(resize); observer.observe(canvas); resize();
   function poses() {
@@ -189,7 +191,7 @@ export function createStoryScene(canvas, labelsElement, { onNode, onError } = {}
         const samples=teaching.circuitResult?.trace[id];
         const at=Math.round(teaching.circuitTime/.1), active=samples?.slice(Math.max(0,at-45),at+1).some(p=>p.spike);
         node.material.emissiveIntensity=active?1.7:.18;
-        node.halo.material.opacity=id===teaching.selectedNode?.22:.065;
+        node.halo.material.opacity=id===teaching.selectedNode ? .22 : .065;
       }
       for(const edge of circuit.edges) {
         const enabled=edge.from!=='inhibitory'||teaching.circuitResult?.inhibition!==false;
@@ -202,7 +204,7 @@ export function createStoryScene(canvas, labelsElement, { onNode, onError } = {}
       }
     }
     brain.material.opacity=brainSpikes>0?.95:.7;
-    scene.updateMatrixWorld(true);
+    scene.updateMatrixWorld(true);camera.updateMatrixWorld(true);
     for(const l of labels) {
       l.node.hidden=l.mode!==type;
       if(l.node.hidden)continue;
@@ -210,7 +212,11 @@ export function createStoryScene(canvas, labelsElement, { onNode, onError } = {}
       l.node.style.left=`${(projected.x*.5+.5)*100}%`;l.node.style.top=`${(-projected.y*.5+.5)*100}%`;
       l.node.style.opacity=projected.z<1?'1':'0';
     }
-    renderer.render(scene,camera);frameId=requestAnimationFrame(render);
+    const nextSignature=[chapter,revision,yaw,tilt,walking?mixer.time:0,...camera.position.toArray().map(v=>v.toFixed(3)),...target.toArray().map(v=>v.toFixed(3))].join('|');
+    if(nextSignature!==signature && (!renderer.isSoftware || now-lastDraw>80)) {
+      renderer.render(scene,camera);signature=nextSignature;lastDraw=now;
+    }
+    frameId=requestAnimationFrame(render);
   }
   function visibility(){cancelAnimationFrame(frameId);if(!document.hidden){last=performance.now();frameId=requestAnimationFrame(render);}}
   document.addEventListener('visibilitychange',visibility);
@@ -227,17 +233,17 @@ export function createStoryScene(canvas, labelsElement, { onNode, onError } = {}
   canvas.addEventListener('keydown',(e)=>{if(!rotate)return;const delta={'ArrowLeft':-.16,'ArrowRight':.16}[e.key];if(delta!==undefined){yaw+=delta;e.preventDefault();}if(e.key==='Home'){yaw=tilt=0;e.preventDefault();}});
   poses();camera.position.copy(desiredCamera);target.copy(desiredTarget);frameId=requestAnimationFrame(render);
   return {
-    fly,
+    fly, simplified: !!renderer.isSoftware,
     setChapter(index, within=0){if(chapter!==index){yaw=tilt=0;if(walking){walk.stop();walking=false;resetPose(fly);}}chapter=index;progress=within;},
     setMotion(value){motion=value;if(!value&&walking){walk.stop();walking=false;resetPose(fly);}},
     setRotate(value){rotate=value;canvas.classList.toggle('is-rotating',value);canvas.tabIndex=value?0:-1;if(value)canvas.focus({preventScroll:true});},
     resetView(){yaw=tilt=0;},
     setWalk(value){walking=value;if(value){walk.reset().play();}else{walk.stop();resetPose(fly);}},
-    updateTeaching(state){Object.assign(teaching,state);},
-    setReflexAngle(degrees){const bone=fly.bones.leg_FL_tibia;bone.quaternion.fromArray(bone.userData.restQuaternion);bone.rotateX((degrees-70)*Math.PI/180);},
-    resetFly(){resetPose(fly);},
-    updateBrain(spikes){brainSpikes=spikes;},
-    snapshot(){return {chapter,type:POSES[chapter].type,walking,motion,camera:camera.position.toArray(),tibia:fly.bones.leg_FL_tibia.quaternion.toArray(),draws:renderer.info.render.calls,triangles:renderer.info.render.triangles};},
+    updateTeaching(state){Object.assign(teaching,state);revision++;},
+    setReflexAngle(degrees){const bone=fly.bones.leg_FL_tibia;bone.quaternion.fromArray(bone.userData.restQuaternion);bone.rotateX((degrees-70)*Math.PI/180);revision++;},
+    resetFly(){resetPose(fly);revision++;},
+    updateBrain(spikes){brainSpikes=spikes;revision++;},
+    snapshot(){return {simplified:!!renderer.isSoftware,chapter,type:POSES[chapter].type,walking,motion,camera:camera.position.toArray(),tibia:fly.bones.leg_FL_tibia.quaternion.toArray(),draws:renderer.info.render.calls,triangles:renderer.info.render.triangles};},
     dispose(){disposed=true;cancelAnimationFrame(frameId);observer.disconnect();document.removeEventListener('visibilitychange',visibility);scene.traverse(o=>{o.geometry?.dispose();const mats=Array.isArray(o.material)?o.material:[o.material];mats.forEach(m=>m?.dispose());});renderer.dispose();}
   };
 }

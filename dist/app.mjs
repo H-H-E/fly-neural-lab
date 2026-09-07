@@ -84,7 +84,7 @@ updateScroll();
 try {
   const {createStoryScene}=await import('./story-scene.mjs');
   scene=createStoryScene($('scene'),$('scene-labels'),{onNode:labs.selectNode,onError:fallback});
-  $('scene-loading').hidden=true;scene.setMotion(motion);scene.setChapter(Math.max(0,active));labs.enter(active);labs.resize();
+  $('scene-loading').hidden=true;if(scene.simplified){$('specimen-stage').dataset.renderer='simplified';$('stage-render-mode').hidden=false;}scene.setMotion(motion);scene.setChapter(Math.max(0,active));labs.enter(active);labs.resize();
 }catch(error){fallback('The 3D view is unavailable in this browser. All experiment controls, traces, and text results still work.');console.warn('3D view unavailable:',error.message);}
 // Development/QA readout only; these functions never advance any model.
 window.__storyQA=()=>({chapter:chapters[active]?.id,motion,scene:scene?.snapshot(),labs:labs.snapshot(),source:$('scene-source').textContent});

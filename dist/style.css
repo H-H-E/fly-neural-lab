@@ -11,3 +11,5 @@
 @media(max-height:650px) and (min-width:761px){h1{font-size:78px}.chapter-hero{padding-top:120px}.specimen-stage{bottom:86px}.stage-heading{top:15px}.stage-bottom{bottom:8px}.chapter-dock{bottom:12px}.chapter-number{margin-top:18px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important;animation-iteration-count:1!important}}
 html.reduce-motion{scroll-behavior:auto}html.reduce-motion *,html.reduce-motion *:before,html.reduce-motion *:after{animation:none!important;transition:none!important}
+
+#stage-render-mode{position:absolute;top:20px;right:0;font-size:7px;letter-spacing:.5px;color:#a5b5a9}
