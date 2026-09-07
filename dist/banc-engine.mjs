@@ -1,8 +1,11 @@
 // Generic Shiu-model LIF over a CSR graph (BANC or synthetic).
 // Constants match dist/reflex-engine.mjs.
+import { RandomSource, cappedIds } from './experiment-core.mjs';
+
 export const DT = 1e-4, T_MBR = 0.02, TAU = 0.005;
 export const V0 = -0.052, VTH = -0.045, RFC_TICKS = 22, DELAY_TICKS = 18;
 export const W_SYN = 0.275e-3, F_POI = 250;
+export const MAX_WATCH = 64, MAX_WATCH_SPIKES = 4096;
 
 const EG = Math.exp(-DT / TAU), EV = Math.exp(-DT / T_MBR);
 const L8 = V0 * (1 - EV), L10 = EV;
@@ -24,7 +27,7 @@ function csrFromEdges(n, src, dst, count, preSign) {
 }
 
 export class BancNet {
-  constructor({ n, off, dst, wt }) {
+  constructor({ n, off, dst, wt, seed = null }) {
     this.n = n;
     this.tick = 0;
     this.t = 0;
@@ -38,13 +41,16 @@ export class BancNet {
     this.spikes = [];
     this.spikeCounts = new Int32Array(n);
     this.stim = new Map();
+    this.rng = new RandomSource(seed);
+    this.watch = new Set();
+    this.watchSpikes = [];
   }
 
-  static fromEdges({ n, src, dst, count, preSign }) {
-    return new BancNet({ n, ...csrFromEdges(n, src, dst, count, preSign) });
+  static fromEdges({ n, src, dst, count, preSign, seed = null }) {
+    return new BancNet({ n, ...csrFromEdges(n, src, dst, count, preSign), seed });
   }
 
-  static fromCSR(buf, preSign) {
+  static fromCSR(buf, preSign, { seed = null } = {}) {
     const u8 = buf instanceof Uint8Array ? buf : new Uint8Array(buf);
     const magic = String.fromCharCode(...u8.subarray(0, 9));
     if (magic !== 'BANC CSR1') throw new Error(`bad CSR magic ${magic}`);
@@ -63,14 +69,37 @@ export class BancNet {
       for (let p = off[s]; p < off[s + 1]; p++)
         wt[p] = sign * view.getFloat32(wOff + p * 4, true) * W_SYN;
     }
-    return new BancNet({ n, off, dst, wt });
+    return new BancNet({ n, off, dst, wt, seed });
   }
 
   stimulate(idx, rateHz) { rateHz > 0 ? this.stim.set(idx, rateHz) : this.stim.delete(idx); }
   clearStim() { this.stim.clear(); }
+  setSeed(seed = null) { this.rng.setSeed(seed); }
+  setWatch(ids = []) {
+    this.watch = new Set(cappedIds(ids, MAX_WATCH).filter((idx) => idx < this.n));
+  }
+  observe() {
+    return {
+      spikes: this.watchSpikes.map((id) => id),
+      neurons: [...this.watch].map((id) => ({
+        id,
+        v: this.v[id],
+        g: this.g[id],
+        spikes: this.spikeCounts[id],
+      })),
+    };
+  }
+  reset({ seed = this.rng.seed } = {}) {
+    this.tick = 0; this.t = 0;
+    this.v.fill(V0); this.g.fill(0); this.deadline.fill(0);
+    for (const slot of this.ring) slot.length = 0;
+    this.spikes.length = 0; this.spikeCounts.fill(0); this.stim.clear();
+    this.watchSpikes.length = 0; this.rng.reset(seed);
+  }
 
   step(ticks, collect = true) {
     const { v, g, deadline, off, dst, wt, ring, n } = this;
+    this.watchSpikes.length = 0;
     for (let s = 0; s < ticks; s++) {
       const slot = ring[this.tick % DELAY_TICKS];
       for (let k = 0; k < slot.length; k += 2) g[slot[k]] += slot[k + 1];
@@ -85,12 +114,13 @@ export class BancNet {
           deadline[i] = this.tick + RFC_TICKS;
           this.spikeCounts[i]++;
           if (fired) fired.push(i);
+          if (this.watch.has(i) && this.watchSpikes.length < MAX_WATCH_SPIKES) this.watchSpikes.push(i);
           const dslot = ring[this.tick % DELAY_TICKS];
           for (let p = off[i]; p < off[i + 1]; p++) dslot.push(dst[p], wt[p]);
         }
       }
       for (const [i, r] of this.stim) {
-        if (Math.random() < r * DT) g[i] += W_SYN * F_POI;
+        if (this.rng.next() < r * DT) g[i] += W_SYN * F_POI;
       }
       if (fired) this.spikes.push(fired);
       this.tick++; this.t += DT;

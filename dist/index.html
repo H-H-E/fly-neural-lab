@@ -3,96 +3,127 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="Fly Lab — a walking fruit fly driven by real BANC nerve-cord neurons, simulated in your browser.">
-  <title>Fly Lab — a fruit fly you can poke</title>
+  <meta name="description" content="Fly Lab — learn how neural models connect inputs, spikes, and movement in your browser.">
+  <title>Fly Lab — how a nervous system makes a body move</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2324402c'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%23c8ef61'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <header class="topbar">
-  <a href="./" class="brand"><strong>Fly Lab</strong><small>DROSOPHILA · BANC v888</small></a>
+  <a href="./" class="brand"><strong>Fly Lab</strong><small>BROWSER NEUROSCIENCE · v1</small></a>
   <nav class="topnav">
-    <a href="./reflex.html">Reflex lesson</a>
+    <a href="./lesson.html">Start the lesson</a>
+    <a href="./taste.html">Taste experiment</a>
+    <a href="./reflex.html">Reflex case study</a>
     <a href="https://github.com/H-H-E/fly-neural-lab" target="_blank" rel="noopener">Source</a>
   </nav>
 </header>
 
 <section class="hero">
-  <p class="eyebrow">LIVING CONNECTOME · 01</p>
-  <h1>It&rsquo;s walking. <em>You can interrupt a step.</em></h1>
-  <p class="lede">A procedural male fruit fly walks a tripod gait while a real nerve-cord simulation &mdash; traced neuron by neuron from electron microscopy &mdash; drives one shin. Tripod walking itself is kinematic; the flex is neural.</p>
+  <p class="eyebrow">FLY LAB · BROWSER NEUROSCIENCE</p>
+  <h1>How can a nervous system <em>make a body move?</em></h1>
+  <p class="lede">Run small experiments in a browser-local neural model, then compare them with a traced fly nerve cord. Change an input, watch spikes move through the model, and ask what the visible body does — and what it does not prove.</p>
   <ul class="meta-row">
-    <li>138,639 neurons</li>
-    <li>BANC v888 cord</li>
+    <li>Start with one neuron</li>
+    <li>BANC v888 body model</li>
+    <li>FlyWire v783 optional</li>
     <li>runs locally · no account</li>
   </ul>
 </section>
 
 <main class="layout">
-  <section class="stage-card" aria-label="Interactive three-dimensional fruit fly">
+  <section class="stage-card" aria-label="Interactive three-dimensional fruit fly visualization">
     <div class="stage-head">
-      <span>SPECIMEN &mdash; WALKING</span>
-      <span class="status-pill" id="status">Loading the nerve cord&hellip;</span>
+      <span>SPECIMEN &mdash; VISUALIZATION</span>
+      <span class="status-pill" id="status" role="status">Loading BANC body model&hellip;</span>
     </div>
     <div class="viewport">
-      <canvas id="scene" aria-label="Interactive three-dimensional fruit fly"></canvas>
+      <canvas id="scene" aria-label="Interactive three-dimensional fruit fly visualization"></canvas>
+      <div class="stage-annotation" aria-live="polite">
+        <span class="annotation-label">VISIBLE MOTION</span>
+        <strong id="active-source">Waiting for simulation</strong>
+        <small id="active-source-detail">The walk, when shown, is a kinematic visualization.</small>
+      </div>
     </div>
     <div class="stage-foot">
       <span>DRAG TO ROTATE &middot; SCROLL TO ZOOM</span>
-      <span>FRONT-LEFT SHIN IS THE DRIVEN JOINT</span>
+      <span>WALK = KINEMATIC VISUALIZATION &middot; SHIN = BANC OUTPUT</span>
     </div>
   </section>
 
   <aside class="panel">
-    <section class="card">
-      <p class="card-number">01 &mdash; STIMULATE</p>
-      <h2>Fold the front-left shin.</h2>
-      <p>The fly is already walking. When the button lights up, press it &mdash; that leg&rsquo;s shin is driven by BANC motor neurons for a moment, then the gait takes it back.</p>
-      <progress id="progress" max="1" value="0" hidden></progress>
+    <section class="card orientation-card">
+      <p class="card-number">00 &mdash; ORIENT</p>
+      <h2>Start with a question.</h2>
+      <p>The 3D fly is the destination, not the evidence. Begin with one neuron and a tiny circuit so you can see exactly what an input changes.</p>
+      <div class="btn-row"><a class="btn" href="./lesson.html">Run the first experiment</a></div>
+      <p class="hint">Prediction &rarr; intervention &rarr; observation &rarr; explanation.</p>
+    </section>
+
+    <section class="card" id="banc-card">
+      <p class="card-number">01 &mdash; BANC NERVE CORD</p>
+      <h2>Stimulate one motor pool.</h2>
+      <p>These are measured motor-neuron channels from BANC v888. The button applies an explicit input to the front-left tibia flexor pool; the rate shown below is what the model actually emitted.</p>
+      <progress id="banc-progress" max="1" value="0" hidden></progress>
       <div class="btn-row">
-        <button class="btn" id="flex" disabled>Flex the shin</button>
+        <button class="btn" id="flex" disabled>Stimulate tibia flexors</button>
       </div>
-      <p class="hint"><a href="./reflex.html">Then watch the reflex &nearr;</a> &mdash; bend the joint yourself and see the nerve cord push back. The better first lesson.</p>
+      <div class="model-identity"><span class="source-dot banc-dot"></span><span id="banc-status">Loading BANC v888&hellip;</span></div>
       <div class="readouts">
-        <div><span>SIM TIME</span><strong id="simtime">0.00 <small>s</small></strong></div>
-        <div><span>SPIKES</span><strong id="spikes">&mdash;</strong></div>
-        <div><span>SPEED</span><strong id="speed">&mdash;</strong></div>
+        <div><span>SIM TIME</span><strong id="banc-simtime">0.00 <small>s</small></strong></div>
+        <div><span>CORD SPIKES</span><strong id="banc-spikes">&mdash;</strong></div>
+        <div><span>COMPUTE</span><strong id="banc-speed">&mdash;</strong></div>
       </div>
       <figure class="figure">
-        <canvas id="trace" aria-label="Recent motor-neuron spike count"></canvas>
-        <figcaption class="figcap">MOTOR SPIKES · LAST 120 CHUNKS</figcaption>
+        <canvas id="banc-trace" aria-label="Recent BANC motor-neuron spike counts"></canvas>
+        <figcaption class="figcap">BANC MODEL · MOTOR-POOL SPIKES · LAST 120 SAMPLES</figcaption>
       </figure>
+      <p class="source-note" id="banc-source">No movement claim is made from the walking clip. The shin responds only to measured BANC motor output or an explicitly labelled direct demo.</p>
     </section>
 
     <details class="disclosure">
-      <summary>More controls</summary>
+      <summary>Controls and counterfactuals</summary>
       <div class="controls btn-row">
-        <button class="btn-ghost btn" id="pause" disabled>Start cord</button>
-        <button class="btn-ghost btn" id="kick" disabled>Kick (skip the neurons)</button>
+        <button class="btn-ghost btn" id="pause" disabled>Start simulation</button>
+        <button class="btn-ghost btn" id="reset" disabled>Reset BANC</button>
+        <button class="btn-ghost btn" id="kick" disabled>Direct joint demo</button>
       </div>
       <label class="switch"><input id="noproprio" type="checkbox"><span>Silence joint sensors</span></label>
-      <p class="hint">Kick writes 200&nbsp;Hz straight onto the joint. Flex goes through the real motor neurons. Silencing sensors does nothing useful yet &mdash; those cells aren&rsquo;t typed well enough to close the loop.</p>
+      <p class="hint">Direct joint demo writes a rate straight to the effector and skips the neurons. It is a control, not neural evidence. Sensor silence is an explicit intervention on the current illustrative proprioceptive input.</p>
     </details>
 
-    <details class="disclosure">
-      <summary>Load the whole brain (54 MB)</summary>
-      <p>Optional overlay: FlyWire v783, sugar taste, 138,639 neurons. The body does not start walking.</p>
-      <div class="btn-row">
-        <button class="btn-ghost btn" id="load">Load FlyWire overlay</button>
+    <details class="disclosure" id="brain-panel">
+      <summary>01b &mdash; FlyWire brain model (optional 54 MB)</summary>
+      <p>FlyWire v783 is a separate whole-brain model: 138,639 neurons, loaded only when you ask. Its output stays in its own panel and does not drive the walking fly.</p>
+      <div class="btn-row"><button class="btn-ghost btn" id="load">Load FlyWire model</button></div>
+      <progress id="brain-progress" max="1" value="0" hidden></progress>
+      <div class="model-identity"><span class="source-dot brain-dot"></span><span id="brain-status">Not loaded</span></div>
+      <div class="readouts brain-readouts">
+        <div><span>SIM TIME</span><strong id="brain-simtime">0.00 <small>s</small></strong></div>
+        <div><span>BRAIN SPIKES</span><strong id="brain-spikes">&mdash;</strong></div>
+        <div><span>TOUCHED</span><strong id="brain-touched">&mdash;</strong></div>
       </div>
-      <label class="switch"><input id="sugar" type="checkbox" checked disabled><span>Sugar stimulation</span></label>
+      <div class="readouts brain-readouts">
+        <div><span>COMPUTE</span><strong id="brain-speed">&mdash;</strong></div>
+        <div><span>WATCHED</span><strong id="brain-watched">0</strong></div>
+        <div><span>INPUT</span><strong id="brain-input">off</strong></div>
+      </div>
+      <label class="switch"><input id="sugar" type="checkbox" checked disabled><span>Sugar input</span></label>
+      <p class="hint">The current build exposes aggregate spikes plus a bounded spike monitor. It does not yet export named feeding-population identities or membrane voltage.</p>
     </details>
 
     <details class="disclosure">
-      <summary>What am I looking at?</summary>
-      <p>Male 3D mesh, female central nervous system. The cord is BANC v888 as a leaky integrate-and-fire model. Joints are kinematic, not physics. This is not a complete biological fly.</p>
+      <summary>What each model means</summary>
+      <p><strong>BANC v888:</strong> a female-CNS, leaky-integrate-and-fire nerve-cord model connected to a male procedural body through a kinematic motor-to-joint mapping.</p>
+      <p><strong>FlyWire v783:</strong> a browser-local whole-brain simulation with its own counters and optional sugar input. Loading it does not make the visible fly walk.</p>
+      <p><strong>Walking:</strong> a kinematic animation clip. It is a visual introduction, not an emergent connectome result.</p>
       <p id="download-info"></p>
       <p><a href="https://github.com/H-H-E/fly-neural-lab" target="_blank" rel="noopener">Source and attribution &nearr;</a></p>
     </details>
   </aside>
 </main>
 
-<footer class="colophon"><span>CONNECTOME &rarr; A LEG THAT MOVES</span><span>RESEARCH PROTOTYPE · NO ACCOUNT REQUIRED</span></footer>
+<footer class="colophon"><span>CONNECTOME &rarr; A BODY YOU CAN QUESTION</span><span>RESEARCH PROTOTYPE · NO ACCOUNT REQUIRED</span></footer>
 <script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
 <script type="module" src="app.mjs"></script>
 </body>

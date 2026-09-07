@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="A cautious FlyWire taste-input experiment scaffold with bounded spike observation.">
+  <title>Taste input experiment · Fly Lab</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2324402c'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%23c8ef61'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <a href="./" class="brand"><strong>Fly Lab</strong><small>BROWSER NEUROSCIENCE · v1</small></a>
+  <nav class="topnav">
+    <a href="./lesson.html">Start the lesson</a>
+    <a href="./taste.html" aria-current="page">Taste experiment</a>
+    <a href="./reflex.html">Reflex case study</a>
+</nav>
+</header>
+
+<section class="hero hero-narrow">
+  <p class="eyebrow">LESSON · 02 / 03 · FLYWIRE V783</p>
+  <h1>Give the model a taste. <em>Then check its answer.</em></h1>
+  <p class="lede">The research question is whether activating sugar-sensing neurons predicts downstream responses involved in feeding. This page supplies an imposed sugar input and exposes the model's aggregate and watched-cell spikes. It refuses to call those spikes “feeding” until the pinned release has a verified cell-identity map.</p>
+</section>
+
+<main class="lesson-layout">
+  <a class="back-link" href="./lesson.html">&larr; Back to the first experiment</a>
+  <div class="depth-tabs" role="tablist" aria-label="Explanation depth">
+    <button type="button" role="tab" aria-selected="true" data-taste-depth="start">Start here</button>
+    <button type="button" role="tab" aria-selected="false" data-taste-depth="works">How it works</button>
+    <button type="button" role="tab" aria-selected="false" data-taste-depth="evidence">Model &amp; evidence</button>
+  </div>
+  <section class="instrument-card">
+    <p class="card-number">PAPER-GROUNDED INPUT · NOT YET A VALIDATED OUTPUT CLAIM</p>
+    <h2>Can sugar input change the downstream pattern?</h2>
+    <p>The full FlyWire model is large: loading it is optional and desktop-first. Start with sugar off, record a baseline, then turn sugar on and compare conditions. The current committed build knows the input switch and spike monitor, but it does not yet ship the verified named sugar-sensory or MN9 index map from the paper's experiment.</p>
+    <div class="question">
+      <p>What counts as evidence here?</p>
+      <p class="hint" id="taste-depth-copy">A change in aggregate activity is an observation. A claim about a named feeding output requires the correct pinned cell identities and a preregistered comparison.</p>
+    </div>
+    <div class="btn-row">
+      <button class="btn" id="load">Load FlyWire model (54 MB)</button>
+      <button class="btn btn-ghost" id="run" disabled>Run baseline</button>
+      <button class="btn btn-ghost" id="reset" disabled>Reset / unload</button>
+    </div>
+    <div class="model-identity"><span class="source-dot brain-dot"></span><span id="status" class="lesson-status">Model not loaded.</span></div>
+    <div class="readouts">
+      <div><span>SIM TIME</span><strong id="simtime">0.00 <small>s</small></strong></div>
+      <div><span>WHOLE-BRAIN SPIKES</span><strong id="spikes">&mdash;</strong></div>
+      <div><span>COMPUTE</span><strong id="speed">&mdash;</strong></div>
+    </div>
+    <div class="readouts">
+      <div><span>INPUT</span><strong id="input">off</strong></div>
+      <div><span>WATCHED SPIKES</span><strong id="watched-spikes">0</strong></div>
+      <div><span>TOUCHED NEURONS</span><strong id="touched">&mdash;</strong></div>
+    </div>
+    <label class="switch"><input id="sugar" type="checkbox" disabled><span>Imposed sugar input</span></label>
+    <canvas id="trace" aria-label="Whole-brain and watched-cell spike trace"></canvas>
+    <p class="instrument-caption">AGGREGATE SPIKES (EMBER) · WATCHED SPIKES (BLUE) · MODEL CLOCK</p>
+  </section>
+
+  <section class="lesson-grid" style="margin-top:18px">
+    <article class="instrument-card">
+      <p class="card-number">OBSERVATION API</p>
+      <h2>Watch a bounded set.</h2>
+      <p>Enter model neuron indices once a verified release mapping exists. At most 64 IDs are watched, and the interface reads the existing spike monitor without asking the model to materialize the whole brain.</p>
+      <div class="control-line"><label>Indices <input id="watch-ids" type="text" placeholder="e.g. 123, 456, 789" inputmode="numeric"></label><button class="btn btn-ghost" id="watch" disabled>Watch IDs</button></div>
+      <p class="lesson-status" id="watch-status">No named cell map is bundled yet.</p>
+      <p class="hint">The field is intentionally raw: a number in this WASM build is not automatically a biological identity.</p>
+    </article>
+    <article class="instrument-card">
+      <p class="card-number">INTERPRETATION</p>
+      <h2>What this page can and cannot say.</h2>
+      <ul class="evidence-list">
+        <li><strong>Can say:</strong> whether the imposed input changed the model's emitted spike pattern.</li>
+        <li><strong>Can say:</strong> which watched indices emitted spikes during a run.</li>
+        <li><strong>Cannot yet say:</strong> that a watched index is sugar-sensing or MN9 without a verified mapping.</li>
+        <li><strong>Cannot say:</strong> that a simulated spike is a complete feeding behavior.</li>
+      </ul>
+      <p><a href="https://www.nature.com/articles/s41586-024-07763-9" target="_blank" rel="noopener">Read the primary study &nearr;</a></p>
+    </article>
+  </section>
+</main>
+
+<footer class="colophon"><span>INPUT &rarr; TRACE &rarr; CLAIM</span><span>FLYWIRE SPIKE MONITOR · NAMED MAP PENDING</span></footer>
+
+<script type="module">
+const $ = (id) => document.getElementById(id);
+let worker = null, loaded = false, running = false, sugarOn = false, watchedIds = [];
+let samples = [];
+
+function setTasteDepth(depth) {
+  const copy = {
+    start: 'A change in aggregate activity is an observation. A claim about a named feeding output requires the correct pinned cell identities and a preregistered comparison.',
+    works: 'The page sends an imposed sugar switch to the FlyWire worker. The worker advances its own fixed neural clock and returns aggregate spikes plus a bounded readout from the exported spike monitor.',
+    evidence: 'This is a model comparison, not a receptor-level taste simulation. The pinned build has no verified sugar-sensory or MN9 identity map here, so the page reports neural activity without naming it as feeding.',
+  };
+  document.querySelectorAll('[data-taste-depth]').forEach((button) => button.setAttribute('aria-selected', String(button.dataset.tasteDepth === depth)));
+  $('taste-depth-copy').textContent = copy[depth];
+}
+
+function setStatus(message) { $('status').textContent = message; }
+function draw() {
+  const canvas = $('trace'), dpr = Math.min(window.devicePixelRatio || 1, 2), width = Math.max(1, canvas.clientWidth), height = 230;
+  canvas.width = Math.round(width * dpr); canvas.height = Math.round(height * dpr);
+  const c = canvas.getContext('2d'); c.setTransform(dpr, 0, 0, dpr, 0, 0); c.fillStyle = '#12160f'; c.fillRect(0, 0, width, height);
+  const left = 48, right = 14, top = 18, bottom = 26, plotWidth = width - left - right;
+  const maxT = Math.max(1, ...samples.map((p) => p.time)), maxValue = Math.max(1, ...samples.map((p) => p.spikes));
+  const x = (time) => left + time / maxT * plotWidth, y = (value) => top + (height - top - bottom) * (1 - value / maxValue);
+  c.strokeStyle = '#34402e'; c.lineWidth = 1;
+  for (let i = 0; i <= 3; i++) { const yy = top + (height - top - bottom) * i / 3; c.beginPath(); c.moveTo(left, yy); c.lineTo(width - right, yy); c.stroke(); }
+  c.fillStyle = '#8f9c80'; c.font = '10px ui-monospace, monospace'; c.fillText('spikes / chunk', 8, 13); c.fillText('time (s)', width - 58, height - 8);
+  if (!samples.length) return;
+  for (const [key, color] of [['spikes', '#f5a36a'], ['watched', '#7aa7d8']]) {
+    c.strokeStyle = color; c.lineWidth = 2; c.beginPath(); samples.forEach((p, i) => { const value = key === 'spikes' ? p.spikes : p.watched; i ? c.lineTo(x(p.time), y(value)) : c.moveTo(x(p.time), y(value)); }); c.stroke();
+  }
+}
+function parseWatchIds() {
+  return [...new Set($('watch-ids').value.split(',').map((value) => Number(value.trim())).filter((value) => Number.isInteger(value) && value >= 0 && value < 138639))].slice(0, 64);
+}
+function createWorker() {
+  worker?.terminate(); worker = new Worker('./brain-worker.mjs', { type: 'module' });
+  worker.onerror = () => setStatus('Worker stopped. Try a desktop browser with more free memory.');
+  worker.onmessage = ({ data: d }) => {
+    if (d.type === 'progress') setStatus(d.message || `Loading · ${Math.round(d.fraction * 100)}%`);
+    if (d.type === 'ready') {
+      loaded = true; $('load').disabled = true; $('run').disabled = false; $('reset').disabled = false; $('sugar').disabled = false; $('watch').disabled = false;
+      setStatus(`${d.modelLabel} ready · ${d.memoryMiB} MiB. Output is spike-monitor data.`); worker.postMessage({ type: 'watch', ids: watchedIds });
+    }
+    if (d.type === 'sample') {
+      samples.push({ time: Number(d.time || 0), spikes: Number(d.spikes || 0), watched: (d.observed || []).length }); if (samples.length > 160) samples.shift();
+      $('simtime').textContent = `${Number(d.time || 0).toFixed(2)} s`; $('spikes').textContent = Number(d.spikes || 0).toLocaleString(); $('speed').textContent = `${Number(d.speed || 0).toFixed(2)}×`; $('watched-spikes').textContent = String((d.observed || []).length); $('touched').textContent = Number(d.touched || 0).toLocaleString(); draw();
+    }
+    if (d.type === 'input') { sugarOn = d.on; $('input').textContent = sugarOn ? 'sugar on' : 'off'; }
+    if (d.type === 'watch') { watchedIds = d.ids; $('watch-status').textContent = `Watching ${watchedIds.length} raw model indices.`; }
+  };
+  worker.postMessage({ type: 'load' });
+}
+$('load').onclick = () => { if (!('Worker' in window) || !('WebAssembly' in window) || !('DecompressionStream' in window)) { setStatus('This browser lacks a required FlyWire feature.'); return; } setStatus('Starting FlyWire download…'); createWorker(); };
+$('run').onclick = () => { if (!loaded) return; running = !running; $('run').textContent = running ? 'Pause' : (sugarOn ? 'Run sugar condition' : 'Run baseline'); worker.postMessage({ type: running ? 'run' : 'pause' }); };
+$('sugar').onchange = () => { sugarOn = $('sugar').checked; $('run').textContent = sugarOn ? 'Run sugar condition' : 'Run baseline'; worker?.postMessage({ type: 'sugar', on: sugarOn }); };
+$('watch').onclick = () => { watchedIds = parseWatchIds(); worker?.postMessage({ type: 'watch', ids: watchedIds }); };
+$('reset').onclick = () => { worker?.terminate(); worker = null; loaded = false; running = false; sugarOn = false; watchedIds = []; samples = []; $('load').disabled = false; $('run').disabled = true; $('reset').disabled = true; $('sugar').disabled = true; $('watch').disabled = true; $('sugar').checked = false; $('input').textContent = 'off'; $('watched-spikes').textContent = '0'; $('touched').textContent = '—'; $('simtime').textContent = '0.00 s'; $('spikes').textContent = '—'; $('speed').textContent = '—'; $('watch-status').textContent = 'No named cell map is bundled yet.'; $('load').textContent = 'Load FlyWire model (54 MB)'; setStatus('Model unloaded.'); draw(); };
+document.querySelectorAll('[data-taste-depth]').forEach((button) => button.addEventListener('click', () => setTasteDepth(button.dataset.tasteDepth)));
+window.addEventListener('resize', draw); draw();
+setTasteDepth('start');
+window.__tasteQA = () => ({ loaded, running, sugarOn, watchedIds: watchedIds.length, samples: samples.length });
+</script>
+</body>
+</html>

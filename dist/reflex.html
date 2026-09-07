@@ -1,203 +1,461 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="Bend a fly's shin and watch its nerve cord push back — a tibia reflex driven by real traced neurons.">
-<title>Tibia reflex — the leg pushes back · Fly Lab</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2324402c'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%23c8ef61'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Test what makes a model fly leg move: neural output, sensory feedback, or passive mechanics.">
+  <title>Tibia evidence lab · Fly Lab</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2324402c'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%23c8ef61'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <header class="topbar">
-  <a href="./" class="brand"><strong>Fly Lab</strong><small>DROSOPHILA · BANC v888</small></a>
+  <a href="./" class="brand"><strong>Fly Lab</strong><small>BROWSER NEUROSCIENCE · v1</small></a>
   <nav class="topnav">
-    <a href="./reflex.html" aria-current="page">Reflex lesson</a>
+    <a href="./lesson.html">Start the lesson</a>
+    <a href="./taste.html">Taste experiment</a>
+    <a href="./reflex.html" aria-current="page">Reflex case study</a>
     <a href="https://github.com/H-H-E/fly-neural-lab" target="_blank" rel="noopener">Source</a>
   </nav>
 </header>
 
 <section class="hero hero-narrow">
-  <p class="eyebrow">LESSON · TIBIA REFLEX</p>
-  <h1>The leg <em>pushes back.</em></h1>
-  <p class="lede">The green segment is the femur; the orange one is the tibia &mdash; the fly&rsquo;s shin. Bend it with the slider, then watch the lower panel: each dot is one neuron firing, one row per muscle group, and every neuron here was traced from a real fruit fly, connection by connection, in electron microscope images.</p>
-  <p class="lede">When the tibia bends, joint sensors fire, the message runs up the nerve cord and back down, and a muscle tugs the tibia toward where it was. No brain required &mdash; the wiring just does this, the way a spring pushes back.</p>
+  <p class="eyebrow">LESSON · 03 / 03 · BANC V888 SUBGRAPH</p>
+  <h1>A leg moved. <em>What caused it?</em></h1>
+  <p class="lede">This page uses the pinned tibia subgraph to separate three things that are easy to confuse: sensory input, neural motor output, and passive joint mechanics. Run matched conditions, inspect a bounded population trace, and make the causal claim no stronger than the experiment allows.</p>
 </section>
 
-<div class="rx-wrap">
-  <a class="back-link" href="./">&larr; Back to the 3D fly</a>
+<main class="rx-wrap">
+  <a class="back-link" href="./lesson.html">&larr; Back to the first experiment</a>
 
   <div class="control-card">
     <div class="control-row">
       <button class="btn" id="run" disabled>Run</button>
+      <button class="btn btn-ghost" id="step" disabled>Step 1 ms</button>
       <button class="btn btn-ghost" id="perturb" disabled>Perturb +20&deg;</button>
+      <button class="btn btn-ghost" id="reset" disabled>Reset</button>
+      <button class="btn btn-ghost" id="replay" disabled>Replay</button>
       <label class="bend-wrap">Bend <input id="bend" type="range" min="10" max="150" value="70" disabled> <output id="bendv" for="bend">70&deg;</output></label>
     </div>
     <div class="control-row" style="margin-top:12px">
+      <label>Seed <input id="seed" type="number" min="0" max="4294967295" step="1" value="2026" disabled></label>
       <button class="link-btn" id="how" disabled>How does the leg know?</button>
       <span class="status-line" id="status" role="status">Loading reflex-tibia.json&hellip;</span>
     </div>
+    <div class="condition-tabs" role="tablist" aria-label="Reflex experiment condition">
+      <button type="button" role="tab" aria-selected="true" data-condition="full">Full feedback</button>
+      <button type="button" role="tab" aria-selected="false" data-condition="no-sensors">Sensors off</button>
+      <button type="button" role="tab" aria-selected="false" data-condition="no-neural">Neural output off</button>
+      <button type="button" role="tab" aria-selected="false" data-condition="passive">Passive only</button>
+    </div>
+  </div>
+
+  <div class="depth-tabs" role="tablist" aria-label="Explanation depth">
+    <button type="button" role="tab" aria-selected="true" data-reflex-depth="start">Start here</button>
+    <button type="button" role="tab" aria-selected="false" data-reflex-depth="works">How it works</button>
+    <button type="button" role="tab" aria-selected="false" data-reflex-depth="evidence">Model &amp; evidence</button>
   </div>
 
   <div class="callout article" id="l1" hidden>
-    <p>Pull your hand back from a hot pan and your spinal cord handles most of it. The signal goes out, comes back, your arm moves, and your brain finds out later, as a done deal. Flies run the same trick, and this page lets you watch.</p>
-    <p>Grab the Bend slider. At the joint sit sensors called FeCO neurons, and they fire whenever the tibia moves: some track the angle, some track direction and speed, some only complain when the joint nears a stop. Those spikes climb into the nerve cord, hop across a couple of relay neurons, and land on motor neurons wired to two opposing muscles, the flexor that bends the tibia and the extensor that straightens it. Bend the joint and the extensor pool wakes up while the flexor goes quiet, so the leg pushes back toward where it was.</p>
-    <p>Press Perturb and the tibia jumps 20 degrees. The leg starts correcting in about ten milliseconds. You&rsquo;d take roughly two hundred. Reflexes live in the nerve cord instead of the brain for exactly this reason: asking the brain would mean waiting on it.</p>
+    <p>At the joint sit sensory channels that encode an assumed position, velocity, and limit signal. Their spikes enter this small BANC-derived graph; motor neurons then provide a rate readout for two opposing muscle groups.</p>
+    <p>The important question is not whether the tibia returns. A passive spring can do that too. Compare the full condition with sensors off, neural output off, and passive mechanics alone. If the motion survives when neural output is disconnected, the motion itself cannot prove a neural reflex.</p>
+  </div>
+
+  <div class="depth-panel callout article" id="reflex-depth-works" hidden>
+    <p>The model advances in fixed 0.1 ms steps. Every 10 ticks it derives a motor-pool rate, advances the hinge, and records neural torque and passive torque as separate terms. The screen redraws those states; it does not determine the simulation clock.</p>
+  </div>
+
+  <div class="depth-panel callout article" id="reflex-depth-evidence" hidden>
+    <p>The extracted wiring is useful for a causal probe, not a complete physiological reflex. Sensory grouping is illustrative, interneurons use generic LIF dynamics, and the passive spring can restore the joint without neural output. Treat differences between matched conditions as model evidence under these assumptions.</p>
+  </div>
+
+  <div class="question">
+    <p>Prediction: after a +20&deg; perturbation, which condition should show a neural contribution?</p>
+    <div class="prediction-row">
+      <button class="btn btn-ghost" type="button" data-predict="full">Full feedback</button>
+      <button class="btn btn-ghost" type="button" data-predict="passive">Passive only</button>
+      <span class="model-chip" id="prediction-result">Choose a prediction, then Perturb.</span>
+    </div>
   </div>
 
   <figure class="specimen-figure leg">
-    <canvas id="leg" width="640" height="220"></canvas>
-    <figcaption>FIG. 1 &mdash; FEMUR (GREEN) · TIBIA (EMBER) · SINGLE-HINGE JOINT</figcaption>
+    <canvas id="leg" width="640" height="220" aria-label="Simulated fly tibia joint"></canvas>
+    <figcaption>FIG. 1 &mdash; FEMUR (GREEN) · TIBIA (EMBER) · SINGLE-HINGE BODY MODEL</figcaption>
   </figure>
 
   <figure class="specimen-figure">
-    <canvas id="raster" width="640" height="120"></canvas>
-    <figcaption>FIG. 2 &mdash; MOTOR POOL RASTER · FLEXOR (TOP) VS EXTENSOR (BOTTOM)</figcaption>
+    <canvas id="evidence-trace" width="640" height="220" aria-label="Joint angle, neural torque, and passive torque over simulation time"></canvas>
+    <figcaption>FIG. 2 &mdash; ANGLE (TOP) · NEURAL TORQUE VS PASSIVE TORQUE (BOTTOM)</figcaption>
   </figure>
 
-  <p class="stats-line" id="stats"></p>
-  <div class="terminal" id="log" aria-live="polite"></div>
+  <section class="instrument-card">
+    <p class="card-number">INSTRUMENT PANEL &mdash; BOUNDED OBSERVATION</p>
+    <h2>Which cells responded?</h2>
+    <p>Choose a named pool from this extracted subgraph. The panel watches at most 64 neuron indices and reads their existing state after each fixed simulation chunk; observing does not alter the model.</p>
+    <div class="population-tabs" role="tablist" aria-label="Population trace selection">
+      <button type="button" aria-selected="true" data-population="sensory">Sensory pool</button>
+      <button type="button" aria-selected="false" data-population="relay">Relay / VNC</button>
+      <button type="button" aria-selected="false" data-population="flexor">Flexor MNs</button>
+      <button type="button" aria-selected="false" data-population="extensor">Extensor MNs</button>
+    </div>
+    <p class="model-identity"><span class="source-dot banc-dot"></span><span id="watch-label">Watching the sensory pool</span><span class="model-chip" id="watch-count">0 neurons</span></p>
+    <canvas id="population-trace" class="compact" aria-label="Selected neural population firing rate over simulation time"></canvas>
+    <p class="instrument-caption" id="population-caption">SELECTED POOL RATE · DERIVED FROM SPIKES IN THE MODEL CLOCK</p>
+    <p class="hint">The sensory groups on this page are an explicit illustrative split of the extracted sensory rows, not verified functional recordings. The caveat is part of the result.</p>
+  </section>
 
-  <div class="article">
+  <p class="stats-line" id="stats"></p>
+  <div class="terminal event-log" id="log" aria-live="polite"></div>
+
+  <section class="article">
     <details class="disclosure" id="hood">
       <summary>Under the hood</summary>
-      <p>The joint angle is encoded, not measured. There is no ruler anywhere in that leg. What travels up the nerve is a population code: a bank of position neurons, each tuned to its own preferred angle, fires hardest when the joint is near that angle and stays mostly quiet otherwise. Read the whole bank together and the angle falls out of the pattern. Your retina runs the same trick for edges and motion. On this page, each position sensor is one slice of that tuning curve. A real FeCO organ spreads one receptor&rsquo;s dendrites across the tendon, so the code is continuous rather than a row of little dials.</p>
-      <p>Velocity is coded the opposite way: half the movement neurons fire for one direction, half for the other, and the difference between the two populations is the speed. Your vestibular system works this way too.</p>
-      <p>None of that does anything by itself. The readout happens at the motor neurons, which pool every incoming spike in a ten millisecond window and turn pool rate into torque: extensor rate minus flexor rate, signed and scaled, minus a passive spring and damper at the joint. The spring-damper term is honest modeling laziness; a real fly has passive joint stiffness too.</p>
-      <p>One caveat, because it matters: most of the interneurons in this nerve cord were never recorded during this reflex. Their shapes and synapses come from the connectome, but their dynamics are a generic leaky integrate-and-fire model, and electrical synapses between them are not modeled at all. The sensor-to-motor wiring is measured. The stuff in between is a plausible guess wearing a measured skeleton. If a biologist silenced a neuron in a real fly and the reflex carried on regardless, this sim could not have predicted that.</p>
+      <p>The joint angle is encoded, not measured. There is no ruler in the leg. A bank of assumed position channels is tuned across 10&deg; to 150&deg;; velocity channels are direction-opponent; limit channels rise near either stop. Those inputs are sent to a LIF graph with 0.1 ms steps and an approximately 1 ms sensor-to-CNS exchange.</p>
+      <p>Motor output is read as a 10 ms pool rate. The body then computes two separate terms: neural torque from flexor minus extensor rates, and passive torque from a spring-damper. The plotted angle is the result of their sum. That decomposition is why the counterfactuals matter.</p>
+      <p>Most interneurons here were not recorded during this exact reflex. Their wiring comes from the extracted graph; their dynamics are a generic LIF approximation, and electrical synapses are not modeled. The sensor-to-motor wiring is measured; the missing physiology is not.</p>
     </details>
-
     <div style="margin:18px 0 6px"><button class="link-btn" id="pedantic">For the pedantic</button></div>
     <div class="fine-print" id="l3" hidden>
-      <p>Encoding: Gaussian position tuning, sigma 25 degrees, 150 Hz peak, tiled across 10 to 150 degrees. Velocity: direction-opponent half-wave rectified pairs. Limit detectors ramp up inside 15 degrees of either stop. Motor readout: 10 ms boxcar pool rate; torque = k(flexor &minus; extensor) minus a passive spring-damper on a single-hinge inertia of 1e-6.</p>
-      <p>Fidelity gaps, ordered by how much they should worry you:</p>
+      <p>Encoding: Gaussian position tuning, sigma 25&deg;, 150 Hz peak, tiled across 10&deg; to 150&deg;. Velocity: direction-opponent half-wave rectified pairs. Limit detectors ramp inside 15&deg; of either stop. Motor readout: 10 ms boxcar pool rate; neural torque = k(flexor &minus; extensor); passive torque = &minus;k<sub>spring</sub>(theta &minus; theta<sub>rest</sub>) &minus; c<sub>damper</sub>omega on a single-hinge inertia of 1e-6.</p>
       <ol>
-        <li>Every interneuron is LIF with generic synapses. The real VNC contains non-spiking interneurons and electrical synapses; both change gain and timing, and neither exists here.</li>
-        <li>The encoder grid is not the FeCO organ. Claw neurons are tonic position units that also carry some velocity sensitivity; hook neurons are phasic but not cleanly direction-pure. A real recording shows partly redundant, correlated channels, not three orthogonal populations.</li>
-        <li>No efference copy. During active movements the CNS modulates reflex gain; this loop runs constant gain, so it will be wrong during grooming and possibly wrong in sign for some active motions.</li>
-        <li>Pools recruit uniformly here. Real FeCO-driven recruitment is ordered (think size principle), not all-at-once, which reshapes the torque onset profile.</li>
-        <li>The 20 ms raster is a display convenience; the sim ticks at 0.1 ms and the exchange with the &ldquo;CNS&rdquo; is 1 ms, so latency claims should quote the sim clock, not the screen.</li>
+        <li>Every interneuron is LIF with generic synapses. Non-spiking interneurons and electrical synapses are absent.</li>
+        <li>The encoder grid is not the FeCO organ. Functional subtypes are not established by this page's row split.</li>
+        <li>There is no efference copy, so active-movement reflex gain is not represented.</li>
+        <li>Pools recruit uniformly here; ordered recruitment is not represented.</li>
+        <li>Latency claims refer to the simulation clock, not the display refresh rate.</li>
       </ol>
     </div>
-  </div>
-</div>
+    <h3>Evidence table</h3>
+    <table class="contrast-table">
+      <thead><tr><th>Condition</th><th>Input / output</th><th>What motion can show</th></tr></thead>
+      <tbody>
+        <tr><td>Full feedback</td><td>Sensors + neural torque + passive torque</td><td>Both pathways are present</td></tr>
+        <tr><td>Sensors off</td><td>No new sensory input + passive torque</td><td>Tests whether the loop needs the encoder</td></tr>
+        <tr><td>Neural output off</td><td>Sensors still run; motor torque = 0</td><td>Motion is a mechanics control</td></tr>
+        <tr><td>Passive only</td><td>Sensors and motor output disconnected</td><td>Spring-damper baseline</td></tr>
+      </tbody>
+    </table>
+  </section>
+</main>
 
-<footer class="colophon"><span>CONNECTOME &rarr; A LEG THAT MOVES</span><span>RESEARCH PROTOTYPE · NO ACCOUNT REQUIRED</span></footer>
+<footer class="colophon"><span>A LEG MOVED &rarr; FIND THE CAUSE</span><span>BANC-DERIVED PROBE · ASSUMPTIONS VISIBLE</span></footer>
+
 <script type="module">
-import { ReflexNet, DT } from './reflex-engine.mjs';
-const $ = id => document.getElementById(id);
-const log = m => { $('log').textContent += m + '\n'; };
+import { ReflexNet, DT, V0, VTH } from './reflex-engine.mjs';
+import { EXPERIMENT_SCHEMA, RNG_VERSION, downloadJSON, makeRecorder } from './experiment-core.mjs';
 
+const $ = (id) => document.getElementById(id);
 const graph = await (await fetch('./reflex-tibia.json')).json();
-const net = new ReflexNet(graph);
-const N = graph.meta.n_nodes;
-$('status').textContent = `Loaded: ${N} neurons, ${graph.meta.n_edges} edges (${graph.meta.source}).`;
-
-const sensIdx = [], flexMN = [], extMN = [], otherMN = [];
-graph.role.forEach((r, i) => {
-  if (r === 'sensory') sensIdx.push(i);
-  else if (r === 'motor') {
-    const t = graph.target[i];
-    if (/flexor/i.test(t)) flexMN.push(i);
-    else if (/extensor/i.test(t)) extMN.push(i);
-    else otherMN.push(i);
-  }
-});
-log(`sensory=${sensIdx.length} flexMN=${flexMN.length} extMN=${extMN.length} otherMN=${otherMN.length}`);
-// split sensory into position (first 60%), velocity (next 30%), limit (rest)
-const nP = Math.floor(sensIdx.length * .6), nV = Math.floor(sensIdx.length * .3);
-const posN = sensIdx.slice(0, nP), velN = sensIdx.slice(nP, nP + nV), limN = sensIdx.slice(nP + nV);
-
-// hinge state
-let theta = 70 * Math.PI / 180, omega = 0, running = false, simT = 0;
-let perturbT = -1, torqueOnsetT = -1, lastTorque = 0, poolWin = [];
+const recorder = makeRecorder();
+const MODEL = 'BANC v888 tibia subgraph · reflex-engine qualitative probe';
+const DT_MS = DT * 1000;
+const CHUNK_TICKS = 10;
+const WINDOW_TICKS = 100;
 const TH_MIN = 10 * Math.PI / 180, TH_MAX = 150 * Math.PI / 180;
+const REST = 70 * Math.PI / 180;
 const K_MUSC = 2e-4, K_SPR = 4e-5, C_DMP = 2e-5, INERT = 1e-6;
+const population = { sensory: [], relay: [], flexor: [], extensor: [] };
+const sensory = [], flexMN = [], extMN = [], relay = [];
+graph.role.forEach((role, index) => {
+  if (role === 'sensory') sensory.push(index);
+  else if (role === 'motor') {
+    const target = graph.target[index] || '';
+    if (/flexor/i.test(target)) flexMN.push(index);
+    else if (/extensor/i.test(target)) extMN.push(index);
+  } else if (role === 'vnc' || role === 'central') relay.push(index);
+});
+population.sensory = sensory;
+population.relay = relay;
+population.flexor = flexMN;
+population.extensor = extMN;
 
-function encode(dt) {
+let net;
+let seed = 2026;
+let condition = 'full';
+let selectedPopulation = 'sensory';
+let running = false;
+let replaying = false;
+let replayEvents = [];
+let replayTargetTime = 0;
+let theta = REST, omega = 0, simT = 0;
+let poolWin = [];
+let history = [];
+let selectedWatchIds = [];
+let prediction = null;
+let explanationDepth = 'start';
+
+function log(message) {
+  const lines = ($('log').textContent ? $('log').textContent.split('\n') : []).filter(Boolean);
+  lines.push(message); while (lines.length > 14) lines.shift();
+  $('log').textContent = lines.join('\n');
+}
+
+function record(type, data = {}, time = simT) {
+  const event = { type, time: +time.toFixed(4), ...data };
+  if (!replaying) {
+    recorder.record(type, event.time, data);
+    replayEvents.push(event);
+    const detail = Object.entries(data).map(([key, value]) => `${key}=${value}`).join(' ');
+    log(`${event.time.toFixed(3)}s · ${type}${detail ? ` · ${detail}` : ''}`);
+  }
+}
+
+function setCondition(next) {
+  condition = next;
+  document.querySelectorAll('[data-condition]').forEach((button) => button.setAttribute('aria-selected', String(button.dataset.condition === condition)));
+  resetSimulation();
+  record('condition', { condition }, 0);
+  $('status').textContent = `${conditionLabel()} ready. Perturb the joint, then run.`;
+}
+
+function conditionLabel() {
+  return ({ full: 'Full feedback', 'no-sensors': 'Sensors disconnected', 'no-neural': 'Neural output disconnected', passive: 'Passive mechanics only' })[condition];
+}
+
+function setReflexDepth(depth) {
+  explanationDepth = depth;
+  document.querySelectorAll('[data-reflex-depth]').forEach((button) => button.setAttribute('aria-selected', String(button.dataset.reflexDepth === depth)));
+  $('l1').hidden = depth !== 'start';
+  $('reflex-depth-works').hidden = depth !== 'works';
+  $('reflex-depth-evidence').hidden = depth !== 'evidence';
+}
+
+function selectedIds() {
+  return population[selectedPopulation].slice(0, 64);
+}
+
+function resetSimulation({ keepReplay = false } = {}) {
+  running = false; replaying = false;
+  net = new ReflexNet(graph, { seed });
+  selectedWatchIds = selectedIds(); net.setWatch(selectedWatchIds);
+  theta = Number($('bend').value) * Math.PI / 180;
+  omega = 0; simT = 0; poolWin = []; history = [];
+  if (!keepReplay) { replayEvents = []; replayTargetTime = 0; recorder.clear(); $('log').textContent = ''; }
+  prediction = null;
+  $('prediction-result').textContent = 'Choose a prediction, then Perturb.';
+  $('run').textContent = 'Run';
+  draw(); drawTrace(); drawPopulation(); updateStats(0, 0, 0, 0, 0);
+  $('replay').disabled = !keepReplay && replayTargetTime <= 0;
+}
+
+function encode() {
+  net.clearStim();
+  if (condition === 'no-sensors' || condition === 'passive') return;
   const deg = theta * 180 / Math.PI;
-  posN.forEach((idx, k) => {           // Gaussian position tuning across range
-    const pref = 10 + 140 * (k / Math.max(1, posN.length - 1));
-    net.stimulate(idx, 150 * Math.exp(-((deg - pref) ** 2) / (2 * 25 ** 2)));
-  });
-  velN.forEach((idx, k) => {           // half each direction
-    const dir = k % 2 ? 1 : -1, w = omega * 180 / Math.PI;
-    net.stimulate(idx, Math.max(0, dir * w) * 2);
-  });
-  limN.forEach(idx => {                // joint-limit detectors
-    const near = Math.min(deg - 10, 150 - deg);
-    net.stimulate(idx, near < 15 ? 150 * (1 - near / 15) : 0);
+  const positionCount = Math.floor(sensory.length * .6);
+  const velocityCount = Math.floor(sensory.length * .3);
+  sensory.forEach((index, k) => {
+    let hz = 0;
+    if (k < positionCount) {
+      const pref = 10 + 140 * (k / Math.max(1, positionCount - 1));
+      hz = 150 * Math.exp(-((deg - pref) ** 2) / (2 * 25 ** 2));
+    } else if (k < positionCount + velocityCount) {
+      const dir = (k - positionCount) % 2 ? 1 : -1;
+      hz = Math.max(0, dir * omega * 180 / Math.PI) * 2;
+    } else {
+      const near = Math.min(deg - 10, 150 - deg);
+      hz = near < 15 ? 150 * (1 - Math.max(near, 0) / 15) : 0;
+    }
+    net.stimulate(index, hz);
   });
 }
-function poolRate(pool, window) {
-  let c = 0;
-  for (const tickSpikes of window) for (const s of tickSpikes) if (pool.includes(s)) c++;
-  return c / (pool.length * window.length * DT);
+
+function countPool(spikes, ids) {
+  if (!ids.length) return 0;
+  const wanted = new Set(ids);
+  let count = 0;
+  for (const tickSpikes of spikes) for (const id of tickSpikes) if (wanted.has(id)) count++;
+  return count;
 }
-function physicsStep(dt, flexHz, extHz) {
-  const tq = K_MUSC * (flexHz - extHz) - K_SPR * (theta - 70 * Math.PI / 180) - C_DMP * omega;
-  omega += tq / INERT * dt; theta += omega * dt;
+
+function poolRate(ids) {
+  return countPool(poolWin.slice(-WINDOW_TICKS), ids) / (Math.max(1, ids.length) * WINDOW_TICKS * DT);
+}
+
+function advanceChunk({ recordStep = true } = {}) {
+  encode();
+  const spikes = net.step(CHUNK_TICKS);
+  poolWin.push(...spikes); if (poolWin.length > 1000) poolWin.splice(0, poolWin.length - 1000);
+  simT = net.t;
+  const flexHz = poolRate(flexMN), extHz = poolRate(extMN);
+  const neuralTorque = condition === 'no-neural' || condition === 'passive' ? 0 : K_MUSC * (flexHz - extHz);
+  const passiveTorque = -K_SPR * (theta - REST) - C_DMP * omega;
+  const totalTorque = neuralTorque + passiveTorque;
+  omega += totalTorque / INERT * CHUNK_TICKS * DT;
+  theta += omega * CHUNK_TICKS * DT;
   if (theta < TH_MIN) { theta = TH_MIN; omega = 0; }
   if (theta > TH_MAX) { theta = TH_MAX; omega = 0; }
-  return tq;
+  const observation = net.observe();
+  history.push({ time: simT, angle: theta * 180 / Math.PI, neuralTorque, passiveTorque, totalTorque, observed: observation });
+  if (history.length > 900) history.shift();
+  if (recordStep) draw();
+  drawTrace(); drawPopulation(); updateStats(flexHz, extHz, neuralTorque, passiveTorque, totalTorque);
+  return { flexHz, extHz, neuralTorque, passiveTorque, totalTorque };
 }
+
+function updateStats(flexHz, extHz, neuralTorque, passiveTorque, totalTorque) {
+  $('stats').textContent = `${conditionLabel()} · t=${simT.toFixed(3)}s · θ=${(theta * 180 / Math.PI).toFixed(1)}° · flex=${flexHz.toFixed(1)}Hz · ext=${extHz.toFixed(1)}Hz · neural τ=${neuralTorque.toExponential(2)} · passive τ=${passiveTorque.toExponential(2)} · total τ=${totalTorque.toExponential(2)}`;
+}
+
 function draw() {
-  const c = $('leg').getContext('2d');
-  c.clearRect(0, 0, 640, 220);
+  const canvas = $('leg'), c = canvas.getContext('2d');
+  c.clearRect(0, 0, canvas.width, canvas.height);
   const ox = 90, oy = 170, L1 = 250, L2 = 150;
   const kx = ox + L1, ky = oy;
   const tx = kx + L2 * Math.cos(-theta), ty = ky + L2 * Math.sin(-theta);
   c.lineWidth = 10; c.strokeStyle = '#6d7653'; c.beginPath(); c.moveTo(ox, oy); c.lineTo(kx, ky); c.stroke();
   c.strokeStyle = '#b34c2f'; c.beginPath(); c.moveTo(kx, ky); c.lineTo(tx, ty); c.stroke();
   c.fillStyle = '#e8efdb'; c.font = '12px ui-monospace, monospace'; c.fillText(`θ=${(theta * 180 / Math.PI).toFixed(1)}°`, 14, 24);
-  const r = $('raster').getContext('2d');
-  r.clearRect(0, 0, 640, 120);
-  r.fillStyle = '#b34c2f';
-  const win = poolWin.slice(-200);
-  win.forEach((sp, x) => {
-    let yf = 20, ye = 70;
-    for (const s of sp) {
-      if (flexMN.includes(s) && yf < 55) r.fillRect(x * 3.2, yf++, 2, 2);
-      else if (extMN.includes(s) && ye < 105) r.fillRect(x * 3.2, ye++, 2, 2);
-    }
-  });
-  r.fillStyle = '#67705f'; r.font = '11px ui-monospace, monospace'; r.fillText('flexor pool', 10, 12); r.fillText('extensor pool', 10, 62);
+  c.fillStyle = '#a9b79b'; c.fillText(conditionLabel(), 14, 45);
+  c.fillStyle = '#6d7653'; c.fillRect(420, 18, 12, 4); c.fillStyle = '#e8efdb'; c.fillText('femur', 438, 22);
+  c.fillStyle = '#b34c2f'; c.fillRect(500, 18, 12, 4); c.fillStyle = '#e8efdb'; c.fillText('tibia', 518, 22);
 }
+
+function drawTrace() {
+  const canvas = $('evidence-trace'), dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const width = Math.max(1, canvas.clientWidth), height = 220;
+  canvas.width = Math.round(width * dpr); canvas.height = Math.round(height * dpr);
+  const c = canvas.getContext('2d'); c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, width, height);
+  c.fillStyle = '#12160f'; c.fillRect(0, 0, width, height);
+  const left = 48, right = 14, top = 20, bottom = 22, plotWidth = width - left - right;
+  const maxT = Math.max(1, simT, ...history.map((p) => p.time));
+  const x = (time) => left + time / maxT * plotWidth;
+  const angleY = (angle) => top + (150 - angle) / 140 * 72;
+  const torqueY = (torque) => 137 - torque / Math.max(1e-6, ...history.flatMap((p) => [Math.abs(p.neuralTorque), Math.abs(p.passiveTorque), Math.abs(p.totalTorque)])) * 54;
+  c.strokeStyle = '#34402e'; c.lineWidth = 1;
+  [20, 56, 101, 137, 191].forEach((y) => { c.beginPath(); c.moveTo(left, y); c.lineTo(width - right, y); c.stroke(); });
+  c.fillStyle = '#8f9c80'; c.font = '10px ui-monospace, monospace'; c.fillText('angle °', 8, 27); c.fillText('torque', 8, 143); c.fillText('time (s)', width - 58, 211);
+  const lines = [
+    ['angle', '#c8ef61', angleY], ['neuralTorque', '#f5a36a', torqueY], ['passiveTorque', '#7aa7d8', torqueY], ['totalTorque', '#f5d06f', torqueY],
+  ];
+  lines.forEach(([key, color, yfn]) => {
+    if (!history.length) return;
+    c.strokeStyle = color; c.lineWidth = key === 'totalTorque' ? 1.5 : 2; c.beginPath();
+    history.forEach((point, index) => { const y = yfn(point[key]); index ? c.lineTo(x(point.time), y) : c.moveTo(x(point.time), y); }); c.stroke();
+  });
+  const legend = [['angle', '#c8ef61'], ['neural', '#f5a36a'], ['passive', '#7aa7d8'], ['total', '#f5d06f']];
+  let lx = left; legend.forEach(([label, color]) => { c.fillStyle = color; c.fillRect(lx, 198, 10, 3); c.fillStyle = '#cdd8b8'; c.fillText(label, lx + 14, 202); lx += label.length * 7 + 38; });
+}
+
+function drawPopulation() {
+  const canvas = $('population-trace'), dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const width = Math.max(1, canvas.clientWidth), height = 190;
+  canvas.width = Math.round(width * dpr); canvas.height = Math.round(height * dpr);
+  const c = canvas.getContext('2d'); c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, width, height);
+  c.fillStyle = '#12160f'; c.fillRect(0, 0, width, height);
+  const left = 48, right = 14, top = 18, bottom = 24, plotWidth = width - left - right;
+  const points = history.map((p) => ({ time: p.time, rate: countPool(p.observed?.spikes?.length ? [p.observed.spikes] : [], selectedWatchIds) / Math.max(1, selectedWatchIds.length * CHUNK_TICKS * DT) }));
+  const maxT = Math.max(1, simT), maxRate = Math.max(1, ...points.map((p) => p.rate));
+  const x = (time) => left + time / maxT * plotWidth, y = (rate) => top + (height - top - bottom) * (1 - rate / maxRate);
+  c.strokeStyle = '#34402e'; c.lineWidth = 1; for (let i = 0; i <= 3; i++) { const yy = top + (height - top - bottom) * i / 3; c.beginPath(); c.moveTo(left, yy); c.lineTo(width - right, yy); c.stroke(); }
+  c.fillStyle = '#8f9c80'; c.font = '10px ui-monospace, monospace'; c.fillText('Hz', 14, 25); c.fillText('time (s)', width - 58, height - 8);
+  if (points.length) { c.strokeStyle = '#c8ef61'; c.lineWidth = 2; c.beginPath(); points.forEach((p, i) => { i ? c.lineTo(x(p.time), y(p.rate)) : c.moveTo(x(p.time), y(p.rate)); }); c.stroke(); }
+}
+
+function applyReplayEvent(event) {
+  if (event.type === 'set-angle') { theta = event.deg * Math.PI / 180; omega = 0; }
+  if (event.type === 'perturb') { theta = Math.min(TH_MAX, theta + event.deltaDeg * Math.PI / 180); omega = 0; }
+}
+
 function loop() {
   if (!running) return;
-  encode();
-  const spikes = net.step(10);          // 1 ms sensor↔CNS exchange
-  poolWin.push(...spikes); if (poolWin.length > 500) poolWin.splice(0, poolWin.length - 500);
-  simT += 10 * DT;
-  const flexHz = poolRate(flexMN, poolWin.slice(-100)), extHz = poolRate(extMN, poolWin.slice(-100));
-  const tq = physicsStep(10 * DT, flexHz, extHz);
-  if (perturbT > 0 && torqueOnsetT < 0 && Math.sign(tq) !== Math.sign(lastTorque) && Math.abs(tq) > 1e-6) {
-    torqueOnsetT = simT;
-    log(`corrective torque onset latency: ${((torqueOnsetT - perturbT) * 1000).toFixed(1)} ms`);
+  if (replaying) {
+    while (replayEvents.length && replayEvents[0].time <= simT) applyReplayEvent(replayEvents.shift());
+    if (simT >= replayTargetTime) { running = false; replaying = false; $('run').textContent = 'Run'; $('status').textContent = 'Replay complete. Same seed, settings, and interventions.'; return; }
   }
-  lastTorque = tq;
-  $('stats').textContent = `t=${simT.toFixed(2)}s flex=${flexHz.toFixed(1)}Hz ext=${extHz.toFixed(1)}Hz τ=${tq.toExponential(2)}`;
-  draw();
+  advanceChunk();
   setTimeout(loop, 0);
 }
-$('bend').oninput = e => {
-  $('bendv').textContent = e.target.value + '°';
-  $('how').disabled = false;
-};
-$('how').onclick = () => { $('l1').hidden = !$('l1').hidden; };
-$('pedantic').onclick = () => { $('l3').hidden = !$('l3').hidden; };
-$('run').onclick = () => {
-  running = !running; $('run').textContent = running ? 'Pause' : 'Run';
-  if (running) { theta = $('bend').value * Math.PI / 180; omega = 0; loop(); }
-};
-$('perturb').onclick = () => {
+
+function hasReplayInterventions() {
+  return replayEvents.some((event) => event.type === 'set-angle' || event.type === 'perturb');
+}
+
+function startRun() {
+  running = !running;
+  $('run').textContent = running ? 'Pause' : 'Run';
+  if (running) { record('run', {}, simT); loop(); }
+  else { replayTargetTime = simT; $('replay').disabled = !hasReplayInterventions(); $('status').textContent = 'Paused. State is frozen; press Step or Run to continue.'; }
+}
+
+function perturb() {
   theta = Math.min(TH_MAX, theta + 20 * Math.PI / 180); omega = 0;
-  perturbT = simT; torqueOnsetT = -1;
-  log(`perturb at t=${simT.toFixed(3)}s → θ=${(theta * 180 / Math.PI).toFixed(1)}°`);
+  record('perturb', { deltaDeg: 20 });
+  $('status').textContent = `Perturbed at t=${simT.toFixed(3)}s. Run to compare neural and passive torque.`;
+  if (prediction) $('prediction-result').textContent = `Prediction recorded: ${prediction === 'full' ? 'full feedback' : 'passive only'}.`;
+  draw();
+}
+
+function reset() {
+  seed = Number($('seed').value) >>> 0;
+  replayEvents = []; replayTargetTime = 0; recorder.clear();
+  resetSimulation();
+  record('reset', { seed, condition }, 0);
+  $('status').textContent = `${conditionLabel()} reset with seed ${seed}.`;
+}
+
+function replay() {
+  if (!replayTargetTime) { $('status').textContent = 'Run and pause an experiment before replaying it.'; return; }
+  const events = replayEvents.filter((event) => event.type === 'set-angle' || event.type === 'perturb').map((event) => ({ ...event }));
+  const target = replayTargetTime;
+  replayEvents = events;
+  replayTargetTime = target;
+  resetSimulation({ keepReplay: true });
+  replayEvents = events;
+  replayTargetTime = target;
+  replaying = true; running = true; $('run').textContent = 'Replay…'; $('status').textContent = 'Replaying the recorded interventions…';
+  loop();
+}
+
+function saveExperiment() {
+  const payload = {
+    schema: EXPERIMENT_SCHEMA, savedAt: new Date().toISOString(), lesson: 'tibia-evidence-lab', model: MODEL,
+    graph: { source: graph.meta.source, neurons: graph.meta.n_nodes, edges: graph.meta.n_edges },
+    settings: { condition, seed, bendDegrees: Number($('bend').value) },
+    assumptions: { sensoryGrouping: '60% position / 30% velocity / remainder limit; illustrative split', passiveMechanics: true, electricalSynapses: false, interneuronModel: 'generic LIF' },
+    rng: { version: RNG_VERSION, seed },
+    trace: history.map(({ observed, ...point }) => point),
+    observations: history.map(({ time, observed }) => ({ time, ...observed })),
+    events: recorder.snapshot(),
+  };
+  downloadJSON('fly-lab-tibia-experiment.json', payload);
+  $('status').textContent = 'Saved model settings, interventions, traces, and assumptions as JSON.';
+}
+
+document.querySelectorAll('[data-condition]').forEach((button) => button.addEventListener('click', () => setCondition(button.dataset.condition)));
+document.querySelectorAll('[data-population]').forEach((button) => button.addEventListener('click', () => {
+  selectedPopulation = button.dataset.population;
+  selectedWatchIds = selectedIds(); net.setWatch(selectedWatchIds);
+  document.querySelectorAll('[data-population]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.population === selectedPopulation)));
+  $('watch-label').textContent = `Watching the ${selectedPopulation} pool`;
+  $('watch-count').textContent = `${selectedWatchIds.length} neurons`;
+  drawPopulation();
+}));
+document.querySelectorAll('[data-predict]').forEach((button) => button.addEventListener('click', () => {
+  prediction = button.dataset.predict; $('prediction-result').textContent = `Prediction recorded: ${prediction === 'full' ? 'neural contribution' : 'passive baseline'}.`; record('prediction', { prediction });
+}));
+$('bend').oninput = (event) => {
+  const deg = Number(event.target.value); $('bendv').textContent = `${deg}°`; theta = deg * Math.PI / 180; omega = 0;
+  record('set-angle', { deg }); draw(); $('how').disabled = false;
 };
-$('run').disabled = $('perturb').disabled = $('bend').disabled = false;
-$('status').textContent += ' Ready. Drag Bend, then press Run.';
-draw();
+$('seed').onchange = reset;
+$('run').onclick = startRun;
+$('step').onclick = () => { if (!running) { const start = simT; advanceChunk(); record('single-step', { durationMs: 1 }, start); } };
+$('perturb').onclick = perturb;
+$('reset').onclick = reset;
+$('replay').onclick = replay;
+$('how').onclick = () => setReflexDepth('works');
+$('pedantic').onclick = () => { $('l3').hidden = !$('l3').hidden; };
+document.querySelectorAll('[data-reflex-depth]').forEach((button) => button.addEventListener('click', () => setReflexDepth(button.dataset.reflexDepth)));
+
+$('run').disabled = $('step').disabled = $('perturb').disabled = $('reset').disabled = $('bend').disabled = $('seed').disabled = false;
+net = new ReflexNet(graph, { seed }); net.setWatch(selectedIds());
+$('watch-count').textContent = `${selectedIds().length} neurons`;
+$('status').textContent = `Loaded: ${graph.meta.n_nodes} neurons, ${graph.meta.n_edges} edges (${graph.meta.source}). Ready. Drag Bend, then Perturb.`;
+draw(); drawTrace(); drawPopulation();
+setReflexDepth('start');
+window.addEventListener('resize', () => { draw(); drawTrace(); drawPopulation(); });
+window.__reflexQA = () => ({ condition, seed, running, time: simT, theta: theta * 180 / Math.PI, history: history.length, selectedPopulation, events: replayEvents.length, explanationDepth, stats: $('stats').textContent });
 </script>
 </body>
 </html>

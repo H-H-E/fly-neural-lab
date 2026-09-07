@@ -1,8 +1,10 @@
-// BANC worker: packed gzip CSR LIF. Falls back to mock MN rates if manifest missing.
+// BANC worker: packed gzip CSR LIF. Missing assets disable the scientific path;
+// the home page keeps its direct-joint control explicitly separate.
 import { BancNet, DT } from './banc-engine.mjs';
 
 let net = null, channels = null, running = false, timer = null, ticksPerChunk = 50;
-let motorIdx = null, prevCounts = null, heldDrive = new Map();
+let motorIdx = null, prevCounts = null, heldDrive = new Map(), experimentSeed = 2026;
+let watchedIds = [];
 const post = (type, data = {}) => self.postMessage({ type, ...data });
 
 async function gunzip(url) {
@@ -50,8 +52,13 @@ async function load() {
     }
     const signBytes = await gunzip('./' + man.sign.url);
     const sign = new Int8Array(signBytes.buffer, signBytes.byteOffset, signBytes.byteLength);
-    net = BancNet.fromCSR(buf, sign);
-    post('ready', { mode: 'banc', memoryMiB: Math.round(buf.byteLength / 1048576), n: net.n });
+    net = BancNet.fromCSR(buf, sign, { seed: experimentSeed });
+    net.setWatch(watchedIds);
+    post('ready', {
+      mode: 'banc', model: 'banc-v888', modelLabel: 'BANC v888 body model',
+      memoryMiB: Math.round(buf.byteLength / 1048576), n: net.n,
+      seed: experimentSeed,
+    });
   } catch (e) {
     post('error', { message: e.message || String(e) });
   }
@@ -72,28 +79,24 @@ function tick() {
     net.step(ticksPerChunk, false);
     const denom = ticksPerChunk * DT;
     let total = 0;
-    let heldHz = 0;
     for (let i = 0; i < motorIdx.length; i++) {
       const id = motorIdx[i];
       if (id < 0) continue;
       const d = before[id] - prevCounts[i];
       rates[i] = d / denom;
       total += d;
-      if (heldDrive.has(id)) heldHz = Math.max(heldHz, rates[i]);
-    }
-    if (heldDrive.size && heldHz < 40) {
-      channels.motor.forEach((m, i) => {
-        if (m.idx >= 0 && heldDrive.has(m.idx)) rates[i] = 200;
-      });
     }
     spikes = total;
   }
   const elapsed = performance.now() - start;
+  const observation = net?.observe();
   post('sample', {
-    time: net ? net.t : 0,
+    model: 'banc-v888', source: heldDrive.size ? 'banc-direct-stimulus' : 'banc-neural-output',
+    time: net ? net.t : 0, dt: net ? ticksPerChunk * DT : 0,
     spikes,
     speed: net ? (ticksPerChunk * 0.1 / Math.max(elapsed, 0.1)) : 0,
     rates,
+    observed: observation,
     mode: heldDrive.size ? 'drive' : (net ? 'banc' : 'mock'),
   });
   timer = setTimeout(tick, Math.max(0, 50 - elapsed));
@@ -125,6 +128,22 @@ self.onmessage = (e) => {
       if (m.bone === bone && (m.target || '').includes(want) && !(m.target || '').includes('accessory'))
         rates[i] = 200;
     });
-    post('sample', { time: 0, spikes: 0, speed: 0, rates, mode: 'kick' });
+    post('sample', {
+      model: 'direct-joint-demo', source: 'direct-joint-demo',
+      time: net?.t || 0, dt: 0, spikes: 0, speed: 0, rates, mode: 'kick',
+      note: 'This rate is written directly to the effector. The neural model was skipped.',
+    });
+  } else if (type === 'watch' && net) {
+    watchedIds = Array.from(new Set((e.data.ids || []).map(Number).filter(Number.isInteger))).slice(0, 64);
+    net.setWatch(watchedIds);
+    post('watch', { model: 'banc-v888', ids: watchedIds });
+  } else if (type === 'seed') {
+    experimentSeed = Number.isFinite(Number(e.data.seed)) ? (Number(e.data.seed) >>> 0) : 2026;
+    if (net) net.setSeed(experimentSeed);
+    post('seed', { model: 'banc-v888', seed: experimentSeed });
+  } else if (type === 'reset' && net) {
+    running = false; clearTimeout(timer); heldDrive.clear();
+    net.reset({ seed: experimentSeed }); net.setWatch(watchedIds);
+    post('reset', { model: 'banc-v888', time: net.t, seed: experimentSeed });
   }
 };
