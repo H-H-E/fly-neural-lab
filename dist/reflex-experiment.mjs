@@ -93,6 +93,11 @@ export class ReflexExperiment {
     this.latest = { time: this.chunks * CHUNK * DT, angle: this.theta / RAD, neuralTorque, passiveTorque, totalTorque, flexorHz, extensorHz, sensoryHz: rate('sensory') };
     this.trace.push({ ...this.latest, observed: this.net.observe() });
     if (this.trace.length > 2000) this.trace.shift();
+    // A bend applied while paused at the final timestamp belongs to the replay
+    // too, even though it did not cause another integration step.
+    if (this.replayEvents && this.chunks >= this.replayEnd) {
+      while (this.replayEvents.length && this.replayEvents[0].chunk <= this.chunks) this.bend(this.replayEvents.shift().degrees, false);
+    }
     return this.latest;
   }
 

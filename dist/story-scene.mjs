@@ -10,7 +10,7 @@ const POSES = [
   { camera: [3.7, 2.55, -6.1], target: [0, .2, 0], type: 'fly' },
   { camera: [0, .4, 7.6], target: [0, .1, 0], type: 'neuron' },
   { camera: [0, .3, 7.8], target: [0, .1, 0], type: 'circuit' },
-  { camera: [-2.6, 1.3, -4.2], target: [-.6, -.15, -.5], type: 'reflex' },
+  { camera: [-2.8, 1.5, 4.1], target: [-.6, -.05, .5], type: 'reflex' },
   { camera: [.5, 1.3, 7.9], target: [0, 0, 0], type: 'brain' },
   { camera: [-3.6, 3.8, -6.5], target: [0, .1, 0], type: 'fly' },
 ];

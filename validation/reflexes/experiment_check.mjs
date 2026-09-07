@@ -18,6 +18,7 @@ assert.deepEqual(first.trace,before,'replay preserves bends at their exact model
 assert.deepEqual(first.events,events,'replay retains the original event log');
 assert.ok(first.replay());while(first.chunks<first.replayEnd)first.step();
 assert.deepEqual(first.trace,before,'replaying again gives the same result');
+const terminal=run();terminal.bend(105);terminal.replay();while(terminal.chunks<terminal.replayEnd)terminal.step();assert.equal(terminal.latest.angle,105,'replay applies a bend at the final paused timestamp');
 const passive=run('passive'),motorOff=run('no-neural'),sensorsOff=run('no-sensors');
 assert.ok(passive.trace.every(p=>p.neuralTorque===0&&p.sensoryHz===0),'passive baseline has no neural torque or sensory input');
 assert.ok(motorOff.trace.every(p=>p.neuralTorque===0),'disconnecting motor output removes all neural torque');
