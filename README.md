@@ -1,16 +1,21 @@
 # Fly Lab
 
-Fly Lab is a browser-local computational-neuroscience workbench. Start with [`dist/lesson.html`](./dist/lesson.html): predict what one small model neuron will do, intervene, inspect its trace, then disable a branch in an illustrative four-node circuit. The full models remain available as separate experiments.
-
-The visible body is a kinematic visualization, not proof that a complete fly is walking from the connectome. It is tagged `sexMismatch: male-morphology/female-CNS`: the stage is a procedural, photo-matched male *Drosophila melanogaster*, while the neural data are female-CNS model data. No model inference server is used.
+Fly Lab is an interactive introduction to computational neuroscience built around a persistent Three.js specimen and a six-chapter, native-scroll story. Open [`dist/index.html`](./dist/index.html), follow a signal from one neuron into a circuit, then compare causes of leg movement and optionally run a whole-brain model. No model inference server or account is used.
 
 ## Learning path
 
-| Page | Question | Evidence boundary |
+| Chapter | Question | Evidence boundary |
 |---|---|---|
-| [`dist/lesson.html`](./dist/lesson.html) | How does a model neuron become a small circuit? | Deliberately illustrative LIF model; not a reconstructed fly circuit |
-| [`dist/taste.html`](./dist/taste.html) | Does an imposed sugar input change the FlyWire spike pattern? | Aggregate and watched spikes only until a pinned named-cell map is verified |
-| [`dist/reflex.html`](./dist/reflex.html) | What makes a tibia move: neural output, sensors, or mechanics? | BANC-derived subgraph with neural and passive torque plotted separately |
+| `#meet` | How does electricity become movement? | Procedural male fly; optional walking animation is explicitly labelled |
+| `#neuron` | Can you make a neuron fire? | Illustrative LIF model with voltage, pulse timing, and inhibition |
+| `#circuit` | What changes without an inhibitory connection? | Four-cell teaching circuit; output counts computed from the model |
+| `#reflex` | What makes a tibia move? | BANC-derived probe; neural and passive torque shown separately |
+| `#brain` | Does an imposed input change whole-brain activity? | Optional FlyWire download; aggregate and bounded watched spikes |
+| `#evidence` | What can we conclude? | Wiring, physiology assumptions, and visualization are distinguished |
+
+Existing `lesson.html`, `reflex.html`, and `taste.html` bookmarks enter the corresponding story chapter. All learning controls are semantic HTML; Three.js shows their state in a persistent view. Wheel/touch scroll belongs to the page. Rotation is an explicit mode, with arrow-key and reset controls. Reduced motion respects the system preference and a visible toggle. Model controls and textual results remain available without WebGL.
+
+The scene uses one renderer, the existing fly rig, a branching teaching neuron, a four-cell circuit, and a clearly illustrative point-cloud brain. The brain view does not use reconstructed anatomical coordinates. On narrow screens the specimen stays above the scrolling lesson.
 
 ## Model boundaries
 
@@ -19,7 +24,7 @@ The visible body is a kinematic visualization, not proof that a complete fly is 
 | Teaching neuron/circuit | `dist/neuron-model.mjs`; fixed-step, deterministic LIF traces | Biological firing rates or a hidden Drosophila circuit |
 | BANC v888 body model | `dist/banc-worker.mjs`; measured motor-neuron output drives a kinematic hinge | Physics-based locomotion or complete motor embodiment |
 | FlyWire v783 brain model | `dist/brain-worker.mjs`; optional 138,639-neuron WASM run with aggregate and bounded spike monitoring | A connection to the visible body, named taste identities, membrane-voltage export, or feeding behavior |
-| Walking clip | Three.js animation, advanced only from the BANC simulation clock on the home page | Neural evidence |
+| Walking clip | Optional Three.js animation preview, controlled separately from experiments | Neural evidence |
 
 The **Direct joint demo** is an explicit control that writes a rate to the effector and skips the BANC model. It is labelled as such and is not included as neural evidence. The BANC, FlyWire, and teaching-model counters have separate identities and displays.
 
@@ -27,7 +32,7 @@ The **Direct joint demo** is an explicit control that writes a rate to the effec
 
 The small experiments expose the same basic contract: reset, fixed-step advancement, bounded observation, seedable randomness where the model uses random draws, replay, and JSON export. Shared helpers live in `dist/experiment-core.mjs` (`fly-lab-experiment/v1`, `mulberry32-v1`). Observation is read-only and capped at 64 watched neuron IDs / 4,096 watched spike events per sample. The FlyWire worker reads its existing exported spike monitor only; it does not materialize the whole WASM state for the interface.
 
-For BANC, neural state, motor rates, the kinematic effector, joint sensors, and the home-page animation timeline are advanced from the model’s simulation time. Browser rendering handles camera and redraws. Pausing stops simulation state while leaving camera interaction available.
+Neural state, motor rates, the kinematic effector, and joint sensors advance from model time. Scrolling moves the camera only. Teaching traces use fixed-step playback; the reflex advances in fixed 1 ms chunks. Leaving a chapter or hiding the document pauses experiments. The optional walking animation is a separate display-only clock and never supplies neural evidence. BANC and FlyWire downloads require explicit clicks.
 
 ## Implementation
 
@@ -43,7 +48,7 @@ Download is approximately 53.9 MB compressed, expanding to approximately 241.5 M
 - Emscripten 6.0.9 batch build in Node WebAssembly: ten simulated seconds in 5.76768 seconds of integration (9.06461 seconds whole executable). Raw spike and state files match native bit-for-bit.
 - Live stepping in Node: 200 separate 50 ms updates complete in 5.67871 seconds and reproduce the same complete ten-second trace and final states bit-for-bit. Floating-point reported network time is 10.000000000000007 seconds; spike times remain exactly equal.
 - On/off stimulation smoke test is in controls-check.json.
-- These are Node WebAssembly checks; the local environment used for this change did not have a browser executable available for the Playwright harness. Hosting publication does not establish browser numerical or visual parity. Performance varies by device/browser.
+- These numerical parity results are Node WebAssembly checks. Frontend interaction checks are tracked separately; visual inspection does not establish browser numerical parity. Performance varies by device/browser.
 
 ## Build and serve
 
@@ -53,7 +58,7 @@ The compiled WebAssembly and source are included. To rebuild, activate Emscripte
 
 Reference test scripts require the native static_arrays directory indicated in their data variable; change it to your matching pinned upstream generated data. Browser assets already contain that data compressed. Tests write only local result files.
 
-The focused checks for the experiment boundary are `node validation/engines/observation_check.mjs` and `node validation/lessons/lesson_check.mjs`.
+The focused checks are `node validation/engines/observation_check.mjs`, `node validation/lessons/lesson_check.mjs`, and `node validation/reflexes/experiment_check.mjs`. The last verifies deterministic/repeated replay, immediate bending, and matched passive controls. See [`docs/frontend-redesign.md`](./docs/frontend-redesign.md) for the redesign checklist.
 
 ## Sources and notices
 

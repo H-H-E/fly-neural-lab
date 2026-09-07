@@ -2,129 +2,151 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="Fly Lab — learn how neural models connect inputs, spikes, and movement in your browser.">
-  <title>Fly Lab — how a nervous system makes a body move</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2324402c'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%23c8ef61'/%3E%3C/svg%3E">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10251e">
+  <meta name="description" content="Meet a tiny fly. Send a signal. Change a circuit. An interactive, three-dimensional introduction to computational neuroscience, running in your browser.">
+  <title>Fly Lab — a small fly, a big question</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='16' fill='%2310251e'/%3E%3Cpath d='M8 16h5l3-8 3 16 3-8h3' fill='none' stroke='%23d8f788' stroke-width='2'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="style.css">
+  <script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
 </head>
-<body>
-<header class="topbar">
-  <a href="./" class="brand"><strong>Fly Lab</strong><small>BROWSER NEUROSCIENCE · v1</small></a>
-  <nav class="topnav">
-    <a href="./lesson.html">Start the lesson</a>
-    <a href="./taste.html">Taste experiment</a>
-    <a href="./reflex.html">Reflex case study</a>
-    <a href="https://github.com/H-H-E/fly-neural-lab" target="_blank" rel="noopener">Source</a>
-  </nav>
-</header>
+<body data-chapter="meet">
+  <a class="skip-link" href="#neuron">Skip to the first experiment</a>
+  <header class="site-header">
+    <a class="brand" href="#meet" aria-label="Fly Lab, back to the beginning"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="15"/><path d="M5 16h6l4-8 4 16 3-8h5"/></svg><span>fly<span class="brand-light">lab</span><small>A NERVOUS SYSTEM, EXPLAINED</small></span></a>
+    <nav class="header-nav" aria-label="Main navigation"><a href="#neuron">The story</a><a href="#reflex">The experiments</a><a href="#evidence">The science <span aria-hidden="true">↗</span></a></nav>
+    <button class="text-button motion-button" id="motion-toggle" aria-pressed="false" title="Reduce camera motion"><span class="motion-icon" aria-hidden="true">◌</span><span id="motion-label">Motion on</span></button>
+  </header>
 
-<section class="hero">
-  <p class="eyebrow">FLY LAB · BROWSER NEUROSCIENCE</p>
-  <h1>How can a nervous system <em>make a body move?</em></h1>
-  <p class="lede">Run small experiments in a browser-local neural model, then compare them with a traced fly nerve cord. Change an input, watch spikes move through the model, and ask what the visible body does — and what it does not prove.</p>
-  <ul class="meta-row">
-    <li>Start with one neuron</li>
-    <li>BANC v888 body model</li>
-    <li>FlyWire v783 optional</li>
-    <li>runs locally · no account</li>
-  </ul>
-</section>
-
-<main class="layout">
-  <section class="stage-card" aria-label="Interactive three-dimensional fruit fly visualization">
-    <div class="stage-head">
-      <span>SPECIMEN &mdash; VISUALIZATION</span>
-      <span class="status-pill" id="status" role="status">Loading BANC body model&hellip;</span>
+  <div class="specimen-stage" id="specimen-stage">
+    <div class="stage-grid" aria-hidden="true"></div>
+    <div class="stage-heading"><span class="status-dot" aria-hidden="true"></span><span id="scene-kicker">SPECIMEN 001</span><span class="stage-edition">INTERACTIVE ATLAS / 2026</span></div>
+    <canvas id="scene" aria-label="Three-dimensional fly specimen. Enable Rotate view to use left and right arrow keys; Home resets the view." tabindex="-1"></canvas>
+    <div id="scene-labels" class="scene-labels" aria-hidden="true"></div>
+    <div class="render-fallback" id="render-fallback" role="status" hidden><span aria-hidden="true">◎</span><strong>The experiment is still here.</strong><p id="render-message">3D rendering is unavailable. Use the controls and readouts to follow the same story.</p></div>
+    <div class="scene-loading" id="scene-loading" role="status"><span class="loading-ring" aria-hidden="true"></span>Preparing the specimen</div>
+    <div class="stage-bottom">
+      <div class="scene-provenance"><span id="scene-source">3D ANATOMICAL ILLUSTRATION</span><p id="scene-description">Male fruit fly · a procedural model</p></div>
+      <div class="view-controls" role="group" aria-label="Three-dimensional view controls"><button id="rotate-view" class="icon-button" aria-pressed="false" aria-label="Rotate view" title="Rotate view"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5"/></svg></button><button id="reset-view" class="icon-button" aria-label="Reset view" title="Reset view"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/><circle cx="12" cy="12" r="3"/></svg></button></div>
     </div>
-    <div class="viewport">
-      <canvas id="scene" aria-label="Interactive three-dimensional fruit fly visualization"></canvas>
-      <div class="stage-annotation" aria-live="polite">
-        <span class="annotation-label">VISIBLE MOTION</span>
-        <strong id="active-source">Waiting for simulation</strong>
-        <small id="active-source-detail">The walk, when shown, is a kinematic visualization.</small>
+    <p id="rotate-hint" class="rotate-hint" hidden>Drag to turn · ← → to rotate · Home to reset</p>
+  </div>
+
+  <main class="story" id="story">
+    <section class="chapter chapter-hero" id="meet" data-index="0" aria-labelledby="meet-title">
+      <div class="chapter-content">
+        <p class="eyebrow"><span class="tiny-star" aria-hidden="true">✳</span> A SMALL INTRODUCTION TO A BIG IDEA</p>
+        <h1 id="meet-title">A tiny fly.<br>A world of<br><em>signals.</em></h1>
+        <p class="chapter-intro">How does a little electricity become a moving leg?</p>
+        <p class="body-copy hero-copy">Meet your guide to computational neuroscience. Go from one neuron to a whole brain, one experiment at a time.</p>
+        <a class="primary-button start-story" href="#neuron">Follow the signal <span aria-hidden="true">↓</span></a>
+        <div class="hero-meta"><span><i aria-hidden="true"></i> Runs in your browser</span><span>No account. Just curiosity.</span></div>
+        <button class="text-button walk-button" id="walk-preview" aria-pressed="false"><span aria-hidden="true">▷</span> Preview a walking animation</button>
+        <p id="walk-note" class="small-note" hidden>This is a programmed animation. It is separate from the neural experiments.</p>
+        <div class="chapter-number" aria-hidden="true">01 <span>/ 06</span></div>
       </div>
-    </div>
-    <div class="stage-foot">
-      <span>DRAG TO ROTATE &middot; SCROLL TO ZOOM</span>
-      <span>WALK = KINEMATIC VISUALIZATION &middot; SHIN = BANC OUTPUT</span>
-    </div>
-  </section>
-
-  <aside class="panel">
-    <section class="card orientation-card">
-      <p class="card-number">00 &mdash; ORIENT</p>
-      <h2>Start with a question.</h2>
-      <p>The 3D fly is the destination, not the evidence. Begin with one neuron and a tiny circuit so you can see exactly what an input changes.</p>
-      <div class="btn-row"><a class="btn" href="./lesson.html">Run the first experiment</a></div>
-      <p class="hint">Prediction &rarr; intervention &rarr; observation &rarr; explanation.</p>
     </section>
 
-    <section class="card" id="banc-card">
-      <p class="card-number">01 &mdash; BANC NERVE CORD</p>
-      <h2>Stimulate one motor pool.</h2>
-      <p>These are measured motor-neuron channels from BANC v888. The button applies an explicit input to the front-left tibia flexor pool; the rate shown below is what the model actually emitted.</p>
-      <progress id="banc-progress" max="1" value="0" hidden></progress>
-      <div class="btn-row">
-        <button class="btn" id="flex" disabled>Stimulate tibia flexors</button>
+    <section class="chapter" id="neuron" data-index="1" aria-labelledby="neuron-title">
+      <div class="chapter-content">
+        <p class="eyebrow">01 / THE SIGNAL</p>
+        <h2 id="neuron-title">Every movement<br>starts <em>somewhere.</em></h2>
+        <p class="body-copy">A neuron collects incoming signals. If its voltage reaches a threshold, it sends a brief electrical pulse: a <strong>spike.</strong></p>
+        <div class="experiment" aria-label="One neuron experiment">
+          <div class="experiment-heading"><span class="experiment-tag">TRY IT / 01</span><span class="model-tag">Teaching model</span></div>
+          <h3>Can you make this neuron fire?</h3>
+          <p class="control-instruction">Start with a weak pulse. Then turn it up, or send several close together.</p>
+          <label class="range-label" for="pulse-strength">Input strength <output id="pulse-strength-value">0.20</output></label>
+          <input id="pulse-strength" type="range" min="0.05" max="0.4" step="0.01" value="0.2">
+          <div class="range-endpoints"><span>Weak</span><span>Strong</span></div>
+          <fieldset class="segmented"><legend>Pulse timing</legend><label><input type="radio" name="pulse-pattern" value="single" checked><span>One pulse</span></label><label><input type="radio" name="pulse-pattern" value="close"><span>Close together</span></label><label><input type="radio" name="pulse-pattern" value="spaced"><span>Spaced apart</span></label></fieldset>
+          <div class="action-row"><button id="neuron-run" class="primary-button" disabled>Send a signal <span aria-hidden="true">↗</span></button><button id="neuron-reset" class="secondary-button" disabled>Reset</button></div>
+          <div class="trace-heading"><span>MEMBRANE VOLTAGE</span><span><output id="neuron-count">0</output> spikes</span></div>
+          <canvas id="neuron-trace" class="trace" data-height="144" role="img" aria-label="Membrane voltage over 320 milliseconds. The dashed line marks the firing threshold."></canvas>
+          <p class="outcome" id="neuron-result" role="status">What do you predict: a spike, or silence?</p>
+          <details class="experiment-details"><summary>More controls &amp; explanation <span aria-hidden="true">+</span></summary><label class="toggle-label"><input id="neuron-inhibition" type="checkbox"> Add an inhibitory input at 75 ms</label><p>Close inputs can add together before voltage leaks away. Inhibition subtracts from the input. This small leaky integrate-and-fire model shows that idea; its drawn shape is illustrative.</p><div class="action-row compact"><button id="neuron-step" class="text-button" disabled>Step 1 ms</button><button id="neuron-replay" class="text-button" disabled>Replay</button><button id="neuron-save" class="text-button" disabled>Save result ↓</button></div><p class="technical-note">0.1 ms model step · −52 mV rest · −45 mV threshold. Playback is slowed for observation.</p></details>
+        </div>
+        <a class="chapter-next" href="#circuit">Now connect a few neurons <span aria-hidden="true">↓</span></a>
       </div>
-      <div class="model-identity"><span class="source-dot banc-dot"></span><span id="banc-status">Loading BANC v888&hellip;</span></div>
-      <div class="readouts">
-        <div><span>SIM TIME</span><strong id="banc-simtime">0.00 <small>s</small></strong></div>
-        <div><span>CORD SPIKES</span><strong id="banc-spikes">&mdash;</strong></div>
-        <div><span>COMPUTE</span><strong id="banc-speed">&mdash;</strong></div>
-      </div>
-      <figure class="figure">
-        <canvas id="banc-trace" aria-label="Recent BANC motor-neuron spike counts"></canvas>
-        <figcaption class="figcap">BANC MODEL · MOTOR-POOL SPIKES · LAST 120 SAMPLES</figcaption>
-      </figure>
-      <p class="source-note" id="banc-source">No movement claim is made from the walking clip. The shin responds only to measured BANC motor output or an explicitly labelled direct demo.</p>
     </section>
 
-    <details class="disclosure">
-      <summary>Controls and counterfactuals</summary>
-      <div class="controls btn-row">
-        <button class="btn-ghost btn" id="pause" disabled>Start simulation</button>
-        <button class="btn-ghost btn" id="reset" disabled>Reset BANC</button>
-        <button class="btn-ghost btn" id="kick" disabled>Direct joint demo</button>
+    <section class="chapter" id="circuit" data-index="2" aria-labelledby="circuit-title">
+      <div class="chapter-content">
+        <p class="eyebrow">02 / THE CONNECTION</p>
+        <h2 id="circuit-title">A signal.<br>A detour.<br><em>A different result.</em></h2>
+        <p class="body-copy">Neurons do more than pass a message along. Some encourage the next neuron to fire. Others act as a brake.</p>
+        <div class="experiment" aria-label="Four neuron circuit experiment">
+          <div class="experiment-heading"><span class="experiment-tag">TRY IT / 02</span><span class="model-tag">Teaching model</span></div>
+          <h3>What happens without the brake?</h3>
+          <label class="switch-control"><span><strong>Inhibitory connection</strong><small>The coral branch can suppress output.</small></span><input id="circuit-inhibition" type="checkbox" role="switch" checked><span class="switch-track" aria-hidden="true"></span></label>
+          <div class="action-row"><button class="primary-button" id="circuit-run" disabled>Run the circuit <span aria-hidden="true">↗</span></button><button class="secondary-button" id="circuit-reset" disabled>Reset</button></div>
+          <div class="circuit-nodes" role="group" aria-label="Inspect a circuit neuron"><button data-node="input" aria-pressed="true"><span>Input</span><output id="count-input">0</output></button><button data-node="relay" aria-pressed="false"><span>Relay</span><output id="count-relay">0</output></button><button data-node="inhibitory" aria-pressed="false" class="coral"><span>Brake</span><output id="count-inhibitory">0</output></button><button data-node="output" aria-pressed="false"><span>Output</span><output id="count-output">0</output></button></div>
+          <p class="small-note" id="node-description">Input neuron · receives the repeated stimulus. Select a neuron to inspect its role.</p>
+          <p class="outcome" id="circuit-result" role="status">Run once with the brake connected. Then disconnect it and compare.</p>
+          <details class="experiment-details"><summary>Follow the voltage <span aria-hidden="true">+</span></summary><canvas id="circuit-trace" class="trace" data-height="144" role="img" aria-label="Selected circuit neuron's voltage over simulation time"></canvas><div class="action-row compact"><button id="circuit-step" class="text-button" disabled>Step 1 ms</button><button id="circuit-replay" class="text-button" disabled>Replay</button><button id="circuit-save" class="text-button" disabled>Save result ↓</button></div><p>This four-cell circuit is built to explain excitation and inhibition. It is not a recovered fly circuit. The dots travelling along connections illustrate signal direction.</p></details>
+        </div>
+        <a class="chapter-next" href="#reflex">Give the signal a body <span aria-hidden="true">↓</span></a>
       </div>
-      <label class="switch"><input id="noproprio" type="checkbox"><span>Silence joint sensors</span></label>
-      <p class="hint">Direct joint demo writes a rate straight to the effector and skips the neurons. It is a control, not neural evidence. Sensor silence is an explicit intervention on the current illustrative proprioceptive input.</p>
-    </details>
+    </section>
 
-    <details class="disclosure" id="brain-panel">
-      <summary>01b &mdash; FlyWire brain model (optional 54 MB)</summary>
-      <p>FlyWire v783 is a separate whole-brain model: 138,639 neurons, loaded only when you ask. Its output stays in its own panel and does not drive the walking fly.</p>
-      <div class="btn-row"><button class="btn-ghost btn" id="load">Load FlyWire model</button></div>
-      <progress id="brain-progress" max="1" value="0" hidden></progress>
-      <div class="model-identity"><span class="source-dot brain-dot"></span><span id="brain-status">Not loaded</span></div>
-      <div class="readouts brain-readouts">
-        <div><span>SIM TIME</span><strong id="brain-simtime">0.00 <small>s</small></strong></div>
-        <div><span>BRAIN SPIKES</span><strong id="brain-spikes">&mdash;</strong></div>
-        <div><span>TOUCHED</span><strong id="brain-touched">&mdash;</strong></div>
+    <section class="chapter" id="reflex" data-index="3" aria-labelledby="reflex-title">
+      <div class="chapter-content">
+        <p class="eyebrow">03 / THE MOVEMENT</p>
+        <h2 id="reflex-title">A leg moves.<br><em>But why?</em></h2>
+        <p class="body-copy">A leg can move because neurons drive its muscles. It can also move because a spring pulls it back. Now you can test the difference.</p>
+        <div class="experiment" aria-label="Leg reflex experiment">
+          <div class="experiment-heading"><span class="experiment-tag">TRY IT / 03</span><span class="model-tag">BANC-derived probe</span></div>
+          <h3>Bend the leg. Change the cause.</h3>
+          <p class="control-instruction">Set a starting pose, add a nudge, then run. Compare the same nudge with the neural output disconnected.</p>
+          <label class="range-label" for="bend">Joint angle <output id="bend-value">70°</output></label><input id="bend" type="range" min="10" max="150" step="1" value="70" disabled><div class="range-endpoints"><span>Folded · 10°</span><span>Extended · 150°</span></div>
+          <fieldset class="segmented conditions"><legend>What is connected?</legend><label><input type="radio" name="condition" value="full" checked><span>Full feedback</span></label><label><input type="radio" name="condition" value="no-sensors"><span>Sensors off</span></label><label><input type="radio" name="condition" value="no-neural"><span>Motor off</span></label><label><input type="radio" name="condition" value="passive"><span>Passive only</span></label></fieldset>
+          <div class="action-row"><button id="reflex-run" class="primary-button" disabled>Run the leg <span aria-hidden="true">↗</span></button><button id="perturb" class="secondary-button" disabled>Nudge +20°</button><button id="reflex-reset" class="text-button" disabled>Reset</button></div>
+          <div class="trace-heading"><span>JOINT ANGLE</span><output id="reflex-time">0.000 s</output></div><canvas id="reflex-angle-trace" class="trace" data-height="115" role="img" aria-label="Joint angle over simulation time"></canvas>
+          <div class="trace-heading torque-key"><span><i class="coral-dot"></i> NEURAL TORQUE</span><span><i class="blue-dot"></i> PASSIVE TORQUE</span></div><canvas id="reflex-torque-trace" class="trace" data-height="125" role="img" aria-label="Neural and passive torque shown separately over simulation time"></canvas>
+          <p class="outcome" id="reflex-status" role="status">Preparing the leg experiment…</p><button id="reflex-retry" class="text-button" hidden>Retry loading</button>
+          <details class="experiment-details"><summary>Inspect the experiment <span aria-hidden="true">+</span></summary><div class="mini-readouts"><div><span>Sensory</span><output id="reflex-sensory">0 Hz</output></div><div><span>Flexor</span><output id="reflex-flexor">0 Hz</output></div><div><span>Extensor</span><output id="reflex-extensor">0 Hz</output></div></div><div class="action-row compact"><button id="reflex-step" class="text-button" disabled>Step 1 ms</button><button id="reflex-replay" class="text-button" disabled>Replay</button><button id="reflex-save" class="text-button" disabled>Save result ↓</button><label class="seed-label">Seed <input id="reflex-seed" type="number" min="0" max="4294967295" step="1" value="2026"></label></div><p>The wiring comes from a BANC tibia subgraph. Sensory tuning, muscle strength, and the spring-damper joint are assumptions. A returning leg alone does not establish a neural reflex.</p><p class="technical-note">Fixed 0.1 ms neural steps · 1 ms body updates · generic LIF cells · illustrative sensory grouping. Changing condition resets to the same initial pose and seed.</p></details>
+        </div>
+        <details class="full-model" id="banc-panel"><summary><span>Go further <strong>Run the full nerve cord</strong></span><span aria-hidden="true">+</span></summary><p>Load the larger BANC model and stimulate the front-left motor pool. Its measured spikes drive a kinematic joint mapping. This is separate from the reflex probe above.</p><button class="secondary-button" id="banc-load">Load BANC nerve cord</button><progress id="banc-progress" max="1" value="0" hidden></progress><p id="banc-status" class="small-note" role="status">Not loaded · 34,155 model neurons</p><div class="action-row compact"><button id="flex" class="primary-button" disabled>Stimulate flexors</button><button id="banc-pause" class="secondary-button" disabled>Resume BANC</button><button id="banc-reset" class="text-button" disabled>Reset BANC</button></div><div class="mini-readouts"><div><span>Sim time</span><output id="banc-simtime">0.000 s</output></div><div><span>Motor spikes / sample</span><output id="banc-spikes">0</output></div><div><span>Compute</span><output id="banc-speed">—</output></div></div><label class="toggle-label"><input id="noproprio" type="checkbox"> Silence joint sensors</label><button id="kick" class="text-button" disabled>Direct joint demo</button><p class="small-note" id="banc-source">The direct demo writes to the joint and skips neurons. It is an explicitly labelled control.</p></details>
+        <a class="chapter-next" href="#brain">What happens at the scale of a brain? <span aria-hidden="true">↓</span></a>
       </div>
-      <div class="readouts brain-readouts">
-        <div><span>COMPUTE</span><strong id="brain-speed">&mdash;</strong></div>
-        <div><span>WATCHED</span><strong id="brain-watched">0</strong></div>
-        <div><span>INPUT</span><strong id="brain-input">off</strong></div>
+    </section>
+
+    <section class="chapter" id="brain" data-index="4" aria-labelledby="brain-title">
+      <div class="chapter-content">
+        <p class="eyebrow">04 / THE SCALE</p>
+        <h2 id="brain-title"><span class="big-stat">138,639</span><br>neurons.<br><em>One browser.</em></h2>
+        <p class="body-copy">A map of connections lets us build a much larger model. FlyWire brings a whole fly brain into the browser, with its own activity to measure.</p>
+        <div class="experiment" aria-label="FlyWire whole-brain experiment">
+          <div class="experiment-heading"><span class="experiment-tag">TRY IT / 04</span><span class="model-tag">FlyWire v783</span></div>
+          <h3>Give the model an input.</h3>
+          <p class="control-instruction">Load the brain, then switch its sugar input on and off. Watch how the recorded spike count changes.</p>
+          <button id="brain-load" class="primary-button">Load the brain <span aria-hidden="true">↓</span></button><p class="download-note" id="brain-download">About 54 MB · optional download · best on desktop</p><progress id="brain-progress" max="1" value="0" hidden></progress><p id="brain-status" class="small-note" role="status">Not loaded. The illustration is ready to inspect.</p>
+          <label class="switch-control"><span><strong>Sugar input</strong><small>Apply the model's built-in stimulus.</small></span><input id="sugar" type="checkbox" role="switch" disabled><span class="switch-track" aria-hidden="true"></span></label>
+          <div class="action-row"><button id="brain-run" class="primary-button" disabled>Run the brain <span aria-hidden="true">↗</span></button><button id="brain-unload" class="text-button" disabled>Reset &amp; unload</button></div>
+          <div class="mini-readouts"><div><span>Sim time</span><output id="brain-simtime">0.00 s</output></div><div><span>Spikes / 50 ms</span><output id="brain-spikes">0</output></div><div><span>Compute</span><output id="brain-speed">—</output></div></div><canvas id="brain-trace" class="trace" data-height="125" role="img" aria-label="FlyWire spike count per sample over simulation time"></canvas>
+          <p class="small-note">This brain model does not drive the visible fly. The 3D point cloud is an illustration of scale, not a map of neuron positions.</p>
+          <details class="experiment-details"><summary>Watch individual neurons <span aria-hidden="true">+</span></summary><label class="field-label" for="brain-watch">Neuron indices (comma separated, up to 64)</label><input id="brain-watch" type="text" placeholder="0, 1, 2" inputmode="text"><button id="brain-watch-apply" class="text-button" disabled>Apply watch list</button><p id="brain-watch-status" class="small-note" role="status">No neurons selected.</p><button id="brain-save" class="text-button" disabled>Save recording ↓</button><p>This build exposes aggregate spikes and selected spike times, not membrane voltage. Named sugar-sensory and feeding-output identities are not mapped here, so activity alone is not evidence of feeding.</p></details>
+        </div>
+        <a class="chapter-next" href="#evidence">What can we actually conclude? <span aria-hidden="true">↓</span></a>
       </div>
-      <label class="switch"><input id="sugar" type="checkbox" checked disabled><span>Sugar input</span></label>
-      <p class="hint">The current build exposes aggregate spikes plus a bounded spike monitor. It does not yet export named feeding-population identities or membrane voltage.</p>
-    </details>
+    </section>
 
-    <details class="disclosure">
-      <summary>What each model means</summary>
-      <p><strong>BANC v888:</strong> a female-CNS, leaky-integrate-and-fire nerve-cord model connected to a male procedural body through a kinematic motor-to-joint mapping.</p>
-      <p><strong>FlyWire v783:</strong> a browser-local whole-brain simulation with its own counters and optional sugar input. Loading it does not make the visible fly walk.</p>
-      <p><strong>Walking:</strong> a kinematic animation clip. It is a visual introduction, not an emergent connectome result.</p>
-      <p id="download-info"></p>
-      <p><a href="https://github.com/H-H-E/fly-neural-lab" target="_blank" rel="noopener">Source and attribution &nearr;</a></p>
-    </details>
-  </aside>
-</main>
+    <section class="chapter chapter-evidence" id="evidence" data-index="5" aria-labelledby="evidence-title">
+      <div class="chapter-content">
+        <p class="eyebrow">05 / THE BIGGER PICTURE</p>
+        <h2 id="evidence-title">The point isn't<br>just to watch.<br><em>It's to question.</em></h2>
+        <p class="body-copy">You changed an input, followed a signal, and disconnected a cause. That is the beginning of computational neuroscience.</p>
+        <div class="evidence-list"><div><span>01</span><section><h3>Connections are evidence.</h3><p>BANC and FlyWire supply measured wiring. They are distinct datasets and models.</p></section></div><div><span>02</span><section><h3>A model adds assumptions.</h3><p>Cell equations, sensory tuning, and joint mechanics determine what the simulation can tell us.</p></section></div><div><span>03</span><section><h3>Movement needs an explanation.</h3><p>A rendered fly can animate without neural output. A passive spring can return a leg. Compare conditions before claiming a cause.</p></section></div></div>
+        <details class="experiment-details evidence-details"><summary>Model notes &amp; sources <span aria-hidden="true">+</span></summary><p>The specimen is a procedural male fly; the CNS datasets are from female flies. The body is kinematic, not a validated biomechanical reconstruction. The four-cell circuit and spatial brain layout are illustrations.</p><p><a href="https://www.nature.com/articles/s41586-024-07763-9" target="_blank" rel="noopener">Shiu et al. · whole-brain activity model ↗</a></p><p><a href="https://github.com/H-H-E/fly-neural-lab/blob/main/docs/banc-embodiment.md" target="_blank" rel="noopener">BANC embodiment notes and limitations ↗</a></p><p><a href="https://github.com/H-H-E/fly-neural-lab" target="_blank" rel="noopener">Read the code and validation checks ↗</a></p></details>
+        <a class="primary-button" href="#neuron">Try a different prediction <span aria-hidden="true">↗</span></a>
+        <p class="endnote">A small fly. A better question.<br><span>Made for curious humans.</span></p>
+      </div>
+    </section>
+  </main>
 
-<footer class="colophon"><span>CONNECTOME &rarr; A BODY YOU CAN QUESTION</span><span>RESEARCH PROTOTYPE · NO ACCOUNT REQUIRED</span></footer>
-<script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
-<script type="module" src="app.mjs"></script>
+  <nav class="chapter-dock" aria-label="Story chapters"><div class="dock-progress" aria-hidden="true"><span id="story-progress"></span></div><a href="#meet" class="dock-chapter" aria-current="step"><span class="dock-number">01</span><span class="dock-label">The fly</span></a><a href="#neuron" class="dock-chapter"><span class="dock-number">02</span><span class="dock-label">Neuron</span></a><a href="#circuit" class="dock-chapter"><span class="dock-number">03</span><span class="dock-label">Circuit</span></a><a href="#reflex" class="dock-chapter"><span class="dock-number">04</span><span class="dock-label">Movement</span></a><a href="#brain" class="dock-chapter"><span class="dock-number">05</span><span class="dock-label">Brain</span></a><a href="#evidence" class="dock-chapter"><span class="dock-number">06</span><span class="dock-label">The science</span></a><span class="dock-separator" aria-hidden="true"></span><a id="next-chapter" class="dock-next" href="#neuron" aria-label="Next chapter: Neuron">↓</a></nav>
+  <div class="a11y-status" id="chapter-announcement" role="status"></div>
+  <noscript><div class="noscript-note">The story is readable without JavaScript. The 3D view and experiments need JavaScript enabled.</div><style>.scene-loading{display:none}.specimen-stage{display:none}.story{width:100%}.chapter-content{max-width:650px}.chapter{min-height:0;padding:120px 8vw 40px}.chapter-dock{display:none}</style></noscript>
+  <script type="module" src="app.mjs"></script>
 </body>
 </html>

@@ -105,7 +105,7 @@ function tick() {
 self.onmessage = (e) => {
   const { type } = e.data;
   if (type === 'load') load();
-  else if (type === 'run') {
+  else if (type === 'run' && net && !running) {
     if (e.data.ticks > 0) ticksPerChunk = e.data.ticks | 0;
     running = true; tick();
   } else if (type === 'pause') { running = false; clearTimeout(timer); }
