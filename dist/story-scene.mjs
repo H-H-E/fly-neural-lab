@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { createDrosophilaMale, resetPose } from './fly-model/flyRigged.mjs';
+import { createDrosophilaMale, resetPose, FLY_MODEL_REVISION } from './fly-model/flyRigged.mjs';
 import { RandomSource } from './experiment-core.mjs';
 import { SoftwareSceneRenderer } from './software-scene.mjs';
 
@@ -124,7 +124,10 @@ export function createStoryScene(canvas, labelsElement, { onNode, onError } = {}
   const key = new THREE.DirectionalLight(0xfff2d6,3.4); key.position.set(-3,5,-3); scene.add(key);
   const rim = new THREE.DirectionalLight(0xc8e2d1,3); rim.position.set(4,2,3); scene.add(rim);
   const fill = new THREE.DirectionalLight(0xc2d8cb,1.8); fill.position.set(0,-2,-4); scene.add(fill);
-  const fly = createDrosophilaMale({detail:renderer.isSoftware || innerWidth < 760 ? 'low' : 'standard'});
+  // Keep one source of truth for the specimen. Only tessellation adapts to
+  // the device and renderer; every tier is the current site-fly revision.
+  const flyDetail = renderer.isSoftware ? 'low' : innerWidth < 760 ? 'standard' : 'hero';
+  const fly = createDrosophilaMale({detail:flyDetail});
   resetPose(fly); fly.group.position.y = .65;
   const flyRoot = new THREE.Group(); flyRoot.add(fly.group); scene.add(flyRoot);
   const mixer = new THREE.AnimationMixer(fly.group);
@@ -245,7 +248,7 @@ export function createStoryScene(canvas, labelsElement, { onNode, onError } = {}
     setReflexAngle(degrees){const bone=fly.bones.leg_FL_tibia;bone.quaternion.fromArray(bone.userData.restQuaternion);bone.rotateX((degrees-70)*Math.PI/180);revision++;},
     resetFly(){resetPose(fly);revision++;},
     updateBrain(spikes){brainSpikes=spikes;revision++;},
-    snapshot(){return {simplified:!!renderer.isSoftware,chapter,type:POSES[chapter].type,walking,motion,camera:camera.position.toArray(),tibia:fly.bones.leg_FL_tibia.quaternion.toArray(),draws:renderer.info.render.calls,triangles:renderer.info.render.triangles};},
+    snapshot(){return {simplified:!!renderer.isSoftware,flyModel:{name:'site-fly',revision:FLY_MODEL_REVISION,detail:fly.stats.detail},chapter,type:POSES[chapter].type,walking,motion,camera:camera.position.toArray(),tibia:fly.bones.leg_FL_tibia.quaternion.toArray(),draws:renderer.info.render.calls,triangles:renderer.info.render.triangles};},
     dispose(){disposed=true;cancelAnimationFrame(frameId);observer.disconnect();document.removeEventListener('visibilitychange',visibility);scene.traverse(o=>{o.geometry?.dispose();const mats=Array.isArray(o.material)?o.material:[o.material];mats.forEach(m=>m?.dispose());});renderer.dispose();}
   };
 }

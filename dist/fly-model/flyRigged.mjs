@@ -4,6 +4,10 @@ import { mergeGeometries } from '../vendor/BufferGeometryUtils.js';
 const AXIS_Y = new THREE.Vector3(0, 1, 0);
 const AXIS_Z = new THREE.Vector3(0, 0, 1);
 
+// Keep the visual specimen tied to the latest reviewed site-fly pass. The
+// detail tiers below change tessellation only; they all use this same rig.
+export const FLY_MODEL_REVISION = 'e53c905ec367f7bdc95a0fc9ba836a3087c3d488';
+
 // Tiered tessellation: big body shapes get density, small parts don't pay for it.
 const DETAIL = {
   low:      { big: [22, 14], mid: [12, 8], small: [8, 6], tubeR: 5, bodySetae: 90,  abdomenSetae: 10, legSetae: 4, veinTubular: 10, eyeSetae: 30, microRows: 18 },
@@ -982,6 +986,11 @@ export function createDrosophilaMale(options = {}) {
   group.animations = clips;
   group.userData.species = 'Drosophila melanogaster';
   group.userData.sex = 'male';
+  group.userData.model = {
+    name: 'site-fly',
+    revision: FLY_MODEL_REVISION,
+    detail: detailName,
+  };
   group.userData.scale = { units: 'mm', approximateBodyLength: 2.26, note: 'per-fly scale via group.scale; male mean, not species-universal' };
   group.userData.rig = {
     root: 'fly_root',
@@ -1022,6 +1031,7 @@ export function createDrosophilaMale(options = {}) {
   };
 
   const stats = {
+    revision: FLY_MODEL_REVISION,
     detail: detailName,
     bones: boneList.length,
     clips: clips.length,

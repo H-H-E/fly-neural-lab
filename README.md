@@ -21,6 +21,7 @@ The scene uses one WebGL renderer (or a bounded, simpler Canvas projection of th
 
 | Model or signal | Source and output | What it does not establish |
 |---|---|---|
+| Visible specimen | `dist/fly-model/flyRigged.mjs`; site-fly revision `e53c905`, with adaptive low/standard/hero tessellation | A biological morphology measurement or a neural controller |
 | Teaching neuron/circuit | `dist/neuron-model.mjs`; fixed-step, deterministic LIF traces | Biological firing rates or a hidden Drosophila circuit |
 | BANC v888 body model | `dist/banc-worker.mjs`; measured motor-neuron output drives a kinematic hinge | Physics-based locomotion or complete motor embodiment |
 | FlyWire v783 brain model | `dist/brain-worker.mjs`; optional 138,639-neuron WASM run with aggregate and bounded spike monitoring | A connection to the visible body, named taste identities, membrane-voltage export, or feeding behavior |

@@ -66,4 +66,4 @@ The 3D teaching neuron and brain layout are illustrations, not reconstructed mor
 - Node checks passed for lesson outputs, bounded observations, deterministic and repeated reflex replay (including a final-timestamp bend), matched passive controls, and the existing BANC/effector/sensor regression suite. All application modules pass syntax checks.
 - Limitation: this cloud browser disables WebGL. Full-material GPU rendering and physical touch-device performance remain unverified; software 3D, semantic controls, and model behavior were checked directly. The Playwright harness is updated for a workstation or CI browser with WebGL.
 
-The temporary preview uses the existing deployed model assets. Repository and production configuration retain the bundled, pinned model assets and their original URLs.
+The persistent specimen imports the latest reviewed site-fly revision (`e53c905`, the faceted-eye / micro-hair / mottle pass). Desktop WebGL uses its `hero` tessellation; phone and software-rendered views use lighter tessellation from the same rig. Repository and production configuration retain the bundled, pinned model assets and their original URLs.
