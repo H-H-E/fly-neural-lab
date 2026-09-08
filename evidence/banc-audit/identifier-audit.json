@@ -1,0 +1,26 @@
+{
+  "metadata_rows": 188508,
+  "deployed_population_exact_id_matches": 260,
+  "deployed_population_rows": 34155,
+  "deployed_channel_exact_id_matches": 20,
+  "deployed_channel_rows": 1754,
+  "temp_rebuilt_population_exact_id_matches": 34155,
+  "temp_rebuilt_population_rows": 34155,
+  "temp_rebuilt_channel_exact_id_matches": 1754,
+  "temp_rebuilt_channel_rows": 1754,
+  "deployed_population_examples": [
+    "720575941472733440",
+    "720575941662395648",
+    "720575941626500736"
+  ],
+  "metadata_examples": [
+    "720575941633499884",
+    "720575941472733451",
+    "720575941662395704"
+  ],
+  "temp_population_examples": [
+    "720575941472733451",
+    "720575941662395704",
+    "720575941626500746"
+  ]
+}

@@ -17,6 +17,8 @@ from pathlib import Path
 
 import pandas as pd
 
+from id_utils import identifier_series
+
 BASE = Path(__file__).resolve().parent
 ROOT = BASE.parents[1]  # repo root (brain-body/banc -> ../..)
 EDGE = BASE / "synapses_edge.parquet"
@@ -30,10 +32,25 @@ def main():
         sys.exit(f"missing {EDGE} — run build.py with full edgelist first")
     print("loading neurons + edgelist…", flush=True)
     neurons = pd.read_parquet(BASE / "neurons.parquet")
+    import pyarrow.parquet as pq
+
+    required_edge_columns = {"pre", "post", "count"}
+    available_edge_columns = set(pq.ParquetFile(EDGE).schema.names)
+    missing_edge_columns = required_edge_columns - available_edge_columns
+    if missing_edge_columns:
+        raise ValueError(f"edge table missing required columns: {sorted(missing_edge_columns)}")
     e = pd.read_parquet(EDGE, columns=["pre", "post", "count"])
-    e["pre"] = e["pre"].astype(str)
-    e["post"] = e["post"].astype(str)
-    neurons["banc_888_id"] = neurons["banc_888_id"].astype(str)
+    e["pre"] = identifier_series(e["pre"], field="pre")
+    e["post"] = identifier_series(e["post"], field="post")
+    if e.duplicated(["pre", "post"]).any():
+        raise ValueError("synapses_edge.parquet must contain one aggregated row per pre/post pair")
+    if not pd.api.types.is_integer_dtype(e["count"]):
+        raise ValueError("synapse count must be an integer dtype")
+    if (e["count"] <= 0).any():
+        raise ValueError("synapse count must be positive")
+    neurons["banc_888_id"] = identifier_series(
+        neurons["banc_888_id"], field="banc_888_id"
+    )
 
     is_feco = (
         (neurons["body_part_sensory"] == "front_leg")
@@ -64,7 +81,7 @@ def main():
     priority = []
     seen = set()
     for group in (sens | mns, inter, h2, posts_of_sens, pres_of_mn):
-        for x in group:
+        for x in sorted(group):
             if x not in seen:
                 seen.add(x)
                 priority.append(x)

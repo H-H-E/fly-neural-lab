@@ -1,0 +1,2148 @@
+{
+  "schema": "banc.front-left-tibia-resistance/v1",
+  "status": "identity_gate_blocked",
+  "purpose": "Freeze the first causal assay without assigning sensory identity from desired motor output.",
+  "behavior": {
+    "joint": "front-left femur-tibia",
+    "side": "left",
+    "leg": "prothoracic/front",
+    "external_drive": "sensory_only",
+    "extension_coordinate": {
+      "symbol": "q",
+      "units": "rad",
+      "increases_with": "tibia_extension",
+      "velocity_symbol": "q_dot"
+    },
+    "mechanical_target": "Muscle-generated torque must oppose externally imposed extension in Experiment B; no prescribed angle controller."
+  },
+  "selection": {
+    "extension_sensitive_status": "unknown",
+    "extension_sensitive_reason": "The local BANC metadata contains front-left FeCO position/direction/vibro-tactile subtype labels but no independently supported claw/hook extension-sensitive identity. No neuron is promoted to extension-sensitive from simulated output.",
+    "sensory_candidates": [
+      {
+        "name": "left_front_feco_position",
+        "functional_role": "proprioceptor_candidate",
+        "ids": [
+          "720575941413112212",
+          "720575941438474258",
+          "720575941439451477",
+          "720575941448826805",
+          "720575941455760877",
+          "720575941457704863",
+          "720575941473832544",
+          "720575941478502209",
+          "720575941482795005",
+          "720575941506301861",
+          "720575941507004194",
+          "720575941519296428",
+          "720575941540132221",
+          "720575941544751877",
+          "720575941545449065",
+          "720575941549932093",
+          "720575941560894247",
+          "720575941566973434",
+          "720575941577505640",
+          "720575941578935029",
+          "720575941583568479",
+          "720575941584957406",
+          "720575941589773566",
+          "720575941604058046",
+          "720575941644934856",
+          "720575941680271037",
+          "720575941689664780"
+        ],
+        "morphology_counts": {
+          "claw": 19,
+          "": 8
+        },
+        "morphology": [
+          {
+            "source_id": "720575941413112212",
+            "other_names": "claw",
+            "notes": "SNpp50, claw"
+          },
+          {
+            "source_id": "720575941438474258",
+            "other_names": "claw",
+            "notes": "SNpp50, claw"
+          },
+          {
+            "source_id": "720575941439451477",
+            "other_names": "claw",
+            "notes": "SNpp50, claw"
+          },
+          {
+            "source_id": "720575941448826805",
+            "other_names": "claw",
+            "notes": "SNpp50, claw"
+          },
+          {
+            "source_id": "720575941455760877",
+            "other_names": "claw",
+            "notes": "SNpp50, claw"
+          },
+          {
+            "source_id": "720575941457704863",
+            "other_names": "claw",
+            "notes": "SNpp50, claw"
+          },
+          {
+            "source_id": "720575941473832544",
+            "other_names": "claw",
+            "notes": "SNpp50, claw"
+          },
+          {
+            "source_id": "720575941478502209",
+            "other_names": "",
+            "notes": ""
+          },
+          {
+            "source_id": "720575941482795005",
+            "other_names": "claw",
+            "notes": "SNpp51, claw"
+          },
+          {
+            "source_id": "720575941506301861",
+            "other_names": "",
+            "notes": ""
+          },
+          {
+            "source_id": "720575941507004194",
+            "other_names": "claw",
+            "notes": "SNpp50, claw"
+          },
+          {
+            "source_id": "720575941519296428",
+            "other_names": "",
+            "notes": "claw? may need more proofreading\n"
+          },
+          {
+            "source_id": "720575941540132221",
+            "other_names": "",
+            "notes": ""
+          },
+          {
+            "source_id": "720575941544751877",
+            "other_names": "claw",
+            "notes": "SNpp50, claw"
+          },
+          {
+            "source_id": "720575941545449065",
+            "other_names": "claw",
+            "notes": "SNpp50, claw"
+          },
+          {
+            "source_id": "720575941549932093",
+            "other_names": "claw",
+            "notes": "SNpp50, claw"
+          },
+          {
+            "source_id": "720575941560894247",
+            "other_names": "claw",
+            "notes": "SNpp50, claw"
+          },
+          {
+            "source_id": "720575941566973434",
+            "other_names": "claw",
+            "notes": "SNpp50, claw"
+          },
+          {
+            "source_id": "720575941577505640",
+            "other_names": "",
+            "notes": ""
+          },
+          {
+            "source_id": "720575941578935029",
+            "other_names": "",
+            "notes": ""
+          },
+          {
+            "source_id": "720575941583568479",
+            "other_names": "claw",
+            "notes": "SNpp50, claw"
+          },
+          {
+            "source_id": "720575941584957406",
+            "other_names": "",
+            "notes": ""
+          },
+          {
+            "source_id": "720575941589773566",
+            "other_names": "",
+            "notes": ""
+          },
+          {
+            "source_id": "720575941604058046",
+            "other_names": "claw",
+            "notes": "SNpp50, claw"
+          },
+          {
+            "source_id": "720575941644934856",
+            "other_names": "claw",
+            "notes": "SNpp50, claw"
+          },
+          {
+            "source_id": "720575941680271037",
+            "other_names": "claw",
+            "notes": "SNpp50, claw"
+          },
+          {
+            "source_id": "720575941689664780",
+            "other_names": "claw",
+            "notes": "SNpp50, claw"
+          }
+        ],
+        "evidence_status": "directly_measured",
+        "evidence": "BANC metadata: front_leg, left, chordotonal_organ, proprioception, cell_function_detailed=position; raw other_names/notes give claw/hook/club morphology labels where present. Neither label establishes extension sensitivity.",
+        "resolution": [
+          {
+            "source_id": "720575941413112212",
+            "index": 1651
+          },
+          {
+            "source_id": "720575941438474258",
+            "index": 2189
+          },
+          {
+            "source_id": "720575941439451477",
+            "index": 2166
+          },
+          {
+            "source_id": "720575941448826805",
+            "index": 2167
+          },
+          {
+            "source_id": "720575941455760877",
+            "index": 2143
+          },
+          {
+            "source_id": "720575941457704863",
+            "index": 1732
+          },
+          {
+            "source_id": "720575941473832544",
+            "index": 2080
+          },
+          {
+            "source_id": "720575941478502209",
+            "index": 2065
+          },
+          {
+            "source_id": "720575941482795005",
+            "index": 2212
+          },
+          {
+            "source_id": "720575941506301861",
+            "index": 2342
+          },
+          {
+            "source_id": "720575941507004194",
+            "index": 1702
+          },
+          {
+            "source_id": "720575941519296428",
+            "index": 2008
+          },
+          {
+            "source_id": "720575941540132221",
+            "index": 2141
+          },
+          {
+            "source_id": "720575941544751877",
+            "index": 1660
+          },
+          {
+            "source_id": "720575941545449065",
+            "index": 2091
+          },
+          {
+            "source_id": "720575941549932093",
+            "index": 2036
+          },
+          {
+            "source_id": "720575941560894247",
+            "index": 1734
+          },
+          {
+            "source_id": "720575941566973434",
+            "index": 1645
+          },
+          {
+            "source_id": "720575941577505640",
+            "index": 2082
+          },
+          {
+            "source_id": "720575941578935029",
+            "index": 2184
+          },
+          {
+            "source_id": "720575941583568479",
+            "index": 2171
+          },
+          {
+            "source_id": "720575941584957406",
+            "index": 1718
+          },
+          {
+            "source_id": "720575941589773566",
+            "index": 2075
+          },
+          {
+            "source_id": "720575941604058046",
+            "index": 1715
+          },
+          {
+            "source_id": "720575941644934856",
+            "index": 2110
+          },
+          {
+            "source_id": "720575941680271037",
+            "index": 1808
+          },
+          {
+            "source_id": "720575941689664780",
+            "index": 1733
+          }
+        ]
+      },
+      {
+        "name": "left_front_feco_direction",
+        "functional_role": "proprioceptor_candidate",
+        "ids": [
+          "720575941354084144",
+          "720575941439717676",
+          "720575941460957651",
+          "720575941478068529",
+          "720575941497876352",
+          "720575941508000069",
+          "720575941509347106",
+          "720575941535149802",
+          "720575941538745059",
+          "720575941541413757",
+          "720575941546962721",
+          "720575941551004415",
+          "720575941556215524",
+          "720575941559126287",
+          "720575941561612915",
+          "720575941562227751",
+          "720575941573480094",
+          "720575941579786997",
+          "720575941595922801",
+          "720575941596777511",
+          "720575941612150858",
+          "720575941612455676",
+          "720575941612462332",
+          "720575941615782675",
+          "720575941633111968",
+          "720575941640337269",
+          "720575941691440091"
+        ],
+        "morphology_counts": {
+          "hook": 17,
+          "": 10
+        },
+        "morphology": [
+          {
+            "source_id": "720575941354084144",
+            "other_names": "hook",
+            "notes": "SNpp39, hook"
+          },
+          {
+            "source_id": "720575941439717676",
+            "other_names": "hook",
+            "notes": "SNpp39, hook"
+          },
+          {
+            "source_id": "720575941460957651",
+            "other_names": "hook",
+            "notes": "SNpp41, hook"
+          },
+          {
+            "source_id": "720575941478068529",
+            "other_names": "hook",
+            "notes": "SNpp39, hook"
+          },
+          {
+            "source_id": "720575941497876352",
+            "other_names": "",
+            "notes": "hook?\n"
+          },
+          {
+            "source_id": "720575941508000069",
+            "other_names": "hook",
+            "notes": "SNpp39, hook"
+          },
+          {
+            "source_id": "720575941509347106",
+            "other_names": "",
+            "notes": ""
+          },
+          {
+            "source_id": "720575941535149802",
+            "other_names": "",
+            "notes": ""
+          },
+          {
+            "source_id": "720575941538745059",
+            "other_names": "hook",
+            "notes": "SNpp39, hook"
+          },
+          {
+            "source_id": "720575941541413757",
+            "other_names": "hook",
+            "notes": "SNpp39, hook"
+          },
+          {
+            "source_id": "720575941546962721",
+            "other_names": "hook",
+            "notes": "SNpp41, hook"
+          },
+          {
+            "source_id": "720575941551004415",
+            "other_names": "hook",
+            "notes": "SNpp39, hook"
+          },
+          {
+            "source_id": "720575941556215524",
+            "other_names": "",
+            "notes": ""
+          },
+          {
+            "source_id": "720575941559126287",
+            "other_names": "hook",
+            "notes": "SNpp41, hook"
+          },
+          {
+            "source_id": "720575941561612915",
+            "other_names": "",
+            "notes": ""
+          },
+          {
+            "source_id": "720575941562227751",
+            "other_names": "",
+            "notes": ""
+          },
+          {
+            "source_id": "720575941573480094",
+            "other_names": "hook",
+            "notes": "SNpp39, hook"
+          },
+          {
+            "source_id": "720575941579786997",
+            "other_names": "",
+            "notes": ""
+          },
+          {
+            "source_id": "720575941595922801",
+            "other_names": "",
+            "notes": ""
+          },
+          {
+            "source_id": "720575941596777511",
+            "other_names": "",
+            "notes": ""
+          },
+          {
+            "source_id": "720575941612150858",
+            "other_names": "hook",
+            "notes": "SNpp39, hook"
+          },
+          {
+            "source_id": "720575941612455676",
+            "other_names": "hook",
+            "notes": "SNpp41, hook"
+          },
+          {
+            "source_id": "720575941612462332",
+            "other_names": "hook",
+            "notes": "SNpp41, hook"
+          },
+          {
+            "source_id": "720575941615782675",
+            "other_names": "hook",
+            "notes": "SNpp39, hook"
+          },
+          {
+            "source_id": "720575941633111968",
+            "other_names": "hook",
+            "notes": "SNpp39, hook"
+          },
+          {
+            "source_id": "720575941640337269",
+            "other_names": "",
+            "notes": ""
+          },
+          {
+            "source_id": "720575941691440091",
+            "other_names": "hook",
+            "notes": "SNpp39, hook"
+          }
+        ],
+        "evidence_status": "directly_measured",
+        "evidence": "BANC metadata: front_leg, left, chordotonal_organ, proprioception, cell_function_detailed=direction; raw other_names/notes give claw/hook/club morphology labels where present. Neither label establishes extension sensitivity.",
+        "resolution": [
+          {
+            "source_id": "720575941354084144",
+            "index": 1822
+          },
+          {
+            "source_id": "720575941439717676",
+            "index": 2100
+          },
+          {
+            "source_id": "720575941460957651",
+            "index": 1736
+          },
+          {
+            "source_id": "720575941478068529",
+            "index": 2023
+          },
+          {
+            "source_id": "720575941497876352",
+            "index": 1862
+          },
+          {
+            "source_id": "720575941508000069",
+            "index": 1746
+          },
+          {
+            "source_id": "720575941509347106",
+            "index": 2525
+          },
+          {
+            "source_id": "720575941535149802",
+            "index": 2229
+          },
+          {
+            "source_id": "720575941538745059",
+            "index": 2011
+          },
+          {
+            "source_id": "720575941541413757",
+            "index": 1735
+          },
+          {
+            "source_id": "720575941546962721",
+            "index": 1991
+          },
+          {
+            "source_id": "720575941551004415",
+            "index": 1839
+          },
+          {
+            "source_id": "720575941556215524",
+            "index": 1730
+          },
+          {
+            "source_id": "720575941559126287",
+            "index": 2132
+          },
+          {
+            "source_id": "720575941561612915",
+            "index": 2136
+          },
+          {
+            "source_id": "720575941562227751",
+            "index": 2035
+          },
+          {
+            "source_id": "720575941573480094",
+            "index": 1992
+          },
+          {
+            "source_id": "720575941579786997",
+            "index": 1541
+          },
+          {
+            "source_id": "720575941595922801",
+            "index": 1542
+          },
+          {
+            "source_id": "720575941596777511",
+            "index": 1816
+          },
+          {
+            "source_id": "720575941612150858",
+            "index": 2010
+          },
+          {
+            "source_id": "720575941612455676",
+            "index": 2131
+          },
+          {
+            "source_id": "720575941612462332",
+            "index": 1731
+          },
+          {
+            "source_id": "720575941615782675",
+            "index": 2162
+          },
+          {
+            "source_id": "720575941633111968",
+            "index": 1837
+          },
+          {
+            "source_id": "720575941640337269",
+            "index": 2072
+          },
+          {
+            "source_id": "720575941691440091",
+            "index": 1705
+          }
+        ]
+      },
+      {
+        "name": "left_front_feco_vibro_tactile",
+        "functional_role": "proprioceptor_candidate",
+        "ids": [
+          "720575941404746352",
+          "720575941413320337",
+          "720575941431920993",
+          "720575941439213909",
+          "720575941439718444",
+          "720575941452949929",
+          "720575941466537238",
+          "720575941480772431",
+          "720575941497396347",
+          "720575941498411170",
+          "720575941505749176",
+          "720575941506291269",
+          "720575941508274967",
+          "720575941508505729",
+          "720575941514787793",
+          "720575941517946540",
+          "720575941520052140",
+          "720575941521039283",
+          "720575941525391526",
+          "720575941530288331",
+          "720575941534281738",
+          "720575941534721729",
+          "720575941537137930",
+          "720575941538144405",
+          "720575941543148549",
+          "720575941548964669",
+          "720575941549056061",
+          "720575941551167604",
+          "720575941560758643",
+          "720575941560895015",
+          "720575941562182695",
+          "720575941562182951",
+          "720575941562201383",
+          "720575941567640935",
+          "720575941573650077",
+          "720575941576724406",
+          "720575941579312761",
+          "720575941583523935",
+          "720575941588502405",
+          "720575941588503173",
+          "720575941588503429",
+          "720575941588534917",
+          "720575941591225128",
+          "720575941594333733",
+          "720575941600978729",
+          "720575941602290366",
+          "720575941604168894",
+          "720575941612214758",
+          "720575941612657404",
+          "720575941614551772",
+          "720575941631165627",
+          "720575941640168479",
+          "720575941643984229",
+          "720575941656675540",
+          "720575941668827825",
+          "720575941670298330",
+          "720575941670298586",
+          "720575941670332634",
+          "720575941670332890",
+          "720575941670333658",
+          "720575941687076079",
+          "720575941688239478"
+        ],
+        "morphology_counts": {
+          "club": 34,
+          "": 28
+        },
+        "morphology": [
+          {
+            "source_id": "720575941404746352",
+            "other_names": "",
+            "notes": ""
+          },
+          {
+            "source_id": "720575941413320337",
+            "other_names": "",
+            "notes": ""
+          },
+          {
+            "source_id": "720575941431920993",
+            "other_names": "club",
+            "notes": "SNpp59, club"
+          },
+          {
+            "source_id": "720575941439213909",
+            "other_names": "club",
+            "notes": "SNpp58, club"
+          },
+          {
+            "source_id": "720575941439718444",
+            "other_names": "club",
+            "notes": "SNpp58, club"
+          },
+          {
+            "source_id": "720575941452949929",
+            "other_names": "",
+            "notes": ""
+          },
+          {
+            "source_id": "720575941466537238",
+            "other_names": "club",
+            "notes": "SNpp59, club"
+          },
+          {
+            "source_id": "720575941480772431",
+            "other_names": "",
+            "notes": ""
+          },
+          {
+            "source_id": "720575941497396347",
+            "other_names": "club",
+            "notes": "SNpp60, club"
+          },
+          {
+            "source_id": "720575941498411170",
+            "other_names": "club",
+            "notes": "SNpp60, club"
+          },
+          {
+            "source_id": "720575941505749176",
+            "other_names": "",
+            "notes": ""
+          },
+          {
+            "source_id": "720575941506291269",
+            "other_names": "club",
+            "notes": "SNpp57, club"
+          },
+          {
+            "source_id": "720575941508274967",
+            "other_names": "club",
+            "notes": "SNpp60, club"
+          },
+          {
+            "source_id": "720575941508505729",
+            "other_names": "club",
+            "notes": "SNpp59, club"
+          },
+          {
+            "source_id": "720575941514787793",
+            "other_names": "",
+            "notes": "needs proofreading\n"
+          },
+          {
+            "source_id": "720575941517946540",
+            "other_names": "club",
+            "notes": "SNpp60, club"
+          },
+          {
+            "source_id": "720575941520052140",
+            "other_names": "club",
+            "notes": "SNpp59, club"
+          },
+          {
+            "source_id": "720575941521039283",
+            "other_names": "club",
+            "notes": "SNpp60, club"
+          },
+          {
+            "source_id": "720575941525391526",
+            "other_names": "club",
+            "notes": "SNpp59, club"
+          },
+          {
+            "source_id": "720575941530288331",
+            "other_names": "",
+            "notes": ""
+          },
+          {
+            "source_id": "720575941534281738",
+            "other_names": "club",
+            "notes": "SNpp60, club"
+          },
+          {
+            "source_id": "720575941534721729",
+            "other_names": "",
+            "notes": ""
+          },
+          {
+            "source_id": "720575941537137930",
+            "other_names": "club",
+            "notes": "SNpp59, club"
+          },
+          {
+            "source_id": "720575941538144405",
+            "other_names": "",
+            "notes": ""
+          },
+          {
+            "source_id": "720575941543148549",
+            "other_names": "club",
+            "notes": "SNpp60, club"
+          },
+          {
+            "source_id": "720575941548964669",
+            "other_names": "club",
+            "notes": "SNpp58, club"
+          },
+          {
+            "source_id": "720575941549056061",
+            "other_names": "club",
+            "notes": "SNpp57, club"
+          },
+          {
+            "source_id": "720575941551167604",
+            "other_names": "",
+            "notes": ""
+          },
+          {
+            "source_id": "720575941560758643",
+            "other_names": "",
+            "notes": ""
+          },
+          {
+            "source_id": "720575941560895015",
+            "other_names": "",
+            "notes": ""
+          },
+          {
+            "source_id": "720575941562182695",
+            "other_names": "",
+            "notes": ""
+          },
+          {
+            "source_id": "720575941562182951",
+            "other_names": "",
+            "notes": ""
+          },
+          {
+            "source_id": "720575941562201383",
+            "other_names": "club",
+            "notes": "SNpp59, club"
+          },
+          {
+            "source_id": "720575941567640935",
+            "other_names": "",
+            "notes": ""
+          },
+          {
+            "source_id": "720575941573650077",
+            "other_names": "club",
+            "notes": "SNpp58, club"
+          },
+          {
+            "source_id": "720575941576724406",
+            "other_names": "club",
+            "notes": "SNpp59, club"
+          },
+          {
+            "source_id": "720575941579312761",
+            "other_names": "club",
+            "notes": "SNpp59, club"
+          },
+          {
+            "source_id": "720575941583523935",
+            "other_names": "",
+            "notes": ""
+          },
+          {
+            "source_id": "720575941588502405",
+            "other_names": "club",
+            "notes": "SNpp60, club"
+          },
+          {
+            "source_id": "720575941588503173",
+            "other_names": "club",
+            "notes": "SNpp59, club"
+          },
+          {
+            "source_id": "720575941588503429",
+            "other_names": "",
+            "notes": ""
+          },
+          {
+            "source_id": "720575941588534917",
+            "other_names": "club",
+            "notes": "SNpp59, club"
+          },
+          {
+            "source_id": "720575941591225128",
+            "other_names": "club",
+            "notes": "SNpp60, club"
+          },
+          {
+            "source_id": "720575941594333733",
+            "other_names": "club",
+            "notes": "SNpp57, club"
+          },
+          {
+            "source_id": "720575941600978729",
+            "other_names": "",
+            "notes": ""
+          },
+          {
+            "source_id": "720575941602290366",
+            "other_names": "",
+            "notes": ""
+          },
+          {
+            "source_id": "720575941604168894",
+            "other_names": "",
+            "notes": ""
+          },
+          {
+            "source_id": "720575941612214758",
+            "other_names": "",
+            "notes": "needs proofreading\n"
+          },
+          {
+            "source_id": "720575941612657404",
+            "other_names": "",
+            "notes": ""
+          },
+          {
+            "source_id": "720575941614551772",
+            "other_names": "club",
+            "notes": "SNpp59, club"
+          },
+          {
+            "source_id": "720575941631165627",
+            "other_names": "club",
+            "notes": "SNpp59, club"
+          },
+          {
+            "source_id": "720575941640168479",
+            "other_names": "",
+            "notes": ""
+          },
+          {
+            "source_id": "720575941643984229",
+            "other_names": "",
+            "notes": "needs proofreading\n"
+          },
+          {
+            "source_id": "720575941656675540",
+            "other_names": "club",
+            "notes": "SNpp57, club"
+          },
+          {
+            "source_id": "720575941668827825",
+            "other_names": "",
+            "notes": ""
+          },
+          {
+            "source_id": "720575941670298330",
+            "other_names": "club",
+            "notes": "SNpp59, club"
+          },
+          {
+            "source_id": "720575941670298586",
+            "other_names": "club",
+            "notes": "SNpp59, club"
+          },
+          {
+            "source_id": "720575941670332634",
+            "other_names": "",
+            "notes": ""
+          },
+          {
+            "source_id": "720575941670332890",
+            "other_names": "club",
+            "notes": "SNpp60, club"
+          },
+          {
+            "source_id": "720575941670333658",
+            "other_names": "",
+            "notes": ""
+          },
+          {
+            "source_id": "720575941687076079",
+            "other_names": "club",
+            "notes": "SNpp59, club"
+          },
+          {
+            "source_id": "720575941688239478",
+            "other_names": "",
+            "notes": "needs tracing to soma or edge of dataset but probably ascending, sensory neuron, especially given other neurons in tract are sensory - HHY\n"
+          }
+        ],
+        "evidence_status": "directly_measured",
+        "evidence": "BANC metadata: front_leg, left, chordotonal_organ, proprioception, cell_function_detailed=vibro_tactile; raw other_names/notes give claw/hook/club morphology labels where present. Neither label establishes extension sensitivity.",
+        "resolution": [
+          {
+            "source_id": "720575941404746352",
+            "index": 2089
+          },
+          {
+            "source_id": "720575941413320337",
+            "index": 2176
+          },
+          {
+            "source_id": "720575941431920993",
+            "index": 2144
+          },
+          {
+            "source_id": "720575941439213909",
+            "index": 1752
+          },
+          {
+            "source_id": "720575941439718444",
+            "index": 1607
+          },
+          {
+            "source_id": "720575941452949929",
+            "index": 1846
+          },
+          {
+            "source_id": "720575941466537238",
+            "index": 2032
+          },
+          {
+            "source_id": "720575941480772431",
+            "index": 2172
+          },
+          {
+            "source_id": "720575941497396347",
+            "index": 2133
+          },
+          {
+            "source_id": "720575941498411170",
+            "index": 1861
+          },
+          {
+            "source_id": "720575941505749176",
+            "index": 2343
+          },
+          {
+            "source_id": "720575941506291269",
+            "index": 2066
+          },
+          {
+            "source_id": "720575941508274967",
+            "index": 2059
+          },
+          {
+            "source_id": "720575941508505729",
+            "index": 2142
+          },
+          {
+            "source_id": "720575941514787793",
+            "index": 2191
+          },
+          {
+            "source_id": "720575941517946540",
+            "index": 2087
+          },
+          {
+            "source_id": "720575941520052140",
+            "index": 2026
+          },
+          {
+            "source_id": "720575941521039283",
+            "index": 2139
+          },
+          {
+            "source_id": "720575941525391526",
+            "index": 1886
+          },
+          {
+            "source_id": "720575941530288331",
+            "index": 2206
+          },
+          {
+            "source_id": "720575941534281738",
+            "index": 1974
+          },
+          {
+            "source_id": "720575941534721729",
+            "index": 918
+          },
+          {
+            "source_id": "720575941537137930",
+            "index": 1842
+          },
+          {
+            "source_id": "720575941538144405",
+            "index": 2183
+          },
+          {
+            "source_id": "720575941543148549",
+            "index": 1985
+          },
+          {
+            "source_id": "720575941548964669",
+            "index": 2031
+          },
+          {
+            "source_id": "720575941549056061",
+            "index": 2068
+          },
+          {
+            "source_id": "720575941551167604",
+            "index": 2071
+          },
+          {
+            "source_id": "720575941560758643",
+            "index": 2037
+          },
+          {
+            "source_id": "720575941560895015",
+            "index": 2012
+          },
+          {
+            "source_id": "720575941562182695",
+            "index": 2027
+          },
+          {
+            "source_id": "720575941562182951",
+            "index": 2028
+          },
+          {
+            "source_id": "720575941562201383",
+            "index": 2030
+          },
+          {
+            "source_id": "720575941567640935",
+            "index": 2086
+          },
+          {
+            "source_id": "720575941573650077",
+            "index": 2175
+          },
+          {
+            "source_id": "720575941576724406",
+            "index": 2190
+          },
+          {
+            "source_id": "720575941579312761",
+            "index": 2056
+          },
+          {
+            "source_id": "720575941583523935",
+            "index": 2138
+          },
+          {
+            "source_id": "720575941588502405",
+            "index": 2067
+          },
+          {
+            "source_id": "720575941588503173",
+            "index": 2069
+          },
+          {
+            "source_id": "720575941588503429",
+            "index": 2070
+          },
+          {
+            "source_id": "720575941588534917",
+            "index": 2074
+          },
+          {
+            "source_id": "720575941591225128",
+            "index": 2102
+          },
+          {
+            "source_id": "720575941594333733",
+            "index": 2140
+          },
+          {
+            "source_id": "720575941600978729",
+            "index": 2029
+          },
+          {
+            "source_id": "720575941602290366",
+            "index": 2108
+          },
+          {
+            "source_id": "720575941604168894",
+            "index": 2188
+          },
+          {
+            "source_id": "720575941612214758",
+            "index": 2081
+          },
+          {
+            "source_id": "720575941612657404",
+            "index": 2134
+          },
+          {
+            "source_id": "720575941614551772",
+            "index": 2137
+          },
+          {
+            "source_id": "720575941631165627",
+            "index": 2165
+          },
+          {
+            "source_id": "720575941640168479",
+            "index": 2127
+          },
+          {
+            "source_id": "720575941643984229",
+            "index": 2090
+          },
+          {
+            "source_id": "720575941656675540",
+            "index": 2014
+          },
+          {
+            "source_id": "720575941668827825",
+            "index": 922
+          },
+          {
+            "source_id": "720575941670298330",
+            "index": 2178
+          },
+          {
+            "source_id": "720575941670298586",
+            "index": 2179
+          },
+          {
+            "source_id": "720575941670332634",
+            "index": 2185
+          },
+          {
+            "source_id": "720575941670332890",
+            "index": 2186
+          },
+          {
+            "source_id": "720575941670333658",
+            "index": 2187
+          },
+          {
+            "source_id": "720575941687076079",
+            "index": 1975
+          },
+          {
+            "source_id": "720575941688239478",
+            "index": 933
+          }
+        ]
+      }
+    ],
+    "motor_units": [
+      {
+        "name": "left_tibia_flexor",
+        "functional_role": "tibia_flexor",
+        "ids": [
+          "720575941481179066",
+          "720575941488205769",
+          "720575941497568199",
+          "720575941542454876",
+          "720575941667370739"
+        ],
+        "muscle_target": "tibia_flexor_muscle",
+        "evidence_status": "directly_measured",
+        "evidence": "BANC metadata assigns the cell to the left front leg and the named tibia muscle target; force direction and moment arm remain unvalidated.",
+        "resolution": [
+          {
+            "source_id": "720575941481179066",
+            "index": 1232
+          },
+          {
+            "source_id": "720575941488205769",
+            "index": 1535
+          },
+          {
+            "source_id": "720575941497568199",
+            "index": 1238
+          },
+          {
+            "source_id": "720575941542454876",
+            "index": 1269
+          },
+          {
+            "source_id": "720575941667370739",
+            "index": 1010
+          }
+        ]
+      },
+      {
+        "name": "left_tibia_extensor",
+        "functional_role": "tibia_extensor",
+        "ids": [
+          "720575941478577231",
+          "720575941639281525"
+        ],
+        "muscle_target": "tibia_extensor_muscle",
+        "evidence_status": "directly_measured",
+        "evidence": "BANC metadata assigns the cell to the left front leg and the named tibia muscle target; force direction and moment arm remain unvalidated.",
+        "resolution": [
+          {
+            "source_id": "720575941478577231",
+            "index": 1274
+          },
+          {
+            "source_id": "720575941639281525",
+            "index": 1280
+          }
+        ]
+      }
+    ],
+    "excluded_from_claims": [
+      "campaniform_sensillum",
+      "untyped chordotonal rows",
+      "bilateral pools",
+      "row-order abdomen mappings",
+      "direct motor stimulation"
+    ]
+  },
+  "pathways": [
+    {
+      "kind": "direct",
+      "pre_ids": [
+        "720575941478502209",
+        "720575941482795005",
+        "720575941560894247",
+        "720575941578935029",
+        "720575941604058046",
+        "720575941689664780"
+      ],
+      "post_ids": [
+        "720575941497568199",
+        "720575941542454876"
+      ],
+      "relay_ids": [],
+      "edge_count": 6,
+      "multiplicity_sum": 8,
+      "pair_count": 6,
+      "name": "left_front_feco_position_to_left_tibia_flexor",
+      "pre_group": "left_front_feco_position",
+      "post_group": "left_tibia_flexor",
+      "source": "BANC compact reflex graph"
+    },
+    {
+      "kind": "one_hop",
+      "pre_ids": [
+        "720575941413112212",
+        "720575941438474258",
+        "720575941439451477",
+        "720575941448826805",
+        "720575941455760877",
+        "720575941457704863",
+        "720575941473832544",
+        "720575941478502209",
+        "720575941482795005",
+        "720575941506301861",
+        "720575941507004194",
+        "720575941519296428",
+        "720575941540132221",
+        "720575941544751877",
+        "720575941545449065",
+        "720575941549932093",
+        "720575941560894247",
+        "720575941566973434",
+        "720575941577505640",
+        "720575941578935029",
+        "720575941583568479",
+        "720575941584957406",
+        "720575941589773566",
+        "720575941604058046",
+        "720575941644934856",
+        "720575941680271037",
+        "720575941689664780"
+      ],
+      "post_ids": [
+        "720575941481179066",
+        "720575941488205769",
+        "720575941497568199",
+        "720575941542454876",
+        "720575941667370739"
+      ],
+      "relay_ids": [
+        "720575941413917724",
+        "720575941416652828",
+        "720575941428294793",
+        "720575941429602145",
+        "720575941431066543",
+        "720575941431756503",
+        "720575941431854217",
+        "720575941431957240",
+        "720575941431966200",
+        "720575941438454828",
+        "720575941441245631",
+        "720575941446282666",
+        "720575941448919901",
+        "720575941450597966",
+        "720575941452261427",
+        "720575941452265779",
+        "720575941456653293",
+        "720575941459151556",
+        "720575941462065875",
+        "720575941464769046",
+        "720575941468905995",
+        "720575941470437440",
+        "720575941474802497",
+        "720575941476033054",
+        "720575941477921601",
+        "720575941479472258",
+        "720575941480052960",
+        "720575941480232160",
+        "720575941482028483",
+        "720575941485267920",
+        "720575941485372045",
+        "720575941486936784",
+        "720575941488023605",
+        "720575941492463486",
+        "720575941493067495",
+        "720575941495662720",
+        "720575941496253819",
+        "720575941507031612",
+        "720575941507997730",
+        "720575941511149132",
+        "720575941511884241",
+        "720575941524331545",
+        "720575941524746573",
+        "720575941526037273",
+        "720575941526752356",
+        "720575941530369156",
+        "720575941532496357",
+        "720575941533989976",
+        "720575941533994418",
+        "720575941534733800",
+        "720575941536226058",
+        "720575941536301973",
+        "720575941536775144",
+        "720575941536985866",
+        "720575941537703373",
+        "720575941539620700",
+        "720575941542437212",
+        "720575941542796549",
+        "720575941542866973",
+        "720575941543635205",
+        "720575941546203572",
+        "720575941546266036",
+        "720575941546749473",
+        "720575941547816041",
+        "720575941548728968",
+        "720575941554739995",
+        "720575941555525971",
+        "720575941557176591",
+        "720575941557635443",
+        "720575941559932431",
+        "720575941568951034",
+        "720575941569601650",
+        "720575941571519483",
+        "720575941573981288",
+        "720575941581673337",
+        "720575941583911302",
+        "720575941588919607",
+        "720575941592919080",
+        "720575941603744697",
+        "720575941603980734",
+        "720575941608899049",
+        "720575941609567818",
+        "720575941611961162",
+        "720575941612251868",
+        "720575941612517529",
+        "720575941613369363",
+        "720575941615188220",
+        "720575941621730300",
+        "720575941625896091",
+        "720575941625957019",
+        "720575941628626146",
+        "720575941631875525",
+        "720575941632561339",
+        "720575941633195205",
+        "720575941638178421",
+        "720575941639371125",
+        "720575941644226248",
+        "720575941651536113",
+        "720575941652315865",
+        "720575941654384596",
+        "720575941663137404",
+        "720575941663495548",
+        "720575941689896204",
+        "720575941720479034",
+        "720575941722019386"
+      ],
+      "edge_count": 776,
+      "multiplicity_sum": 4412,
+      "pair_count": 105,
+      "name": "left_front_feco_position_to_left_tibia_flexor",
+      "pre_group": "left_front_feco_position",
+      "post_group": "left_tibia_flexor",
+      "source": "BANC compact reflex graph"
+    },
+    {
+      "kind": "direct",
+      "pre_ids": [
+        "720575941448826805",
+        "720575941455760877",
+        "720575941473832544",
+        "720575941482795005",
+        "720575941506301861",
+        "720575941507004194",
+        "720575941519296428",
+        "720575941540132221",
+        "720575941545449065",
+        "720575941560894247",
+        "720575941584957406"
+      ],
+      "post_ids": [
+        "720575941478577231",
+        "720575941639281525"
+      ],
+      "relay_ids": [],
+      "edge_count": 12,
+      "multiplicity_sum": 35,
+      "pair_count": 12,
+      "name": "left_front_feco_position_to_left_tibia_extensor",
+      "pre_group": "left_front_feco_position",
+      "post_group": "left_tibia_extensor",
+      "source": "BANC compact reflex graph"
+    },
+    {
+      "kind": "one_hop",
+      "pre_ids": [
+        "720575941413112212",
+        "720575941438474258",
+        "720575941439451477",
+        "720575941448826805",
+        "720575941455760877",
+        "720575941457704863",
+        "720575941473832544",
+        "720575941478502209",
+        "720575941482795005",
+        "720575941506301861",
+        "720575941507004194",
+        "720575941519296428",
+        "720575941540132221",
+        "720575941544751877",
+        "720575941545449065",
+        "720575941549932093",
+        "720575941560894247",
+        "720575941566973434",
+        "720575941577505640",
+        "720575941578935029",
+        "720575941583568479",
+        "720575941584957406",
+        "720575941589773566",
+        "720575941604058046",
+        "720575941644934856",
+        "720575941680271037",
+        "720575941689664780"
+      ],
+      "post_ids": [
+        "720575941478577231",
+        "720575941639281525"
+      ],
+      "relay_ids": [
+        "720575941413917724",
+        "720575941430650209",
+        "720575941432775310",
+        "720575941437607253",
+        "720575941438454828",
+        "720575941441453397",
+        "720575941442513855",
+        "720575941445141012",
+        "720575941446282666",
+        "720575941447898388",
+        "720575941448919901",
+        "720575941455572973",
+        "720575941457500141",
+        "720575941461071117",
+        "720575941461333648",
+        "720575941461359248",
+        "720575941464187734",
+        "720575941464769046",
+        "720575941468325239",
+        "720575941469066615",
+        "720575941471086967",
+        "720575941473755946",
+        "720575941474420027",
+        "720575941478103203",
+        "720575941479189187",
+        "720575941480052960",
+        "720575941480232160",
+        "720575941485372045",
+        "720575941488021510",
+        "720575941492446846",
+        "720575941493067495",
+        "720575941494155648",
+        "720575941494182526",
+        "720575941506261538",
+        "720575941507545473",
+        "720575941512405315",
+        "720575941514623587",
+        "720575941515075139",
+        "720575941515341402",
+        "720575941516037475",
+        "720575941516874094",
+        "720575941520072883",
+        "720575941525100198",
+        "720575941526037273",
+        "720575941526261092",
+        "720575941526681677",
+        "720575941526752356",
+        "720575941531522789",
+        "720575941532496357",
+        "720575941533994418",
+        "720575941534733800",
+        "720575941536226058",
+        "720575941536301973",
+        "720575941542796549",
+        "720575941547816041",
+        "720575941548728968",
+        "720575941555525971",
+        "720575941557176591",
+        "720575941557348516",
+        "720575941558675245",
+        "720575941559694863",
+        "720575941561365549",
+        "720575941561394066",
+        "720575941563161256",
+        "720575941565120007",
+        "720575941568951034",
+        "720575941569601650",
+        "720575941571519483",
+        "720575941579786997",
+        "720575941592267478",
+        "720575941603744697",
+        "720575941603980734",
+        "720575941604082361",
+        "720575941609673802",
+        "720575941619873663",
+        "720575941622226428",
+        "720575941625896091",
+        "720575941628626146",
+        "720575941637721205",
+        "720575941638178421",
+        "720575941642528417",
+        "720575941644070226",
+        "720575941644226248",
+        "720575941651536113",
+        "720575941662017660",
+        "720575941663137404",
+        "720575941663500924",
+        "720575941689867416",
+        "720575941689896204",
+        "720575941690789851",
+        "720575941700583386",
+        "720575941720479034"
+      ],
+      "edge_count": 540,
+      "multiplicity_sum": 2532,
+      "pair_count": 92,
+      "name": "left_front_feco_position_to_left_tibia_extensor",
+      "pre_group": "left_front_feco_position",
+      "post_group": "left_tibia_extensor",
+      "source": "BANC compact reflex graph"
+    },
+    {
+      "kind": "direct",
+      "pre_ids": [
+        "720575941354084144",
+        "720575941478068529",
+        "720575941546962721",
+        "720575941556215524",
+        "720575941615782675"
+      ],
+      "post_ids": [
+        "720575941497568199",
+        "720575941542454876"
+      ],
+      "relay_ids": [],
+      "edge_count": 5,
+      "multiplicity_sum": 10,
+      "pair_count": 5,
+      "name": "left_front_feco_direction_to_left_tibia_flexor",
+      "pre_group": "left_front_feco_direction",
+      "post_group": "left_tibia_flexor",
+      "source": "BANC compact reflex graph"
+    },
+    {
+      "kind": "one_hop",
+      "pre_ids": [
+        "720575941354084144",
+        "720575941439717676",
+        "720575941460957651",
+        "720575941478068529",
+        "720575941497876352",
+        "720575941508000069",
+        "720575941509347106",
+        "720575941535149802",
+        "720575941538745059",
+        "720575941541413757",
+        "720575941546962721",
+        "720575941551004415",
+        "720575941556215524",
+        "720575941559126287",
+        "720575941561612915",
+        "720575941562227751",
+        "720575941573480094",
+        "720575941579786997",
+        "720575941595922801",
+        "720575941596777511",
+        "720575941612150858",
+        "720575941612455676",
+        "720575941612462332",
+        "720575941615782675",
+        "720575941633111968",
+        "720575941640337269",
+        "720575941691440091"
+      ],
+      "post_ids": [
+        "720575941481179066",
+        "720575941488205769",
+        "720575941497568199",
+        "720575941542454876",
+        "720575941667370739"
+      ],
+      "relay_ids": [
+        "720575941401753379",
+        "720575941429526743",
+        "720575941429602145",
+        "720575941431066543",
+        "720575941431756503",
+        "720575941431854217",
+        "720575941433679831",
+        "720575941438454828",
+        "720575941438574303",
+        "720575941441245631",
+        "720575941445299732",
+        "720575941446282666",
+        "720575941447849236",
+        "720575941448919901",
+        "720575941451713402",
+        "720575941452261427",
+        "720575941459151556",
+        "720575941462065875",
+        "720575941464769046",
+        "720575941477298996",
+        "720575941477921601",
+        "720575941480052960",
+        "720575941482028483",
+        "720575941486936784",
+        "720575941490075081",
+        "720575941490759600",
+        "720575941495662720",
+        "720575941499770530",
+        "720575941507031612",
+        "720575941507997730",
+        "720575941508299554",
+        "720575941511186508",
+        "720575941511884241",
+        "720575941514435793",
+        "720575941516663768",
+        "720575941516789358",
+        "720575941518523246",
+        "720575941524017154",
+        "720575941524746573",
+        "720575941527256742",
+        "720575941530369156",
+        "720575941532496357",
+        "720575941533989976",
+        "720575941534848961",
+        "720575941536226058",
+        "720575941536591080",
+        "720575941536985866",
+        "720575941542796549",
+        "720575941542866973",
+        "720575941546203572",
+        "720575941546266036",
+        "720575941547816041",
+        "720575941548447521",
+        "720575941548728968",
+        "720575941548733064",
+        "720575941549915709",
+        "720575941554739995",
+        "720575941557176591",
+        "720575941560058094",
+        "720575941569601650",
+        "720575941571519483",
+        "720575941573590267",
+        "720575941581673337",
+        "720575941583368543",
+        "720575941583663070",
+        "720575941588919607",
+        "720575941593737585",
+        "720575941595944305",
+        "720575941611961162",
+        "720575941613369363",
+        "720575941624450506",
+        "720575941625896091",
+        "720575941625957019",
+        "720575941628626146",
+        "720575941632561339",
+        "720575941637800565",
+        "720575941644226248",
+        "720575941654384596",
+        "720575941655202265",
+        "720575941663137404",
+        "720575941689896204"
+      ],
+      "edge_count": 465,
+      "multiplicity_sum": 2411,
+      "pair_count": 81,
+      "name": "left_front_feco_direction_to_left_tibia_flexor",
+      "pre_group": "left_front_feco_direction",
+      "post_group": "left_tibia_flexor",
+      "source": "BANC compact reflex graph"
+    },
+    {
+      "kind": "direct",
+      "pre_ids": [
+        "720575941551004415",
+        "720575941561612915",
+        "720575941579786997"
+      ],
+      "post_ids": [
+        "720575941478577231",
+        "720575941639281525"
+      ],
+      "relay_ids": [],
+      "edge_count": 3,
+      "multiplicity_sum": 4,
+      "pair_count": 3,
+      "name": "left_front_feco_direction_to_left_tibia_extensor",
+      "pre_group": "left_front_feco_direction",
+      "post_group": "left_tibia_extensor",
+      "source": "BANC compact reflex graph"
+    },
+    {
+      "kind": "one_hop",
+      "pre_ids": [
+        "720575941354084144",
+        "720575941439717676",
+        "720575941460957651",
+        "720575941478068529",
+        "720575941497876352",
+        "720575941508000069",
+        "720575941509347106",
+        "720575941535149802",
+        "720575941538745059",
+        "720575941541413757",
+        "720575941546962721",
+        "720575941551004415",
+        "720575941556215524",
+        "720575941559126287",
+        "720575941561612915",
+        "720575941562227751",
+        "720575941573480094",
+        "720575941579786997",
+        "720575941595922801",
+        "720575941596777511",
+        "720575941612150858",
+        "720575941612455676",
+        "720575941612462332",
+        "720575941615782675",
+        "720575941633111968",
+        "720575941640337269",
+        "720575941691440091"
+      ],
+      "post_ids": [
+        "720575941478577231",
+        "720575941639281525"
+      ],
+      "relay_ids": [
+        "720575941409865390",
+        "720575941432775310",
+        "720575941438454828",
+        "720575941442513855",
+        "720575941446282666",
+        "720575941448919901",
+        "720575941464769046",
+        "720575941473755946",
+        "720575941479189187",
+        "720575941480052960",
+        "720575941494182526",
+        "720575941508299554",
+        "720575941511186508",
+        "720575941511836944",
+        "720575941512405315",
+        "720575941515341402",
+        "720575941516037475",
+        "720575941516874094",
+        "720575941520072883",
+        "720575941525100198",
+        "720575941526261092",
+        "720575941531445477",
+        "720575941532496357",
+        "720575941536226058",
+        "720575941536923624",
+        "720575941540201933",
+        "720575941542796549",
+        "720575941547816041",
+        "720575941548447521",
+        "720575941548728968",
+        "720575941557176591",
+        "720575941561365549",
+        "720575941563161256",
+        "720575941569601650",
+        "720575941571519483",
+        "720575941573590267",
+        "720575941583368543",
+        "720575941624179708",
+        "720575941624450506",
+        "720575941625896091",
+        "720575941628626146",
+        "720575941633998021",
+        "720575941637800565",
+        "720575941643468133",
+        "720575941644070226",
+        "720575941644226248",
+        "720575941662017660",
+        "720575941663137404",
+        "720575941663500924",
+        "720575941689896204",
+        "720575941700583386"
+      ],
+      "edge_count": 252,
+      "multiplicity_sum": 1470,
+      "pair_count": 51,
+      "name": "left_front_feco_direction_to_left_tibia_extensor",
+      "pre_group": "left_front_feco_direction",
+      "post_group": "left_tibia_extensor",
+      "source": "BANC compact reflex graph"
+    },
+    {
+      "kind": "one_hop",
+      "pre_ids": [
+        "720575941404746352",
+        "720575941413320337",
+        "720575941431920993",
+        "720575941439213909",
+        "720575941439718444",
+        "720575941452949929",
+        "720575941466537238",
+        "720575941480772431",
+        "720575941497396347",
+        "720575941498411170",
+        "720575941505749176",
+        "720575941506291269",
+        "720575941508274967",
+        "720575941508505729",
+        "720575941514787793",
+        "720575941517946540",
+        "720575941520052140",
+        "720575941521039283",
+        "720575941525391526",
+        "720575941530288331",
+        "720575941534281738",
+        "720575941534721729",
+        "720575941537137930",
+        "720575941538144405",
+        "720575941543148549",
+        "720575941548964669",
+        "720575941549056061",
+        "720575941551167604",
+        "720575941560758643",
+        "720575941560895015",
+        "720575941562182695",
+        "720575941562182951",
+        "720575941562201383",
+        "720575941567640935",
+        "720575941573650077",
+        "720575941576724406",
+        "720575941579312761",
+        "720575941583523935",
+        "720575941588502405",
+        "720575941588503173",
+        "720575941588503429",
+        "720575941588534917",
+        "720575941591225128",
+        "720575941594333733",
+        "720575941600978729",
+        "720575941602290366",
+        "720575941604168894",
+        "720575941612214758",
+        "720575941612657404",
+        "720575941614551772",
+        "720575941631165627",
+        "720575941640168479",
+        "720575941643984229",
+        "720575941656675540",
+        "720575941668827825",
+        "720575941670298330",
+        "720575941670298586",
+        "720575941670332634",
+        "720575941670332890",
+        "720575941670333658",
+        "720575941687076079",
+        "720575941688239478"
+      ],
+      "post_ids": [
+        "720575941481179066",
+        "720575941488205769",
+        "720575941497568199",
+        "720575941542454876",
+        "720575941667370739"
+      ],
+      "relay_ids": [
+        "720575941401753379",
+        "720575941476980785",
+        "720575941477921601",
+        "720575941482028483",
+        "720575941511186508",
+        "720575941514435793",
+        "720575941546203572",
+        "720575941557176591",
+        "720575941569601650",
+        "720575941571519483",
+        "720575941572348232",
+        "720575941576905461",
+        "720575941593737585",
+        "720575941611961162",
+        "720575941624450506",
+        "720575941632561339",
+        "720575941637800565",
+        "720575941662395704"
+      ],
+      "edge_count": 94,
+      "multiplicity_sum": 813,
+      "pair_count": 18,
+      "name": "left_front_feco_vibro_tactile_to_left_tibia_flexor",
+      "pre_group": "left_front_feco_vibro_tactile",
+      "post_group": "left_tibia_flexor",
+      "source": "BANC compact reflex graph"
+    },
+    {
+      "kind": "one_hop",
+      "pre_ids": [
+        "720575941404746352",
+        "720575941413320337",
+        "720575941431920993",
+        "720575941439213909",
+        "720575941439718444",
+        "720575941452949929",
+        "720575941466537238",
+        "720575941480772431",
+        "720575941497396347",
+        "720575941498411170",
+        "720575941505749176",
+        "720575941506291269",
+        "720575941508274967",
+        "720575941508505729",
+        "720575941514787793",
+        "720575941517946540",
+        "720575941520052140",
+        "720575941521039283",
+        "720575941525391526",
+        "720575941530288331",
+        "720575941534281738",
+        "720575941534721729",
+        "720575941537137930",
+        "720575941538144405",
+        "720575941543148549",
+        "720575941548964669",
+        "720575941549056061",
+        "720575941551167604",
+        "720575941560758643",
+        "720575941560895015",
+        "720575941562182695",
+        "720575941562182951",
+        "720575941562201383",
+        "720575941567640935",
+        "720575941573650077",
+        "720575941576724406",
+        "720575941579312761",
+        "720575941583523935",
+        "720575941588502405",
+        "720575941588503173",
+        "720575941588503429",
+        "720575941588534917",
+        "720575941591225128",
+        "720575941594333733",
+        "720575941600978729",
+        "720575941602290366",
+        "720575941604168894",
+        "720575941612214758",
+        "720575941612657404",
+        "720575941614551772",
+        "720575941631165627",
+        "720575941640168479",
+        "720575941643984229",
+        "720575941656675540",
+        "720575941668827825",
+        "720575941670298330",
+        "720575941670298586",
+        "720575941670332634",
+        "720575941670332890",
+        "720575941670333658",
+        "720575941687076079",
+        "720575941688239478"
+      ],
+      "post_ids": [
+        "720575941478577231",
+        "720575941639281525"
+      ],
+      "relay_ids": [
+        "720575941461333648",
+        "720575941506261538",
+        "720575941511186508",
+        "720575941512405315",
+        "720575941516037475",
+        "720575941516874094",
+        "720575941520072883",
+        "720575941540201933",
+        "720575941557176591",
+        "720575941562942103",
+        "720575941563161256",
+        "720575941569601650",
+        "720575941571519483",
+        "720575941572348232",
+        "720575941604082361",
+        "720575941624179708",
+        "720575941624450506",
+        "720575941637800565"
+      ],
+      "edge_count": 56,
+      "multiplicity_sum": 275,
+      "pair_count": 18,
+      "name": "left_front_feco_vibro_tactile_to_left_tibia_extensor",
+      "pre_group": "left_front_feco_vibro_tactile",
+      "post_group": "left_tibia_extensor",
+      "source": "BANC compact reflex graph"
+    }
+  ],
+  "assay": {
+    "experiment_a": {
+      "baseline_ms": 250,
+      "extension_deg": 10,
+      "ramp_ms": 50,
+      "hold_ms": 100,
+      "mechanically_clamped": true
+    },
+    "experiment_b": {
+      "mechanics": "single_free_hinge",
+      "external_perturbation": "logged_torque_pulse_or_release",
+      "angle_source": "authoritative_mechanical_state"
+    },
+    "primary_endpoint": "Predeclare a left tibia flexor motor-unit response and compensatory torque; thresholds remain to be frozen after the identity gate.",
+    "controls": [
+      "sensory_transmission_cut",
+      "motor_to_muscle_cut",
+      "feedback_clamped",
+      "justified_pathway_intervention",
+      "direct_motor_calibration_separate"
+    ]
+  },
+  "provenance": {
+    "build_commit": "1a0c754bb27731a72c42b6dc5a3d101a72490b83",
+    "edge_table_sha256": "2297b19386155026949a4a71c70171e333cc70285199ab4ae3145c278615298c",
+    "graph_sha256": "7b29a9a80370563c1f0171157a46804ec3b77ae7331dbe7ee0999f7a42636d91",
+    "metadata_file": "brain-body/banc/neurons.parquet",
+    "morphology_file": "brain-body/banc/raw/banc_888_meta_20260521.parquet",
+    "morphology_fields": "other_names, notes (claw/hook/club only; no extension/flexion split)",
+    "edge_file": "brain-body/banc/synapses_edge.parquet",
+    "resolved_graph": "dist/reflex-tibia.json",
+    "graph_id_namespace": "banc_888_id decimal string",
+    "edge_table_contract": "aggregated pre/post pairs with positive integer count",
+    "neural_model": "BANC LIF v1; provenance only, not physiological validation"
+  },
+  "audit_notes": [
+    "Exact source identifiers are retained as decimal strings and resolved to graph indices by identifier lookup.",
+    "Pathways report actual BANC edges in the compact graph; they are not synthetic relay edges.",
+    "The presence of a route does not establish sign, latency, or functional reflex direction.",
+    "Regenerate this file if graph provenance changes."
+  ]
+}

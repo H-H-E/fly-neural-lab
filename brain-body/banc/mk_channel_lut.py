@@ -12,6 +12,8 @@ from pathlib import Path
 
 import pandas as pd
 
+from id_utils import identifier_text
+
 BASE = Path(__file__).parent
 ROOT = BASE.parent.parent
 OUTS = (ROOT / "dist" / "banc-channels.json", BASE / "banc-channels.json")
@@ -56,16 +58,7 @@ def clean(v) -> str:
 
 
 def sid(v) -> str:
-    text = clean(v)
-    if not text:
-        return ""
-    try:
-        f = float(text)
-        if f == f and abs(f) != float("inf"):
-            return str(int(f))
-    except (TypeError, ValueError):
-        pass
-    return text
+    return identifier_text(v, field="banc_888_id")
 
 
 def bone_side(side: str) -> str | None:

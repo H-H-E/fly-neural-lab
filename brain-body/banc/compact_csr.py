@@ -16,6 +16,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from id_utils import identifier_series
+
 BASE = Path(__file__).parent
 ROOT = BASE.parent.parent
 DIST = ROOT / "dist"
@@ -29,7 +31,13 @@ SKIP = {
 
 def main() -> None:
     neurons = pd.read_parquet(BASE / "neurons.parquet")
-    ids = neurons["banc_888_id"].map(lambda v: str(int(float(v))) if pd.notna(v) else "").to_numpy()
+    neurons["banc_888_id"] = identifier_series(
+        neurons["banc_888_id"], field="banc_888_id"
+    )
+    ids = neurons["banc_888_id"].to_numpy()
+    if (not ids.size or any(not value for value in ids)
+            or len(set(ids)) != len(ids)):
+        raise SystemExit("metadata IDs must be non-empty and unique exact decimal strings")
     klass = neurons["super_class"].fillna("").astype(str).to_numpy()
     keep_mask = np.array([k not in SKIP for k in klass], dtype=bool)
     print(f"meta {len(ids)} keep_class {keep_mask.sum()}")
@@ -45,6 +53,19 @@ def main() -> None:
     print(f"csr n={n} ne={ne}")
     if n != len(ids):
         raise SystemExit(f"csr n {n} != meta {len(ids)}")
+    if (
+        len(offsets) != n + 1
+        or len(dst) != ne
+        or len(w) != ne
+        or offsets[0] != 0
+        or offsets[-1] != ne
+        or np.any(np.diff(offsets) < 0)
+        or np.any(dst < 0)
+        or np.any(dst >= n)
+        or not np.isfinite(w).all()
+        or np.any(w <= 0)
+    ):
+        raise SystemExit("CSR offsets, destination bounds, or weights are invalid")
 
     old_to_new = np.full(n, -1, dtype=np.int32)
     keep_idx = np.nonzero(keep_mask)[0]

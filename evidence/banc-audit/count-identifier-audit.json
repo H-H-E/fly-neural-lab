@@ -1,0 +1,68 @@
+{
+  "commit": "1a0c754bb27731a72c42b6dc5a3d101a72490b83",
+  "source": {
+    "metadata": {
+      "path": "C:\\Users\\Windows\\Documents\\fly-neural-lab\\brain-body\\banc\\neurons.parquet",
+      "sha256": "6c7a56ea823b18eb98501d12be8f6ee5b0930c3cdff2eb2802e31b4e1cde8e29",
+      "rows": 188508
+    },
+    "edge_table": {
+      "path": "C:\\Users\\Windows\\Documents\\fly-neural-lab\\brain-body\\banc\\raw\\edgelist_simple_v2.feather",
+      "sha256": "363fdef3813b72a5e45a42f17034cd5a544b654c838929cecf6e1ce5f60625cb",
+      "rows": 11752828,
+      "duplicate_pairs": 0,
+      "count_sum": 35733096,
+      "count_min": 1,
+      "count_max": 1103,
+      "count_one_rows": 6456552
+    }
+  },
+  "existing": {
+    "brain_body_synapses_bin": {
+      "path": "C:\\Users\\Windows\\Documents\\fly-neural-lab\\brain-body\\banc\\synapses.bin",
+      "sha256": "3c440b5e86c15216b51c99b1e98e073f7885cde2bcfd064ed5b0cca26dbab0c0",
+      "n": 188508,
+      "edges": 11752828,
+      "weight_unique": 1,
+      "weight_min": 1.0,
+      "weight_max": 1.0,
+      "weight_sum": 11752828.0,
+      "weight_one_rows": 11752828,
+      "offset_final": 11752828,
+      "destination_min": 0,
+      "destination_max": 188507
+    },
+    "dist_banc_csr_bin": {
+      "path": "C:\\Users\\Windows\\Documents\\fly-neural-lab\\dist\\banc-csr.bin",
+      "sha256": "0a5cf445db14f7ded4796329dce04264304631892673be50e5cc6d349ffd3062",
+      "n": 34155,
+      "edges": 2859644,
+      "weight_unique": 1,
+      "weight_min": 1.0,
+      "weight_max": 1.0,
+      "weight_sum": 2859644.0,
+      "weight_one_rows": 2859644,
+      "offset_final": 2859644,
+      "destination_min": 0,
+      "destination_max": 34154
+    }
+  },
+  "rebuilt_outside_deploy": {
+    "path": "C:\\Users\\Windows\\AppData\\Local\\Temp\\banc-csr-audit-mfam8hz7\\synapses.bin",
+    "sha256": "e929775e51568519f8902691ecdf256b9657c20e671337f4aa3019ceb78e973e",
+    "n": 188508,
+    "edges": 11752828,
+    "weight_unique": 493,
+    "weight_min": 1.0,
+    "weight_max": 1103.0,
+    "weight_sum": 35733096.0,
+    "weight_one_rows": 6456552,
+    "offset_final": 11752828,
+    "destination_min": 0,
+    "destination_max": 188507,
+    "exact_source_destination_pairs": true,
+    "exact_source_counts": true,
+    "n_expected": 188508,
+    "edges_expected": 11752828
+  }
+}

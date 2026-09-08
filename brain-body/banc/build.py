@@ -14,6 +14,7 @@ Outputs (brain-body/banc/):
 
 Usage: brain-body/.venv/Scripts/python.exe brain-body/banc/build.py
 """
+import argparse
 import gzip
 import shutil
 import struct
@@ -21,6 +22,8 @@ import sys
 from pathlib import Path
 
 import pandas as pd
+
+from id_utils import identifier_series
 
 RAW = Path(__file__).parent / "raw"
 OUT = Path(__file__).parent
@@ -40,48 +43,60 @@ NEURON_COLS = [
 ]
 
 
-def main():
+def main(*, one_row_per_synapse: bool = False):
     if not META.exists():
         sys.exit(f"missing required input: {META}")
     m = pd.read_parquet(META)
     keep = [c for c in NEURON_COLS if c in m.columns]
     neurons = m[keep].copy()
+    neurons["banc_888_id"] = identifier_series(neurons["banc_888_id"], field="banc_888_id")
+    neurons["root_888"] = identifier_series(
+        neurons["root_888"], field="root_888", preserve_null=True
+    )
+    if neurons["banc_888_id"].eq("").any() or neurons["banc_888_id"].duplicated().any():
+        raise ValueError("neurons metadata has missing or duplicate banc_888_id values")
     neurons.to_parquet(OUT / "neurons.parquet", index=False)
     print(f"neurons.parquet: {neurons.shape}")
 
     # --- crosswalk: reviewed matches primary, in-meta fafb_match fallback
     xwalk = neurons[["banc_888_id", "root_888", "cell_type", "fafb_match"]].copy()
     xwalk = xwalk.rename(columns={"fafb_match": "fafb_id_meta"})
+    xwalk["fafb_id_meta"] = identifier_series(xwalk["fafb_id_meta"], field="fafb_id_meta")
     reviewed = RAW / "banc_fafb_reviewed_matches.csv"
     if reviewed.exists():
-        r = pd.read_csv(reviewed, dtype=str)
+        r = pd.read_csv(reviewed, dtype="string")
         r = r[r["valid"] == "t"].dropna(subset=["pt_root_id", "match_id"])
         numeric = r["pt_root_id"].str.fullmatch(r"\d+") & r["match_id"].str.fullmatch(r"\d+")
         print(f"reviewed rows valid={len(r)}, numeric={(numeric.fillna(False)).sum()}")
-        r = r[numeric.fillna(False)]
-        r = r[["pt_root_id", "match_id", "match_cell_type"]].astype(
-            {"pt_root_id": "int64", "match_id": "int64"})
+        r = r[numeric.fillna(False)].copy()
+        r["pt_root_id"] = identifier_series(r["pt_root_id"], field="pt_root_id")
+        r["match_id"] = identifier_series(r["match_id"], field="match_id")
+        r = r[["pt_root_id", "match_id", "match_cell_type"]]
         r = r.rename(columns={"pt_root_id": "banc_888_id",
                               "match_id": "fafb_id_reviewed",
                               "match_cell_type": "fafb_type_reviewed"})
-        r["banc_888_id"] = r["banc_888_id"].astype(str)
-        xwalk["banc_888_id"] = xwalk["banc_888_id"].astype(str)
-        xwalk = xwalk.merge(r, on="banc_888_id", how="left")
+        if r["banc_888_id"].duplicated().any():
+            raise ValueError("reviewed crosswalk has duplicate banc_888_id keys")
+        known = set(xwalk["banc_888_id"])
+        reviewed_ids = set(r["banc_888_id"])
+        print(
+            "reviewed join losses: "
+            f"matched={len(known & reviewed_ids)} "
+            f"unmatched_reviewed={len(reviewed_ids - known)} "
+            f"unmatched_neurons={len(known - reviewed_ids)}"
+        )
+        xwalk = xwalk.merge(r, on="banc_888_id", how="left", validate="one_to_one")
         print(f"reviewed matches joined: {xwalk['fafb_id_reviewed'].notna().sum()}")
     for c in ("fafb_id_reviewed", "fafb_id_meta"):
         if c not in xwalk.columns:
             xwalk[c] = ""
-    def idstr(s):
-        try:
-            f = float(s)
-            return str(int(f)) if f == f and abs(f) != float("inf") else ""
-        except (TypeError, ValueError):
-            return ""
-    xwalk["fafb_id"] = [b if b and b != "" else a
-                        for a, b in zip((idstr(v) for v in xwalk["fafb_id_meta"]),
-                                        (idstr(v) for v in xwalk["fafb_id_reviewed"]))]
-    xwalk["fafb_id_reviewed"] = [idstr(v) for v in xwalk["fafb_id_reviewed"]]
-    xwalk["fafb_id_meta"] = [idstr(v) for v in xwalk["fafb_id_meta"]]
+    xwalk["fafb_id_reviewed"] = identifier_series(
+        xwalk["fafb_id_reviewed"], field="fafb_id_reviewed"
+    )
+    xwalk["fafb_id_meta"] = identifier_series(xwalk["fafb_id_meta"], field="fafb_id_meta")
+    xwalk["fafb_id"] = [reviewed or meta for meta, reviewed in zip(
+        xwalk["fafb_id_meta"], xwalk["fafb_id_reviewed"]
+    )]
     xwalk.to_parquet(OUT / "fafb_banc_crosswalk.parquet", index=False)
     print(f"fafb_banc_crosswalk.parquet: with fafb_id={(xwalk['fafb_id'] != '').sum()}")
 
@@ -119,31 +134,79 @@ def main():
         e = pd.read_feather(edge)
         print("edgelist cols:", list(e.columns), e.shape)
         e.to_parquet(OUT / "synapses_edge.parquet", index=False)
-        write_csr(e, OUT / "synapses.bin")
+        write_csr(e, OUT / "synapses.bin", one_row_per_synapse=one_row_per_synapse)
     else:
         print("edgelist not ready; skipping synapses outputs")
 
 
-def write_csr(e: pd.DataFrame, path: Path):
-    """Compact engine-ready CSR. Normalizes pre/post/weight column names."""
-    cols = {c.lower(): c for c in e.columns}
-    pre = next((cols[k] for k in cols if k in ("pre", "src", "source", "pre_root_id")), None)
-    post = next((cols[k] for k in cols if k in ("post", "dst", "target", "post_root_id")), None)
-    w = next((cols[k] for k in cols if k in ("weight", "syn_count", "n_syn", "synapses")), None)
-    if pre is None or post is None:
-        print(f"cannot normalize edgelist columns {list(e.columns)}; skipping synapses.bin")
-        return
+def write_csr(
+    e: pd.DataFrame,
+    path: Path,
+    *,
+    one_row_per_synapse: bool = False,
+):
+    """Write engine-ready CSR from an exact-ID edge table.
+
+    The normal source contract is an aggregated neuron-pair table with a
+    positive multiplicity column. Per-synapse input is permitted only through
+    the explicit ``one_row_per_synapse`` audit flag.
+    """
     import numpy as np
 
+    cols = {str(c).lower(): c for c in e.columns}
+    pre = next((cols[k] for k in ("pre", "src", "source", "pre_root_id") if k in cols), None)
+    post = next((cols[k] for k in ("post", "dst", "target", "post_root_id") if k in cols), None)
+    weight_names = ("weight", "syn_count", "n_syn", "synapses", "count")
+    w = next((cols[k] for k in weight_names if k in cols), None)
+    if pre is None or post is None:
+        raise ValueError(f"cannot normalize edgelist columns {list(e.columns)}")
+    if w is None and not one_row_per_synapse:
+        raise ValueError(
+            "edgelist has no supported synapse multiplicity column; "
+            "select the audited one-row-per-synapse source format explicitly"
+        )
+    if w is not None and not one_row_per_synapse and e.duplicated([pre, post]).any():
+        raise ValueError("aggregated edge table contains duplicate pre/post pairs")
+
     ids = pd.read_parquet(OUT / "neurons.parquet")[["banc_888_id"]].copy()
-    id2idx = {v: i for i, v in enumerate(ids["banc_888_id"].to_numpy())}
-    df = pd.DataFrame({"s": e[pre].map(id2idx), "d": e[post].map(id2idx)})
-    if w is not None:
-        df["w"] = e[w].to_numpy()
+    ids["banc_888_id"] = identifier_series(ids["banc_888_id"], field="banc_888_id")
+    if ids["banc_888_id"].eq("").any() or ids["banc_888_id"].duplicated().any():
+        raise ValueError("neurons.parquet has missing or duplicate banc_888_id values")
+    id2idx = {value: index for index, value in enumerate(ids["banc_888_id"])}
+
+    source = pd.DataFrame({
+        "pre_id": identifier_series(e[pre], field=str(pre)),
+        "post_id": identifier_series(e[post], field=str(post)),
+    })
+    source["s"] = source["pre_id"].map(id2idx)
+    source["d"] = source["post_id"].map(id2idx)
+    if w is None:
+        source["w"] = 1.0
+        print("using audited one-row-per-synapse input; every retained row has weight 1")
     else:
-        df["w"] = 1.0
-    df = df.dropna().astype({"s": "int32", "d": "int32", "w": "float32"})
-    df = df.sort_values(["s", "d"]).reset_index(drop=True)
+        source["w"] = pd.to_numeric(e[w], errors="raise").to_numpy()
+    if not np.isfinite(source["w"]).all() or (source["w"] <= 0).any():
+        raise ValueError(f"{w} must contain positive finite multiplicities/weights")
+
+    missing_pre = source["s"].isna()
+    missing_post = source["d"].isna()
+    missing = missing_pre | missing_post
+    if missing.any():
+        lost_rows = int(missing.sum())
+        lost_weight = float(source.loc[missing, "w"].sum())
+        print(
+            "edge endpoint join losses: "
+            f"rows={lost_rows} multiplicity={lost_weight:g} "
+            f"missing_pre={int(missing_pre.sum())} missing_post={int(missing_post.sum())}"
+        )
+        raise ValueError("edge table contains endpoints absent from neurons.parquet")
+    print(
+        "edge endpoint join losses: rows=0 multiplicity=0 "
+        f"source_rows={len(source)} source_multiplicity={float(source['w'].sum()):g}"
+    )
+
+    df = source[["s", "d", "w"]].astype({"s": "int32", "d": "int32", "w": "float32"})
+    df = df.sort_values(["s", "d"], kind="mergesort").reset_index(drop=True)
     n = len(ids)
     counts = np.bincount(df["s"].to_numpy(), minlength=n).astype(np.int64)
     offsets = np.zeros(n + 1, dtype=np.int64)
@@ -158,4 +221,10 @@ def write_csr(e: pd.DataFrame, path: Path):
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--one-row-per-synapse",
+        action="store_true",
+        help="explicitly audit a source where each row is one synapse",
+    )
+    main(one_row_per_synapse=parser.parse_args().one_row_per_synapse)

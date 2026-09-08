@@ -1,0 +1,45 @@
+{
+  "assets": {
+    "full_csr_sha256": "e929775e51568519f8902691ecdf256b9657c20e671337f4aa3019ceb78e973e",
+    "compact_csr_sha256": "527289e15e479ed7835e4f6e2aef1af841f2ff16c64c2876d5add09ca9b63598",
+    "population_sha256": "9eea20a2093bb1dc8ce760d7a70544dc7f75bc15414b40bcc746678e51ff6e84",
+    "channels_sha256": "cbcea0aeb4432bddd8ea4255fc4157d4abd89b5b1b79f42f56e0e80b7240bebe",
+    "reflex_sha256": "7b29a9a80370563c1f0171157a46804ec3b77ae7331dbe7ee0999f7a42636d91"
+  },
+  "full_csr": {
+    "shape": [
+      188508,
+      11752828
+    ],
+    "exact_source_destination_pairs": true,
+    "exact_source_counts": true,
+    "weight_sum": 35733096.0,
+    "weight_unique": 493
+  },
+  "compact_csr": {
+    "shape": [
+      34155,
+      2859644
+    ],
+    "exact_retained_destination_indices": true,
+    "exact_retained_counts": true,
+    "weight_sum": 10718555.0,
+    "expected_weight_sum": 10718555.0,
+    "weight_unique": 410
+  },
+  "identifiers": {
+    "population_rows": 34155,
+    "population_exact_metadata_matches": 34155,
+    "channel_rows": 1754,
+    "channel_exact_metadata_matches": 1754,
+    "motor_idx_missing": 0,
+    "proprio_idx_missing": 0
+  },
+  "reflex": {
+    "nodes": 5184,
+    "edges": 546792,
+    "count_sum": 2490980,
+    "count_unique": 333,
+    "count_one_rows": 274555
+  }
+}
