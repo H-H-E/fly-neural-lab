@@ -15,3 +15,5 @@ html.reduce-motion{scroll-behavior:auto}html.reduce-motion *,html.reduce-motion 
 #stage-render-mode{position:absolute;top:20px;right:0;font-size:7px;letter-spacing:.5px;color:#a5b5a9}
 
 @media(max-width:760px){.dock-label{display:block;font-size:8px;margin-top:3px}.dock-number{font-size:6px}.dock-chapter{min-height:44px;padding:6px 4px}.dock-chapter[aria-current=step] .dock-label{font-size:8px}.icon-button{width:40px;height:40px}.scene-provenance{min-width:0}}
+/* Anchor focus belongs to the reading location; actionable controls retain their rings. */
+.chapter:focus{outline:none}
