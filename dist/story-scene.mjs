@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { createDrosophilaMale, resetPose, FLY_MODEL_REVISION } from './fly-model/flyRigged.mjs';
+import { createDrosophilaMale, resetPose, FLY_MODEL_REVISION, FLY_GLB_ASSET } from './fly-model/flyRigged.mjs';
 import { RandomSource } from './experiment-core.mjs';
 import { SoftwareSceneRenderer } from './software-scene.mjs';
 
@@ -248,7 +248,7 @@ export function createStoryScene(canvas, labelsElement, { onNode, onError } = {}
     setReflexAngle(degrees){const bone=fly.bones.leg_FL_tibia;bone.quaternion.fromArray(bone.userData.restQuaternion);bone.rotateX((degrees-70)*Math.PI/180);revision++;},
     resetFly(){resetPose(fly);revision++;},
     updateBrain(spikes){brainSpikes=spikes;revision++;},
-    snapshot(){return {simplified:!!renderer.isSoftware,flyModel:{name:'site-fly',revision:FLY_MODEL_REVISION,detail:fly.stats.detail},chapter,type:POSES[chapter].type,walking,motion,camera:camera.position.toArray(),tibia:fly.bones.leg_FL_tibia.quaternion.toArray(),draws:renderer.info.render.calls,triangles:renderer.info.render.triangles};},
+    snapshot(){return {simplified:!!renderer.isSoftware,flyModel:{name:'site-fly',revision:FLY_MODEL_REVISION,glbAsset:FLY_GLB_ASSET,detail:fly.stats.detail},chapter,type:POSES[chapter].type,walking,motion,camera:camera.position.toArray(),tibia:fly.bones.leg_FL_tibia.quaternion.toArray(),draws:renderer.info.render.calls,triangles:renderer.info.render.triangles};},
     dispose(){disposed=true;cancelAnimationFrame(frameId);observer.disconnect();document.removeEventListener('visibilitychange',visibility);scene.traverse(o=>{o.geometry?.dispose();const mats=Array.isArray(o.material)?o.material:[o.material];mats.forEach(m=>m?.dispose());});renderer.dispose();}
   };
 }
