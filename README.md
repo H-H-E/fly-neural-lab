@@ -15,7 +15,7 @@ Fly Lab is an interactive introduction to computational neuroscience built aroun
 
 Existing `lesson.html`, `reflex.html`, and `taste.html` bookmarks enter the corresponding story chapter. All learning controls are semantic HTML; Three.js shows their state in a persistent view. Wheel/touch scroll belongs to the page. Rotation is an explicit mode, with arrow-key and reset controls. Reduced motion respects the system preference and a visible toggle. Model controls and textual results remain available without WebGL.
 
-The scene uses one renderer, the existing fly rig, a branching teaching neuron, a four-cell circuit, and a clearly illustrative point-cloud brain. The brain view does not use reconstructed anatomical coordinates. On narrow screens the specimen stays above the scrolling lesson.
+The scene uses one WebGL renderer (or a bounded, simpler Canvas projection of the same Three.js geometry when graphics acceleration is unavailable), the existing fly rig, a branching teaching neuron, a four-cell circuit, and a clearly illustrative point-cloud brain. The brain view does not use reconstructed anatomical coordinates. On narrow screens the specimen stays above the scrolling lesson.
 
 ## Model boundaries
 
@@ -38,7 +38,7 @@ Neural state, motor rates, the kinematic effector, and joint sensors advance fro
 
 138,639 neurons; 15,091,983 weighted connection rows. Female connectome from eonsystemspbc/fly-brain at commit a3db62f9436074e485c0278290c2164ed6150808. Generated Brian2 code uses double precision, original 0.1 ms steps, integer refractory deadlines, a shared untouched-state recurrence, and fused sparse integration/threshold detection. Untouched neurons activate before any synaptic/Poisson access. Touched neurons are never pruned. Sparse emission order remains ascending; delayed synapse/reset ordering is preserved.
 
-The FlyWire Web Worker advances 500 ticks (50 ms) at a time. The BANC worker uses 50 ticks (5 ms) for its body loop. Rendering runs independently on the main thread. Delays and neural state persist between calls. Only spike recording vectors are cleared between chunks to bound logging memory. Stimulation changes are applied between chunks. Pausing preserves state. No SharedArrayBuffer or pthread requirement. Large network memory makes desktop browsers the initial target; mobile compatibility has not been verified.
+The FlyWire Web Worker advances 500 ticks (50 ms) at a time. The BANC worker uses 50 ticks (5 ms) for its body loop. Rendering runs independently on the main thread. Delays and neural state persist between calls. Only spike recording vectors are cleared between chunks to bound logging memory. Stimulation changes are applied between chunks. Pausing preserves state. No SharedArrayBuffer or pthread requirement. Large-network memory use makes desktop browsers the initial target for FlyWire. The story and small experiments have been checked at phone width; whole-brain performance on physical mobile devices remains unverified.
 
 Download is approximately 53.9 MB compressed, expanding to approximately 241.5 MB of initialization arrays. Loaded runtime state takes additional memory. Assets are gzip chunks decoded with DecompressionStream; serve .gz bytes without adding Content-Encoding:gzip because the worker performs decompression explicitly.
 
