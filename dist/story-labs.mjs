@@ -6,7 +6,7 @@ import { makeEffector } from './effectors/kinematic.mjs';
 import { encodeProprio, poseFromBones } from './sensors/proprio.mjs';
 
 const $ = id => document.getElementById(id);
-const text = (id, value) => { $(id).textContent = value; };
+const text = (id, value) => { const node=$(id); if(node.textContent!==String(value))node.textContent=String(value); };
 const enable = (ids, enabled = true) => ids.forEach(id => { $(id).disabled = !enabled; });
 const selected = name => document.querySelector(`input[name="${name}"]:checked`).value;
 const exported = (lesson, payload) => downloadJSON(`fly-lab-${lesson}.json`, { schema: EXPERIMENT_SCHEMA, lesson, savedAt: new Date().toISOString(), ...payload });

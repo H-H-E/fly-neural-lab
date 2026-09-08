@@ -46,12 +46,24 @@ This is a design hypothesis based on the existing interface and the project brie
 - [x] Cap pixel ratio, reuse scene objects, bound histories, and stop unnecessary work in background tabs.
 
 ### 5. Verification and delivery
-- [ ] Check desktop composition, chapter transitions, experiment outcomes, controls, and console errors in a real browser.
-- [ ] Check narrow layout, overflow, touch/keyboard paths, reduced motion, deep links, and error recovery.
-- [ ] Run meaningful regression checks for teaching models, seed replay, reflex counterfactuals, and existing BANC interfaces.
-- [ ] Update the browser QA harness and README to match the unified experience.
-- [ ] Push a planning checkpoint, a working frontend checkpoint, and the verified final changes to `main`.
+- [x] Check desktop composition, chapter transitions, experiment outcomes, controls, and console errors in a real browser.
+- [x] Check narrow layout, overflow, touch/keyboard paths, reduced motion, deep links, and error recovery.
+- [x] Run meaningful regression checks for teaching models, seed replay, reflex counterfactuals, and existing BANC interfaces.
+- [x] Update the browser QA harness and README to match the unified experience.
+- [x] Push a planning checkpoint, a working frontend checkpoint, and the verified final changes to `main`.
 
 ## Boundaries
 
 The 3D teaching neuron and brain layout are illustrations, not reconstructed morphology. The reflex is a BANC-derived subgraph with assumed sensory encoding and single-hinge mechanics. Full BANC uses a kinematic motor-to-bone mapping. FlyWire runs independently and does not control locomotion. The optional walking clip is labelled as animation. These facts must remain visible without turning the main story into a technical report.
+
+## Verification record · 2026-09-07
+
+- Browser-tested the deployed story: close inputs produce two teaching-neuron spikes; the inhibitory circuit produces two output spikes with its brake and three without it.
+- Verified immediate keyboard Bend (10°), +20° perturbation (30°), passive torque with zero neural torque, and BANC's bounded stimulus followed by pause. The direct-joint control displayed its separate source label.
+- Loaded FlyWire in the browser, enabled sugar input, observed nonzero spikes and advancing simulation time, then paused and reset/unloaded successfully.
+- Inspected the actual fly, branching neuron, and circuit with the same-geometry software renderer. Verified phone reflow in a 390 × 844 iframe, no horizontal overflow, successful pulse playback, the reduced-motion toggle, and keyboard rotation.
+- Verified the legacy reflex link redirects to the corresponding chapter.
+- Node checks passed for lesson outputs, bounded observations, deterministic and repeated reflex replay (including a final-timestamp bend), matched passive controls, and the existing BANC/effector/sensor regression suite. All application modules pass syntax checks.
+- Limitation: this cloud browser disables WebGL. Full-material GPU rendering and physical touch-device performance remain unverified; software 3D, semantic controls, and model behavior were checked directly. The Playwright harness is updated for a workstation or CI browser with WebGL.
+
+The temporary preview uses the existing deployed model assets. Repository and production configuration retain the bundled, pinned model assets and their original URLs.

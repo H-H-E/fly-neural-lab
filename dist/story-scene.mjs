@@ -8,7 +8,7 @@ const LIME = 0xd8f788, CORAL = 0xf49b80, BLUE = 0x8ebfcc;
 const clamp = THREE.MathUtils.clamp;
 const POSES = [
   { camera: [3.7, 2.55, -6.1], target: [0, .2, 0], type: 'fly' },
-  { camera: [0, .4, 7.6], target: [0, .1, 0], type: 'neuron' },
+  { camera: [0, .4, 8.8], target: [0, .1, 0], type: 'neuron' },
   { camera: [0, .3, 7.8], target: [0, .1, 0], type: 'circuit' },
   { camera: [-2.8, 1.5, 4.1], target: [-.6, -.05, .5], type: 'reflex' },
   { camera: [.5, 1.3, 7.9], target: [0, 0, 0], type: 'brain' },
@@ -142,11 +142,12 @@ export function createStoryScene(canvas, labelsElement, { onNode, onError } = {}
   let brainSpikes=0, drag=null, revision=0, signature="", lastDraw=0;
   const target=V(), desiredCamera=V(), desiredTarget=V(), pointer=new THREE.Vector2(), raycaster=new THREE.Raycaster();
   const labels = [];
-  function label(text, position, mode, className='') {
-    const node=document.createElement('span'); node.className=`specimen-label ${className}`; node.textContent=text; labelsElement.append(node); labels.push({node,position,mode});
+  function label(text, position, mode, className='', value=null) {
+    const node=document.createElement('span'); node.className=`specimen-label ${className}`; node.textContent=text; labelsElement.append(node); labels.push({node,position,mode,value});
   }
   label('Drosophila melanogaster',()=>fly.bones.head.getWorldPosition(V()).add(V(0,.55,0)),'fly','species-label');
   label('Cell body',()=>neuron.soma.mesh.getWorldPosition(V()).add(V(0,-.55,0)),'neuron');
+  label('',()=>neuron.soma.mesh.getWorldPosition(V()).add(V(0,-.8,0)),'neuron','model-label',()=>{const p=teaching.result?.trace[Math.min(3199,Math.round(teaching.time/.1))];return p?`${p.voltage.toFixed(1)} mV · ${teaching.result.spikes.filter(t=>t<=teaching.time).length} spikes`: '−52.0 mV · 0 spikes';});
   label('Incoming signals',()=>neuron.group.localToWorld(V(-1.5,1.2,0)),'neuron');
   label('Outgoing spike',()=>neuron.group.localToWorld(V(1.65,-.6,0)),'neuron');
   const nodeNames={input:'01 · Input',relay:'02 · Relay',inhibitory:'03 · Brake',output:'04 · Output'};
@@ -165,7 +166,7 @@ export function createStoryScene(canvas, labelsElement, { onNode, onError } = {}
     const blend=motion ? clamp((progress-.76)/.24,0,1)*.4 : 0;
     desiredCamera.fromArray(p.camera).lerp(V(...next.camera),blend);
     desiredTarget.fromArray(p.target).lerp(V(...next.target),blend);
-    if(camera.aspect<.85) desiredCamera.multiplyScalar(1.2);
+    desiredCamera.sub(desiredTarget).multiplyScalar(Math.max(1, .9 / camera.aspect)).add(desiredTarget);
   }
   function render(now) {
     if(disposed || document.hidden)return;
@@ -208,6 +209,7 @@ export function createStoryScene(canvas, labelsElement, { onNode, onError } = {}
     for(const l of labels) {
       l.node.hidden=l.mode!==type;
       if(l.node.hidden)continue;
+      if(l.value)l.node.textContent=l.value();
       const projected=l.position().project(camera);
       l.node.style.left=`${(projected.x*.5+.5)*100}%`;l.node.style.top=`${(-projected.y*.5+.5)*100}%`;
       l.node.style.opacity=projected.z<1?'1':'0';
