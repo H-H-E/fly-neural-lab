@@ -18,8 +18,12 @@ try:
         page = browser.new_page(viewport={'width': 1440, 'height': 1000})
         errors = []
         page.on('pageerror', lambda e: errors.append(str(e)))
-        page.goto(os.environ.get('FLYLAB_BASE', f'http://127.0.0.1:{server.server_port}/'), wait_until='networkidle')
-        page.wait_for_function('window.__storyQA && window.__storyQA().scene')
+        page.goto(os.environ.get('FLYLAB_BASE', f'http://127.0.0.1:{server.server_port}/'), wait_until='domcontentloaded')
+        # Exercise navigation while the GLB await is still in flight. The
+        # eventual scene initialization must honor the user's chapter choice.
+        page.click('.dock-chapter[href="#reflex"]')
+        page.wait_for_function('window.__storyQA && window.__storyQA().scene', timeout=90000)
+        assert page.evaluate('window.__storyQA().chapter') == 'reflex', 'Delayed GLB load lost an early chapter selection'
         snapshot = page.evaluate('window.__storyQA()')
         assert snapshot['scene']['flyModel'].get('format') == 'glb', 'Live scene still uses procedural geometry, not the Blender GLB'
         assert not errors, errors

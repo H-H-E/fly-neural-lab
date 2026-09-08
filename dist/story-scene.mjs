@@ -125,7 +125,9 @@ export async function createStoryScene(canvas, labelsElement, { onNode, onError 
   const key = new THREE.DirectionalLight(0xfff2d6,3.4); key.position.set(-3,5,-3); scene.add(key);
   const rim = new THREE.DirectionalLight(0xc8e2d1,3); rim.position.set(4,2,3); scene.add(rim);
   const fill = new THREE.DirectionalLight(0xc2d8cb,1.8); fill.position.set(0,-2,-4); scene.add(fill);
-  // The software renderer keeps a bounded fallback; WebGL uses Blender shells.
+  // Asset loading is the only asynchronous initialization seam. If it fails,
+  // release the renderer and any partial scene resources before app fallback.
+  try {
   const fly = renderer.isSoftware ? createDrosophilaMale({detail:'low'}) : await loadBlenderFly();
   resetPose(fly); fly.group.position.y = .65;
   const flyRoot = new THREE.Group(); flyRoot.add(fly.group); scene.add(flyRoot);
@@ -262,4 +264,13 @@ export async function createStoryScene(canvas, labelsElement, { onNode, onError 
     snapshot(){return {simplified:!!renderer.isSoftware,flyModel:{name:'site-fly',...fly.stats,format:fly.stats.format || 'procedural-fallback',glbAsset:fly.stats.format==='glb'?BLENDER_ASSET:null},chapter,type:POSES[chapter].type,walking,motion,camera:camera.position.toArray(),tibia:fly.bones.leg_FL_tibia.quaternion.toArray(),rigProbe:rigProbe(),draws:renderer.info.render.calls,triangles:renderer.info.render.triangles};},
     dispose(){disposed=true;cancelAnimationFrame(frameId);observer.disconnect();document.removeEventListener('visibilitychange',visibility);scene.traverse(o=>{o.geometry?.dispose();const mats=Array.isArray(o.material)?o.material:[o.material];mats.forEach(m=>m?.dispose());});renderer.dispose();}
   };
+  } catch (error) {
+    scene.traverse((object) => {
+      object.geometry?.dispose();
+      const materials = Array.isArray(object.material) ? object.material : [object.material];
+      materials.forEach((material) => material?.dispose());
+    });
+    renderer.dispose();
+    throw error;
+  }
 }
