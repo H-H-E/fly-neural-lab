@@ -15,13 +15,13 @@ Fly Lab is an interactive introduction to computational neuroscience built aroun
 
 Existing `lesson.html`, `reflex.html`, and `taste.html` bookmarks enter the corresponding story chapter. All learning controls are semantic HTML; Three.js shows their state in a persistent view. Wheel/touch scroll belongs to the page. Rotation is an explicit mode, with arrow-key and reset controls. Reduced motion respects the system preference and a visible toggle. Model controls and textual results remain available without WebGL.
 
-The scene uses one WebGL renderer (or a bounded, simpler Canvas projection of the same Three.js geometry when graphics acceleration is unavailable), the existing fly rig, a branching teaching neuron, a four-cell circuit, and a clearly illustrative point-cloud brain. The brain view does not use reconstructed anatomical coordinates. On narrow screens the specimen stays above the scrolling lesson.
+The scene uses one WebGL renderer for the Blender GLB (or a bounded Canvas projection of the low-detail procedural fallback when graphics acceleration is unavailable), the canonical fly controller rig, a branching teaching neuron, a four-cell circuit, and a clearly illustrative point-cloud brain. The brain view does not use reconstructed anatomical coordinates. On narrow screens the specimen stays above the scrolling lesson.
 
 ## Model boundaries
 
 | Model or signal | Source and output | What it does not establish |
 |---|---|---|
-| Visible specimen | `dist/fly-model/flyRigged.mjs`; Blender refinement asset `dist/fly-model/fly_refined.glb`, revision `blender-iteration15-glb`, with adaptive low/standard/hero tessellation | A biological morphology measurement or a neural controller |
+| Visible specimen | `dist/fly-model/blenderFly.mjs` loads `fly_refined.glb` and attaches its rigid shells to the canonical 43-bone controller; revision `blender-iteration15-rig-bridge-v1`. Software rendering retains the low-detail procedural fallback. | A biological morphology measurement or a neural controller |
 | Teaching neuron/circuit | `dist/neuron-model.mjs`; fixed-step, deterministic LIF traces | Biological firing rates or a hidden Drosophila circuit |
 | BANC v888 body model | `dist/banc-worker.mjs`; measured motor-neuron output drives a kinematic hinge | Physics-based locomotion or complete motor embodiment |
 | FlyWire v783 brain model | `dist/brain-worker.mjs`; optional 138,639-neuron WASM run with aggregate and bounded spike monitoring | A connection to the visible body, named taste identities, membrane-voltage export, or feeding behavior |

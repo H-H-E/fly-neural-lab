@@ -1,0 +1,28 @@
+{
+  "model": {
+    "name": "site-fly",
+    "revision": "blender-iteration15-rig-bridge-v1",
+    "format": "glb",
+    "detail": "blender",
+    "bones": 43,
+    "meshes": 119,
+    "mappedBones": 39,
+    "clips": 4,
+    "sexMismatch": "male-morphology/female-CNS",
+    "glbAsset": "http://127.0.0.1:58274/fly-model/fly_refined.glb"
+  },
+  "render": {
+    "draws": 125,
+    "triangles": 64016
+  },
+  "maxRestError": 6.866350197783356e-16,
+  "maxPivotError": 4.661790939596207e-07,
+  "missingMappedMotorBones": 0,
+  "observedMotorSpikesPeak": 6,
+  "maxFootDisplacement": 0.45663882074418444,
+  "walkingDuringNeuralRun": false,
+  "sources": [
+    "banc-direct-stimulus",
+    "none"
+  ]
+}

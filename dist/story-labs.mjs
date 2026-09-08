@@ -35,7 +35,7 @@ export function createLabs({ getScene, setSource, currentChapter }) {
   let circuitNode = 'input', reflex = null, reflexLoading = false, reflexRunning = false, reflexTimer = null;
   let bodyMode = 'reflex';
   let banc = null, bancReady = false, bancRunning = false, bancLoading = false, channels = null, effector = null;
-  let bancTime = 0, driveUntil = 0, finishDriveAt = 0;
+  let bancTime = 0, driveUntil = 0, finishDriveAt = 0, bancSample = {};
   let brain = null, brainReady = false, brainRunning = false, brainHistory = [], brainObserved = [], brainTime = 0;
   let brainWatched = [], lastCircuitCounts = {};
   const circuitDescriptions = {
@@ -190,8 +190,9 @@ export function createLabs({ getScene, setSource, currentChapter }) {
           text('banc-status',`BANC v888 ready · ${d.n.toLocaleString()} neurons · seed ${d.seed}`);
         }
         if(d.type==='error')bancFailure(d.message);
-        if(d.type==='reset') {bancTime=0;driveUntil=finishDriveAt=0;text('banc-simtime','0.000 s');text('banc-spikes','0');text('banc-speed','—');if(effector)effector.a.fill(0);if(bodyMode!=='reflex')getScene()?.resetFly();text('banc-status','BANC reset · seed 2026.');}
+        if(d.type==='reset') {bancSample={};bancTime=0;driveUntil=finishDriveAt=0;text('banc-simtime','0.000 s');text('banc-spikes','0');text('banc-speed','—');if(effector)effector.a.fill(0);if(bodyMode!=='reflex')getScene()?.resetFly();text('banc-status','BANC reset · seed 2026.');}
         if(d.type==='sample'){
+          bancSample={source:d.source,mode:d.mode,time:d.time,dt:d.dt,spikes:d.spikes,maxRateHz:Math.max(0,...d.rates)};
           if(d.mode==='kick'){
             pauseBanc();bodyMode='demo';getScene()?.resetFly();if(!effector&&getScene())effector=makeEffector(channels,getScene().fly.bones);effector?.step(.03,d.rates);
             setSource('DIRECT JOINT DEMO','This pose bypasses the neurons. It is a control.');text('banc-source','Direct joint demo: a rate was written to the joint; neural time and spike counters were not advanced.');return;
@@ -272,6 +273,6 @@ export function createLabs({ getScene, setSource, currentChapter }) {
       if(index===4)drawBrain();
     },
     resize(){neuronUpdate(neuronPlayer.time);circuitUpdate(circuitPlayer.time);reflexUpdate();drawBrain();},
-    snapshot(){return {neuron:{time:neuronPlayer.time,running:neuronPlayer.running,spikes:Number($('neuron-count').textContent)},circuit:{time:circuitPlayer.time,running:circuitPlayer.running,output:Number($('count-output').textContent),inhibition:circuitResult.inhibition},reflex:reflex?{...reflex.latest,running:reflexRunning,condition:reflex.condition,seed:reflex.seed}:null,banc:{ready:bancReady,running:bancRunning,time:bancTime},brain:{ready:brainReady,running:brainRunning,time:brainTime},bodyMode};}
+    snapshot(){return {neuron:{time:neuronPlayer.time,running:neuronPlayer.running,spikes:Number($('neuron-count').textContent)},circuit:{time:circuitPlayer.time,running:circuitPlayer.running,output:Number($('count-output').textContent),inhibition:circuitResult.inhibition},reflex:reflex?{...reflex.latest,running:reflexRunning,condition:reflex.condition,seed:reflex.seed}:null,banc:{ready:bancReady,running:bancRunning,time:bancTime,sample:{...bancSample}},brain:{ready:brainReady,running:brainRunning,time:brainTime},bodyMode};}
   };
 }

@@ -1,5 +1,6 @@
 import * as THREE from 'three';
-import { createDrosophilaMale, resetPose, FLY_MODEL_REVISION, FLY_GLB_ASSET } from './fly-model/flyRigged.mjs';
+import { createDrosophilaMale, resetPose } from './fly-model/flyRigged.mjs';
+import { loadBlenderFly, BLENDER_ASSET } from './fly-model/blenderFly.mjs';
 import { RandomSource } from './experiment-core.mjs';
 import { SoftwareSceneRenderer } from './software-scene.mjs';
 
@@ -113,7 +114,7 @@ function createBrain() {
   return { group, material };
 }
 
-export function createStoryScene(canvas, labelsElement, { onNode, onError } = {}) {
+export async function createStoryScene(canvas, labelsElement, { onNode, onError } = {}) {
   const context = canvas.getContext('webgl2', { antialias: true, alpha: true, powerPreference: 'low-power' });
   const renderer = context ? new THREE.WebGLRenderer({ canvas, context, antialias: true, alpha: true }) : new SoftwareSceneRenderer(canvas);
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, innerWidth < 760 ? 1.5 : 1.75));
@@ -124,10 +125,8 @@ export function createStoryScene(canvas, labelsElement, { onNode, onError } = {}
   const key = new THREE.DirectionalLight(0xfff2d6,3.4); key.position.set(-3,5,-3); scene.add(key);
   const rim = new THREE.DirectionalLight(0xc8e2d1,3); rim.position.set(4,2,3); scene.add(rim);
   const fill = new THREE.DirectionalLight(0xc2d8cb,1.8); fill.position.set(0,-2,-4); scene.add(fill);
-  // Keep one source of truth for the specimen. Only tessellation adapts to
-  // the device and renderer; every tier is the current site-fly revision.
-  const flyDetail = renderer.isSoftware ? 'low' : innerWidth < 760 ? 'standard' : 'hero';
-  const fly = createDrosophilaMale({detail:flyDetail});
+  // The software renderer keeps a bounded fallback; WebGL uses Blender shells.
+  const fly = renderer.isSoftware ? createDrosophilaMale({detail:'low'}) : await loadBlenderFly();
   resetPose(fly); fly.group.position.y = .65;
   const flyRoot = new THREE.Group(); flyRoot.add(fly.group); scene.add(flyRoot);
   const mixer = new THREE.AnimationMixer(fly.group);
@@ -237,6 +236,18 @@ export function createStoryScene(canvas, labelsElement, { onNode, onError } = {}
   canvas.addEventListener('pointercancel',()=>{drag=null;});
   canvas.addEventListener('keydown',(e)=>{if(!rotate)return;const delta={'ArrowLeft':-.16,'ArrowRight':.16}[e.key];if(delta!==undefined){yaw+=delta;e.preventDefault();}if(e.key==='Home'){yaw=tilt=0;e.preventDefault();}});
   poses();camera.position.copy(desiredCamera);target.copy(desiredTarget);frameId=requestAnimationFrame(render);
+  // Read actual shell vertices, not just driver quaternions: QA can detect a
+  // disconnected visual rig without advancing either neural or animation time.
+  function rigProbe() {
+    fly.group.updateMatrixWorld(true);
+    const result = {};
+    for (const name of ['FL_tibia','FL_tarsus','FR_tibia']) {
+      const bone = fly.bones[`leg_${name}`];
+      const mesh = bone.children.find(o => o.isMesh && o.userData.source === 'blender-glb');
+      if (mesh) result[name] = new THREE.Vector3().fromBufferAttribute(mesh.geometry.attributes.position, 0).applyMatrix4(mesh.matrixWorld).toArray();
+    }
+    return result;
+  }
   return {
     fly, simplified: !!renderer.isSoftware,
     setChapter(index, within=0){if(chapter!==index){yaw=tilt=0;if(walking){walk.stop();walking=false;resetPose(fly);}}chapter=index;progress=within;},
@@ -248,7 +259,7 @@ export function createStoryScene(canvas, labelsElement, { onNode, onError } = {}
     setReflexAngle(degrees){const bone=fly.bones.leg_FL_tibia;bone.quaternion.fromArray(bone.userData.restQuaternion);bone.rotateX((degrees-70)*Math.PI/180);revision++;},
     resetFly(){resetPose(fly);revision++;},
     updateBrain(spikes){brainSpikes=spikes;revision++;},
-    snapshot(){return {simplified:!!renderer.isSoftware,flyModel:{name:'site-fly',revision:FLY_MODEL_REVISION,glbAsset:FLY_GLB_ASSET,detail:fly.stats.detail},chapter,type:POSES[chapter].type,walking,motion,camera:camera.position.toArray(),tibia:fly.bones.leg_FL_tibia.quaternion.toArray(),draws:renderer.info.render.calls,triangles:renderer.info.render.triangles};},
+    snapshot(){return {simplified:!!renderer.isSoftware,flyModel:{name:'site-fly',...fly.stats,format:fly.stats.format || 'procedural-fallback',glbAsset:fly.stats.format==='glb'?BLENDER_ASSET:null},chapter,type:POSES[chapter].type,walking,motion,camera:camera.position.toArray(),tibia:fly.bones.leg_FL_tibia.quaternion.toArray(),rigProbe:rigProbe(),draws:renderer.info.render.calls,triangles:renderer.info.render.triangles};},
     dispose(){disposed=true;cancelAnimationFrame(frameId);observer.disconnect();document.removeEventListener('visibilitychange',visibility);scene.traverse(o=>{o.geometry?.dispose();const mats=Array.isArray(o.material)?o.material:[o.material];mats.forEach(m=>m?.dispose());});renderer.dispose();}
   };
 }

@@ -6,8 +6,7 @@ const AXIS_Z = new THREE.Vector3(0, 0, 1);
 
 // Keep the visual specimen tied to the latest reviewed site-fly pass. The
 // detail tiers below change tessellation only; they all use this same rig.
-export const FLY_MODEL_REVISION = 'blender-iteration15-glb';
-export const FLY_GLB_ASSET = './fly-model/fly_refined.glb';
+export const FLY_MODEL_REVISION = 'e53c905ec367f7bdc95a0fc9ba836a3087c3d488';
 
 // Tiered tessellation: big body shapes get density, small parts don't pay for it.
 const DETAIL = {

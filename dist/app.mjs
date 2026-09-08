@@ -5,7 +5,7 @@ const chapters = [...document.querySelectorAll('.chapter')];
 const links = [...document.querySelectorAll('.dock-chapter')];
 const titles = ['The fly','One neuron','A circuit','Movement','The whole brain','The science'];
 const sourceLabels = [
-  ['3D ANATOMICAL ILLUSTRATION','Male fruit fly · a procedural model'],
+  ['3D ANATOMICAL ILLUSTRATION','Male fly morphology · female CNS data · illustrative coupling'],
   ['ILLUSTRATIVE NEURON','A teaching model · highlights follow the computed spikes'],
   ['ILLUSTRATIVE FOUR-CELL CIRCUIT','Measured model output · schematic signal paths'],
   ['BANC-DERIVED REFLEX PROBE','Joint pose follows the probe · sensory and body rules are assumed'],
@@ -83,7 +83,7 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden){labs.pause
 updateScroll();
 try {
   const {createStoryScene}=await import('./story-scene.mjs');
-  scene=createStoryScene($('scene'),$('scene-labels'),{onNode:labs.selectNode,onError:fallback});
+  scene=await createStoryScene($('scene'),$('scene-labels'),{onNode:labs.selectNode,onError:fallback});
   $('scene-loading').hidden=true;if(scene.simplified){$('specimen-stage').dataset.renderer='simplified';$('stage-render-mode').hidden=false;}scene.setMotion(motion);scene.setChapter(Math.max(0,active));labs.enter(active);labs.resize();
 }catch(error){fallback('The 3D view is unavailable in this browser. All experiment controls, traces, and text results still work.');console.warn('3D view unavailable:',error.message);}
 // Development/QA readout only; these functions never advance any model.
