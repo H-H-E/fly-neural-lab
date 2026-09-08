@@ -8,3 +8,4 @@ engine/results/
 __pycache__/
 dist/banc-csr.bin
 dist/banc-population.json
+*.blend1
